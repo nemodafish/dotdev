@@ -19,7 +19,7 @@
                          står & skrevet som &amp; (i <title>, hero-merket og
                          footeren). Ordet «Studio» i hero-merket står i en
                          egen <span class="intro-tag__chip">.
-     • Domene .......... «https://dotdev.no/» (canonical og og:url i <head>)
+     • Domene .......... «https://dotdev.no/» (canonical, og:url og delingsbildet i <head>)
 
   2. FARGER, FONTER OG AVSTANDER
      Alle designverdier er tokens i :root øverst i <style>: farger (--c-…),
@@ -220,7 +220,15 @@
     <!-- ✏️ Domene: bytt til den ekte adressen til nettsiden -->
     <link rel="canonical" href="https://dotdev.no/">
     <meta property="og:url" content="https://dotdev.no/">
-    <meta name="twitter:card" content="summary">
+    <!-- Delingsbilde (vises når lenken deles i Messenger, LinkedIn, Slack, SMS o.l.).
+         Må være full adresse. Bildet ligger i delingsbilde.png (1200 × 630 px). -->
+    <meta property="og:image" content="https://dotdev.no/delingsbilde.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="DOTDEV – Making Brands Digitally Unforgettable. Web Design og AI Automation.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://dotdev.no/delingsbilde.png">
     <!-- ✏️ Aksentfarge i nettleserlinjen og favicon (kan ikke lese tokens: bytt #0004f6 / %230004f6 selv) -->
     <meta name="theme-color" content="#0004f6">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-1 -2 11 11'%3E%3Crect x='-1' y='-2' width='11' height='11' rx='2' fill='%230004f6'/%3E%3Cpath fill='%23fff' d='M0 0h2v7H0zM2 0h3v1H2zM2 6h3v1H2zM5 1h2v5H5zM8 6h1v1H8z'/%3E%3C/svg%3E">
