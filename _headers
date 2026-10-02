@@ -1,0 +1,23 @@
+# Netlify leser denne filen fra publiseringsmappen og legger headerne på svarene.
+# Sjekk resultatet på https://securityheaders.com etter publisering.
+#
+# Content-Security-Policy sier hvor siden får hente innhold fra. Alt ligger på
+# dotdev.no i dag. Tar dere i bruk noe eksternt, må det legges til her:
+#   • Formspree (modus 2 i BOOKING): legg til https://formspree.io i connect-src
+#   • Cal.com/Calendly som lenke (modus 3): trengs ingen endring
+#   • Innebygd kalender, video, analyse o.l.: legg til domenet i riktig direktiv
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
+
+# Fonter endrer aldri innhold (nye fonter får nye filnavn): ett år i nettleserens mellomlager
+/fonter/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Bilder: én uke (bytt filnavn hvis dere bytter et bilde og vil at endringen vises med en gang)
+/bilder/*
+  Cache-Control: public, max-age=604800

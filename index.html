@@ -6,20 +6,28 @@
   Alt ligger i denne ene filen: all CSS i <style> i <head>, all JavaScript i
   én <script> helt nederst. Fontene ligger lokalt i mappen fonter/, så
   siden henter ingenting fra andre nettsteder.
-  Ingen bilder eller video: all grafikk er kode (pikselkunst på <canvas> og
-  CSS-mønstre). Redigerbar tekst er merket med ✏️ i kommentarene.
+  Grafikken er kode (pikselkunst på <canvas> og CSS-mønstre), bortsett fra
+  skjermbildene av prosjekter i bilder/. Redigerbar tekst er merket med ✏️.
+
+  PUBLISERING: denne filen er kilden. Kjør «python3 bygg.py» og publiser
+  mappen dist/, så slipper guiden og kommentarene med ut (punkt 11).
 
   1. SØK OG ERSTATT (Ctrl+H / Cmd+Alt+F)
-     • Navn ............ «DOTDEV»  (title, meta-tagger, meny, footer
+     • Navn ............ «DOTDEV»  (title, meta-tagger, JSON-LD, meny, footer
                          og BOOKING.studio i skriptet)
-     • E-post .......... «kontakt@dotdev.no»  (mailto-lenker, tekst og
-                         BOOKING.email i skriptet)
-     • Slogan .......... «Making Brands» og «Digitally Unforgettable» (hero)
-     • Undertittel ..... søk etter «Web Design &amp; AI Automation». I koden
-                         står & skrevet som &amp; (i <title>, hero-merket og
-                         footeren). Ordet «Studio» i hero-merket står i en
-                         egen <span class="intro-tag__chip">.
-     • Domene .......... «https://dotdev.no/» (canonical, og:url og delingsbildet i <head>)
+     • E-post .......... «kontakt@dotdev.no»  (mailto-lenker, tekst, JSON-LD
+                         og BOOKING.email i skriptet)
+     • Overskrift ...... «Design. Utvikling. Vekst.» står i <h1> i hero, og den
+                         engelske i I18N.en ('hero.title'). Det gamle slagordet
+                         «Making Brands Digitally Unforgettable» står fortsatt
+                         på delingsbilde.png.
+     • Undertittel ..... «Webdesign og AI-automatisering» (<title> og
+                         hero-merket); engelsk «Web Design &amp; AI Automation»
+                         står i I18N.en ('meta.title' og 'hero.tag'). Ordet
+                         «Studio» i hero-merket står i en egen
+                         <span class="intro-tag__chip">.
+     • Domene .......... «https://dotdev.no/» (canonical, og:url, JSON-LD og
+                         delingsbildet i <head>, og i sitemap.xml og robots.txt)
 
   2. FARGER, FONTER OG AVSTANDER
      Alle designverdier er tokens i :root øverst i <style>: farger (--c-…),
@@ -37,36 +45,43 @@
                         Gi .plan__body en ny, unik id og bruk samme verdi i
                         aria-controls på knappen .plan__toggle. Klassen
                         plan--featured gir det mørke, fremhevede kortet.
-     • Prosjektkort ... SEKSJON: Prosjekter, <article class="case">.
-                        Kortene står to og to. Har du et oddetall, gi det
-                        siste kortet klassen case--wide (fullbredde).
-                        Kort med ekte skjermbilde (som DJ Tiny) får klassen
-                        case--photo, som fjerner den mørke tonen over bildet.
-                        Bildene ligger i mappen bilder/ ved siden av filen.
+     • Prosjektkort ... SEKSJON: Prosjekter, <article class="case">. Ett
+                        prosjekt vises stort (case--wide case--feature) med
+                        kundens ord (<figure class="case__quote">). Flere
+                        prosjekter: kopier <article>, fjern case--wide og
+                        case--feature, så står kortene to og to (oddetall:
+                        gi det siste kortet case--wide). Kort med ekte
+                        skjermbilde får klassen case--photo. Bildene ligger
+                        i mappen bilder/ ved siden av filen.
+     • «Hva vi skaper»  SEKSJON: Hero, <li class="made__item">. Fire ord i
+                        logostil; JS bytter skriftstil på to og to av og til.
      • Prosesskort .... SEKSJON: Prosess, <li class="step">.
-     • Kundeomtale .... SEKSJON: Kundeomtaler, <figure class="review">.
+     • Team ........... SEKSJON: Om oss, blokken merket ✏️ TEAM (skjult). Fyll
+                        inn navn, rolle, bilde og LinkedIn for hver av dere, og
+                        slett linjene «TEAM START» og «TEAM SLUTT».
      • Om oss-punkt ... SEKSJON: Om oss, <li class="about__item">. Hvert punkt
                         har sin egen tekst og sin egen <canvas> (illustrasjon),
                         så du kopierer bare én <li>. JS teller punktene selv.
+     • Spørsmål ....... SEKSJON: Spørsmål og svar, <details class="faq__item">.
+                        Husk nøklene i I18N.en (faq.q… / faq.a…).
      • Menyen ......... SEKSJON: Header og meny. Tjenestene står i grupper
                         (.nav__group) med blå etikett; kopier en <li> inn i en
                         gruppe eller kopier en hel gruppe.
-     • «Hva vi skaper»  SEKSJON: Hero, <li class="made__item">. Fire ord i
-                        logostil; JS bytter skriftstil på to og to av og til.
-     • Footer ......... tre lenkekolonner (.footer__links). Får dere
-                        sosiale medier, kopier en kolonne og legg inn lenkene. Nederst står
-                        firmaopplysningene (.footer__company: org.nr. og
-                        adresse, lovpålagt) og lenken til personvern.html.
+     • Footer ......... tre lenkekolonner (.footer__links). Telefon, LinkedIn
+                        og Instagram står klare (skjult mellom «KONTAKT START»
+                        og «KONTAKT SLUTT») i Kontakt-kolonnen. Nederst står firmaopplysningene
+                        (.footer__company: org.nr. og adresse, lovpålagt) og
+                        lenken til personvern.html.
      • Samtaletyper ... (booking) står IKKE i HTML-en, men i BOOKING.types
                         øverst i <script>. Se punkt 8.
 
   4. SKJULE EN SEKSJON
-     Skriv hidden i starttaggen, f.eks. <section class="reviews" hidden …>,
+     Skriv hidden i starttaggen, f.eks. <section class="section faq" hidden …>,
      eller slett alt mellom to SEKSJON-bannere. JavaScript tåler at en seksjon
      mangler. Fjern da også lenkene til den i menyen og footeren.
      Skjuler eller sletter du Booking, sender JavaScript automatisk knappene
-     «Start et prosjekt», «Diskuter prosjektet», «Snakk med oss» og
-     «Bli vår neste kunde» (href="#booking") til #kontakt, og skjuler
+     «Start et prosjekt», «Book en samtale», «Diskuter prosjektet» og
+     «Snakk med oss» (href="#booking") til #kontakt, og skjuler
      «Book en samtale» i menyen og footeren. Uten JavaScript må du endre
      disse lenkene selv.
 
@@ -82,10 +97,7 @@
      textLength="3142" er omkretsen til sirkelen (2 × π × 500) og skal stå.
      --cta-rot i :root styrer hvor buen står i ro (brukes også som start
      for den langsomme rotasjonen).
-     Løpebåndet (SEKSJON: Løpebånd): frasen står tre ganger i <textPath>.
-     Endrer du antall gjentakelser, sett data-reps til samme tall, ellers
-     hopper båndet synlig når det starter på nytt.
-     Engelsk: 'cta.ring' og 'marquee' i I18N.en (punkt 10), med like mange
+     Engelsk: 'cta.ring' i I18N.en (punkt 10), med like mange
      gjentakelser som den norske frasen. Den engelske buen («Book a call»)
      har sin egen hvilestilling, --cta-rot-en i :root, så «a» havner bak
      firkanten. Bytter du den engelske frasen, juster --cta-rot-en.
@@ -169,8 +181,10 @@
      • Universell utforming: nettsider for allmennheten skal oppfylle
        WCAG-kravene (likestillings- og diskrimineringsloven § 18). Malen er
        laget for WCAG AA. Hold kontrasten og alt-tekstene når dere endrer.
-     • Markedsføring: tall og løfter («Svar innen 24 timer», «100 %») må
-       være sanne (markedsføringsloven).
+     • Markedsføring: tall og løfter («Svar innen 24 timer», «Direkte
+       kontakt») må være sanne (markedsføringsloven). Det gjelder også
+       kundeomtaler: har kunden en nær relasjon til dere (familie, venner),
+       bør det komme frem.
 
   10. SPRÅK: NORSK OG ENGELSK (knappen NO | EN)
      • Slik virker det: norsk står i HTML-en og er det Google og besøkende
@@ -201,8 +215,19 @@
        BOOKING.types (titleEn og textEn). Meldinger, e-posten og
        kalenderfilen står i MSG.no og MSG.en i modul 11. Dager og måneder
        i kalenderen kommer fra nettleseren (nb-NO / en-GB).
-     • Buen og løpebåndet har nøklene cta.ring og marquee: hold samme
-       antall gjentakelser som på norsk (se punkt 6).
+     • Buen har nøkkelen cta.ring: hold samme antall gjentakelser som på
+       norsk (se punkt 6).
+
+  11. PUBLISERING (se også LES-MEG.md)
+     • Rediger kildefilene (index.html, personvern.html, 404.html), og kjør
+       «python3 bygg.py» i Terminal fra denne mappen. Skriptet lager
+       mappen dist/ uten guiden, kommentarene og innrykkene, og sjekker at
+       JavaScript-en fortsatt er gyldig.
+     • Publiser mappen dist/ (dra den inn i Netlify under «Deploys»), ikke
+       hele mappen.
+     • _headers (sikkerhet og mellomlagring), robots.txt, sitemap.xml og
+       404.html blir med i dist/ automatisk. Legger dere til en ny side,
+       legg den også i sitemap.xml og i HTML_FILES øverst i bygg.py.
 ═══════════════════════════════════════════════════════════════════════════
 -->
 <html lang="no">
@@ -210,13 +235,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <!-- ✏️ Sidetittel og beskrivelse (vises i Google og når lenken deles) -->
-    <title>DOTDEV · Web Design &amp; AI Automation</title>
-    <meta name="description" content="DOTDEV er et kreativt web- og teknologistudio drevet av to barndomskompiser. Vi kombinerer premiumdesign, moderne teknologi og AI-automatisering.">
+    <title>DOTDEV · Webdesign og AI-automatisering</title>
+    <meta name="description" content="DOTDEV designer og bygger skreddersydde nettsider og AI-automatisering for bedrifter. Book en uforpliktende samtale – vi svarer innen 24 timer.">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="nb_NO">
     <meta property="og:site_name" content="DOTDEV">
-    <meta property="og:title" content="DOTDEV · Making Brands Digitally Unforgettable">
-    <meta property="og:description" content="Premiumdesign, moderne teknologi og AI-automatisering. Nettsider som skiller seg ut og faktisk leverer resultater.">
+    <meta property="og:title" content="DOTDEV · Nettsider og AI som jobber for deg">
+    <meta property="og:description" content="Skreddersydde nettsider og AI-automatisering for bedrifter som vil skille seg ut og spare tid.">
     <!-- ✏️ Domene: bytt til den ekte adressen til nettsiden -->
     <link rel="canonical" href="https://dotdev.no/">
     <meta property="og:url" content="https://dotdev.no/">
@@ -239,6 +264,25 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-1 -2 11 11'%3E%3Crect x='-1' y='-2' width='11' height='11' rx='2' fill='%230004f6'/%3E%3Cpath fill='%23fff' d='M0 0h2v7H0zM2 0h3v1H2zM2 6h3v1H2zM5 1h2v5H5zM8 6h1v1H8z'/%3E%3C/svg%3E">
     <link rel="preload" href="fonter/inter-tight-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonter/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- Strukturerte data for Google (firmaopplysninger). ✏️ Får dere telefon eller sosiale
+         medier: legg til "telephone": "+47 …" og "sameAs": ["https://www.linkedin.com/company/…"]. -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://dotdev.no/#studio",
+        "name": "DOTDEV",
+        "legalName": "Nerland Consulting",
+        "url": "https://dotdev.no/",
+        "logo": "https://dotdev.no/icon-512.png",
+        "image": "https://dotdev.no/delingsbilde.png",
+        "description": "Skreddersydde nettsider og AI-automatisering for bedrifter.",
+        "email": "kontakt@dotdev.no",
+        "identifier": { "@type": "PropertyValue", "propertyID": "Organisasjonsnummer", "value": "936133231" },
+        "areaServed": { "@type": "Country", "name": "Norge" },
+        "knowsAbout": ["Webdesign", "Webutvikling", "AI-automatisering", "UI/UX-design", "Visuell identitet"]
+    }
+    </script>
 
     <style>
     /* ── Fonter: lagret lokalt i mappen fonter/ (ingen kall til Google, bedre personvern).
@@ -331,7 +375,7 @@
         --sp-3: 1.5rem;
         --sp-4: 2.5rem;
         --sp-5: 4rem;
-        --sp-6: clamp(4rem, 8vw, 8rem);
+        --sp-6: clamp(5rem, 10vw, 10rem);
 
         /* Kontakt: blå firkant med pikselmerket */
         --cta-pad:  clamp(2.5rem, 4.5vw, 5rem);
@@ -447,6 +491,14 @@
     /* Pikselkunst-lerret (tegnes av JS; CSS-mønster vises uten JS) */
     .px { display: block; width: 100%; height: 100%; }
     canvas.px.is-drawn { background: none; }
+    /* Blått dither-felt bak mørke flater (reserve uten JS: prikker og glød) */
+    .field-bg {
+        position: absolute; inset: 0; z-index: 0;
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse 45% 60% at 65% 62%, color-mix(in srgb, var(--c-blue) 50%, transparent), transparent 70%),
+            radial-gradient(color-mix(in srgb, var(--c-blue) 45%, transparent) 1.4px, transparent 1.9px) 0 0 / 9px 9px;
+    }
 
     /* ═════════════════════════════════════════════════════════════════
        3. KNAPPER: «split button» (tekstblokk + firkantet pil)
@@ -543,7 +595,7 @@
     }
     .ichip svg { width: 58%; height: 58%; }
     .ico { width: 1.25em; height: 1.25em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-    .ichip svg, .reviews__icon svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    .ichip svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 
     /* Pikselmerket (logo) */
     .mark { fill: currentColor; }
@@ -812,10 +864,10 @@
         transform: rotate(-20deg);
     }
     .hero__visual.is-drawn::before, .hero__visual.is-drawn::after { display: none; }
-    .hero__intro { position: relative; z-index: 1; padding-top: clamp(140px, 12vw, 167px); }
+    .hero__intro { position: relative; z-index: 1; padding-top: clamp(150px, 13vw, 200px); }
     .intro-tag {
         display: inline-flex; align-items: center; gap: 12px;
-        margin-bottom: var(--sp-3);
+        margin-bottom: var(--sp-4);
         padding: 7px 9px 7px 10px;
         background: var(--c-white);
         border-radius: var(--r-xs);
@@ -832,10 +884,13 @@
         font-weight: 500;
         line-height: 1;
     }
-    /* 10em: «Making Brands Digitally» / «Unforgettable.» på brede skjermer;
+    /* 10em: to linjer på brede skjermer (norsk og engelsk);
        på mobil brytes linjene naturlig i tre */
     .hero__heading { max-width: 10em; margin-top: .45rem; font-size: var(--fs-h1); line-height: 1.05; letter-spacing: -.045em; }
-    .hero__lead { max-width: min(640px, 100%); margin-top: var(--sp-3); margin-bottom: var(--sp-6); font-size: var(--fs-lead); line-height: 1.3; text-wrap: pretty; }
+    .hero__lead { max-width: min(640px, 100%); margin-top: var(--sp-4); font-size: var(--fs-lead); line-height: 1.45; text-wrap: pretty; }
+    /* Knapp og tekstlenke under ingressen */
+    .hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); margin-top: calc(var(--sp-4) + var(--sp-1)); margin-bottom: var(--sp-6); }
+    .hero__link { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-sm); font-weight: 500; }
 
     .hero__lower { position: relative; z-index: 1; }
     @media (min-width: 901px) {
@@ -847,8 +902,8 @@
     }
     .hero__lower-inner {
         display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end;
-        gap: var(--sp-4);
-        padding-block: var(--sp-3);
+        gap: var(--sp-5);
+        padding-block: var(--sp-4);
     }
 
     /* Svart «Hvorfor oss»-kort */
@@ -905,7 +960,7 @@
     .services__head { margin-bottom: calc(var(--sp-5) + var(--sp-3)); text-align: center; }
     .services__title { font-size: var(--fs-h2); line-height: 1.12; }
     .services__intro { max-width: 60ch; margin: var(--sp-3) auto 0; color: var(--c-muted); font-size: var(--fs-para); line-height: 1.45; }
-    .services__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(20px, 1.4vw, var(--sp-3)); }
+    .services__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(20px, 2vw, 32px); }
     .plan {
         position: relative;
         display: flex; flex-direction: column;
@@ -962,69 +1017,9 @@
     .plan--featured .chip { border-color: var(--c-blue); }
 
     /* ═════════════════════════════════════════════════════════════════
-       7. VISJON (mørkt bånd med blå dither)
-       ═════════════════════════════════════════════════════════════════ */
-    .vision {
-        position: relative;
-        overflow: hidden;
-        padding-block: var(--sp-6) calc(var(--sp-6) + var(--sp-4));
-        background: var(--c-coal);
-        color: var(--c-white);
-    }
-    .field-bg {
-        position: absolute; inset: 0; z-index: 0;
-        pointer-events: none;
-        background:
-            radial-gradient(ellipse 45% 60% at 65% 62%, color-mix(in srgb, var(--c-blue) 50%, transparent), transparent 70%),
-            radial-gradient(color-mix(in srgb, var(--c-blue) 45%, transparent) 1.4px, transparent 1.9px) 0 0 / 9px 9px;
-    }
-    .vision__inner { position: relative; z-index: 1; }
-    .vision__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--sp-3); margin-bottom: var(--sp-5); }
-    .vision__title { max-width: 12em; margin-right: clamp(0px, 8vw, 160px); font-size: var(--fs-h2); line-height: 1.12; }
-    .vision__body {
-        display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--sp-4);
-        padding-top: var(--sp-5);
-        border-top: 1px solid color-mix(in srgb, var(--c-white) 25%, transparent);
-    }
-    .vision__quote { max-width: 30ch; margin-bottom: var(--sp-4); font-family: var(--f-title); font-size: var(--fs-h4); font-weight: 400; letter-spacing: -.03em; line-height: 1.15; text-wrap: balance; }
-    .vision__link { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-sm); font-weight: 500; }
-
-    /* ═════════════════════════════════════════════════════════════════
-       8. KUNDEOMTALER
-       ═════════════════════════════════════════════════════════════════ */
-    .reviews { padding-block: var(--sp-5); background: var(--c-white); }
-    .reviews__inner { display: flex; flex-direction: column; gap: var(--sp-4); }
-    .reviews__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
-    .reviews__icon {
-        display: grid; place-items: center;
-        width: 44px; height: 44px;
-        border-radius: var(--r-sm);
-        background: var(--c-bg);
-        color: var(--c-blue);
-    }
-    .reviews__icon svg { width: 22px; height: 22px; }
-    .reviews__title { font-size: var(--fs-sm); font-weight: 600; letter-spacing: -.01em; }
-    .reviews__sub { font-size: var(--fs-sm); }
-    .reviews__link { margin-left: auto; color: var(--c-blue); font-size: var(--fs-para); display: inline-flex; align-items: center; min-height: 44px; }
-    .reviews__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
-    .review {
-        display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-2);
-        min-height: 283px;
-        padding: var(--sp-3);
-        border-radius: var(--r);
-        background: var(--c-bg);
-    }
-    .review__src { color: var(--c-blue); font-size: var(--fs-para); line-height: 1; }
-    .review__quote { flex: 1; font-size: var(--fs-para); line-height: 1.4; }
-    .review__by { display: flex; flex-direction: column; gap: .25rem; margin-top: var(--sp-2); }
-    .review__name { font-family: var(--f-title); font-weight: 600; letter-spacing: -.03em; }
-    .reviews__grid--single { grid-template-columns: minmax(0, 980px); }
-    .review--feature .review__quote { font-family: var(--f-title); font-size: var(--fs-h5); letter-spacing: -.025em; line-height: 1.3; }
-
-    /* ═════════════════════════════════════════════════════════════════
        9. PROSJEKTER (case-kort)
        ═════════════════════════════════════════════════════════════════ */
-    .work__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--sp-3); margin-bottom: var(--sp-4); }
+    .work__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--sp-3); margin-bottom: var(--sp-5); }
     .work__title { font-size: var(--fs-h2); line-height: 1; }
     .work__more { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-para); }
     .work__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
@@ -1086,27 +1081,25 @@
         .case--wide .case__bar { align-self: end; margin-top: var(--sp-3); }
     }
 
-    /* ═════════════════════════════════════════════════════════════════
-       10. LØPEBÅND (buet tekst som glir)
-       ═════════════════════════════════════════════════════════════════ */
-    .marquee { position: relative; overflow: hidden; background: var(--c-coal); }
-    .marquee .field-bg {
-        background:
-            radial-gradient(ellipse 22% 80% at 50% 80%, color-mix(in srgb, var(--c-blue) 70%, transparent), transparent 70%),
-            radial-gradient(color-mix(in srgb, var(--c-blue) 40%, transparent) 1.2px, transparent 1.7px) 0 0 / 7px 7px;
-        -webkit-mask-image: radial-gradient(ellipse 40% 100% at 50% 70%, var(--c-black), transparent);
-        mask-image: radial-gradient(ellipse 40% 100% at 50% 70%, var(--c-black), transparent);
+    /* Hovedprosjekt med kundens ord (case--feature): større bilde, sitatet
+       står under beskrivelsen i høyre kolonne */
+    .case__quote { margin: 0 10px; padding: var(--sp-3); border-radius: var(--r-sm); background: var(--c-bg); }
+    .case__quote blockquote { font-family: var(--f-title); font-size: clamp(1.125rem, 1.3vw, 1.3125rem); letter-spacing: -.02em; line-height: 1.38; text-wrap: pretty; }
+    .case__quote figcaption { margin-top: var(--sp-2); color: var(--c-muted); font-size: var(--fs-sm); }
+    .case__quote figcaption strong { color: var(--c-black); font-family: var(--f-title); font-weight: 600; letter-spacing: -.02em; }
+    .case--feature .case__desc { padding-bottom: var(--sp-3); }
+    @media (min-width: 901px) {
+        .case--feature { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-rows: auto auto auto 1fr; }
+        .case--feature .case__media { grid-row: 1 / 5; min-height: clamp(380px, 36vw, 640px); }
+        .case--feature .case__quote { grid-column: 2; }
     }
-    .marquee .field-bg.is-drawn { -webkit-mask-image: none; mask-image: none; }
-    .marquee__svg { position: relative; z-index: 1; width: 100%; height: clamp(140px, 17vw, 294px); }
-    .marquee__text { fill: var(--c-white); font-family: var(--f-title); font-size: 121px; font-weight: 600; letter-spacing: -.035em; }
 
     /* ═════════════════════════════════════════════════════════════════
        11. PROSESS
        ═════════════════════════════════════════════════════════════════ */
     .process__inner { text-align: center; }
     .process__title { margin-bottom: var(--sp-5); font-size: var(--fs-h2); line-height: 1.12; }
-    .process__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); text-align: left; }
+    .process__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(20px, 2vw, 32px); text-align: left; }
     .step {
         padding: var(--sp-4) var(--sp-3);
         border-radius: var(--r);
@@ -1164,6 +1157,21 @@
     .about__floor.is-drawn { -webkit-mask-image: none; mask-image: none; }
     .about__inner { position: relative; z-index: 2; padding-block: var(--sp-6); }
     .about__title { margin-bottom: var(--sp-5); font-size: var(--fs-h2); line-height: 1.08; }
+    /* Teamet: bilde, navn, rolle, kort tekst og LinkedIn (se ✏️ TEAM i HTML-en) */
+    .team { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); margin-bottom: var(--sp-3); }
+    .person {
+        display: grid; grid-template-columns: minmax(110px, 2fr) minmax(0, 3fr); align-items: center; gap: var(--sp-3);
+        padding: var(--vi);
+        border-radius: var(--r);
+        background: color-mix(in srgb, var(--c-white) 6%, transparent);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-white) 14%, transparent);
+    }
+    .person__photo { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--r-sm); background: var(--c-night); }
+    .person__name { font-size: var(--fs-h5); letter-spacing: -.035em; line-height: 1.15; }
+    .person__role { margin-top: .3rem; color: var(--c-tint); font-size: var(--fs-sm); }
+    .person__bio { max-width: 42ch; margin-top: var(--sp-2); font-size: var(--fs-sm); line-height: 1.45; opacity: .9; }
+    .person__link { display: inline-flex; align-items: center; min-height: 44px; margin-top: var(--sp-1); font-weight: 500; }
+
     .about__panel {
         position: relative;
         overflow: hidden;
@@ -1255,7 +1263,53 @@
     .about__progress span { display: block; width: 100%; height: 100%; background: var(--c-white); transform: scaleX(0); transform-origin: left; }
     /* Lys pause mellom Om oss og Kontakt (to mørke seksjoner etter hverandre),
        også når Booking-seksjonen mellom dem er skjult med hidden */
-    .about + .cta, .about + .booking[hidden] + .cta { margin-top: clamp(64px, 8.4vw, 120px); }
+    .about + .cta, .about + .faq[hidden] + .booking[hidden] + .cta { margin-top: clamp(64px, 8.4vw, 120px); }
+
+    /* ═════════════════════════════════════════════════════════════════
+       12b. SPØRSMÅL OG SVAR (trekkspill med <details>, virker uten JS)
+       ═════════════════════════════════════════════════════════════════ */
+    .faq + .booking { padding-top: 0; }
+    .faq__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
+    .faq__title { max-width: 11em; font-size: var(--fs-h2); line-height: 1.08; }
+    .faq__lead { max-width: 44ch; margin-top: var(--sp-3); color: var(--c-muted); font-size: var(--fs-para); line-height: 1.45; }
+    .faq__lead a { color: var(--c-black); }
+    .faq__list { display: flex; flex-direction: column; gap: 10px; }
+    .faq__item { border-radius: var(--r); background: var(--c-white); box-shadow: 0 1px 4px color-mix(in srgb, var(--c-black) 6%, transparent); }
+    .faq__item summary {
+        display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2);
+        min-height: 68px;
+        padding: 14px 14px 14px var(--sp-3);
+        border-radius: var(--r);
+        list-style: none;
+        cursor: pointer;
+        font-family: var(--f-title);
+        font-size: clamp(1.125rem, 1.35vw, 1.375rem);
+        font-weight: 500;
+        letter-spacing: -.03em;
+        line-height: 1.2;
+        transition: color .3s;
+    }
+    .faq__item summary::-webkit-details-marker { display: none; }
+    .faq__icon { position: relative; flex: none; width: 36px; height: 36px; border-radius: var(--r-sm); background: var(--c-bg); transition: background-color .3s, color .3s; }
+    .faq__icon::before, .faq__icon::after {
+        content: "";
+        position: absolute; top: 50%; left: 50%;
+        width: 14px; height: 2px; margin: -1px 0 0 -7px;
+        background: currentColor;
+        transition: transform var(--dur) var(--ease);
+    }
+    .faq__icon::after { transform: rotate(90deg); }
+    .faq__item[open] .faq__icon { background: var(--c-blue); color: var(--c-white); }
+    .faq__item[open] .faq__icon::after { transform: rotate(90deg) scaleX(0); }
+    @media (hover: hover) and (pointer: fine) {
+        .faq__item summary:hover { color: var(--c-blue); }
+    }
+    .faq__answer { max-width: 62ch; padding: 0 var(--sp-3) var(--sp-3); color: var(--c-muted); line-height: 1.5; }
+    .faq__answer a { color: var(--c-black); }
+    @media (min-width: 1100px) {
+        .faq__inner { grid-template-columns: minmax(0, 5fr) minmax(0, 8fr); align-items: start; gap: clamp(40px, 5vw, 96px); }
+        .faq__intro { position: sticky; top: calc(var(--nav-top) + var(--nav-h) + var(--sp-4)); }
+    }
 
     /* ═════════════════════════════════════════════════════════════════
        13. BOOKING («Book en samtale»)
@@ -1814,14 +1868,12 @@
         }
         .hero__visual::before { top: 18%; left: 72%; height: 150%; }
         .hero__visual::after { top: 60%; left: 5%; }
-        .hero__lead { margin-bottom: var(--sp-4); }
+        .hero__actions { margin-bottom: var(--sp-4); }
         .hero__lower-inner { padding-top: 0; }
         .proof { flex-basis: 100%; }
         .made { flex-basis: 100%; }
-        .vision__body { grid-template-columns: 1fr; }
-        .reviews__grid { grid-template-columns: 1fr; }
-        .reviews__link { width: 100%; margin-left: 0; }
         .work__grid { grid-template-columns: 1fr; }
+        .team { grid-template-columns: minmax(0, 1fr); }
         .footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4) var(--sp-3); }
         .footer__mail { font-size: 1.15rem; }
     }
@@ -1845,11 +1897,19 @@
         .about__copy { gap: var(--sp-2); padding: .75rem 12px var(--sp-2); }
         .about__item h3 { font-size: var(--fs-h4); }
         .about__visual { aspect-ratio: 1.08; }
+        .case__chip strong { font-size: 1.1875rem; }
     }
     @media (max-width: 600px) {
         .case__bar { flex-direction: column; align-items: stretch; padding: 12px; }
         .case__bar .sbtn { display: flex; width: 100%; }
-        .proof__row strong { flex-basis: 42%; }
+        .case__quote { padding: var(--sp-2); }
+        .case__chip { padding: .75em .95em; }
+        /* «Hvorfor oss» på mobil: tittel over teksten, begge venstrestilt */
+        .proof__row { flex-direction: column; gap: .35rem; }
+        .proof__row span { max-width: none; text-align: left; }
+        .person { grid-template-columns: minmax(0, 1fr); }
+        .faq__item summary { padding-left: var(--sp-2); }
+        .faq__answer { padding-inline: var(--sp-2); }
     }
     @media (max-width: 400px) {
         /* «Hva vi skaper»: smalere logostil så de lengste ordene får plass */
@@ -1861,6 +1921,7 @@
         .sbtn__txt { flex: 1; padding: 1em 1.4em; white-space: normal; text-align: center; }
         .nav__cta .sbtn { width: auto; }
         .intro-tag__text { font-size: 1rem; }
+        .intro-tag__chip { display: none; }     /* gir plass til hele merketeksten på én linje */
         .footer__base { flex-direction: column; align-items: flex-start; }
         .footer__meta { column-gap: 1.25rem; }
         .footer__mail { font-size: 1rem; letter-spacing: -.02em; }
@@ -1881,7 +1942,6 @@
         .intro-tag { gap: 8px; }
         .intro-tag .mark { width: 24px; }
         .intro-tag__text { font-size: .9375rem; }
-        .intro-tag__chip { display: none; }
         .footer__mail { font-size: .875rem; }
     }
     /* Smale mobiler: logo, språkvelger og meny må få plass på én linje.
@@ -1966,8 +2026,9 @@
                                         <li><a class="nav__page ulink" href="#hjem" data-i18n="nav.home">Hjem</a></li>
                                         <li><a class="nav__page ulink" href="#prosjekter" data-i18n="nav.work">Prosjekter</a></li>
                                         <li><a class="nav__page ulink" href="#tjenester" data-i18n="nav.services">Tjenester</a></li>
-                                        <li><a class="nav__page ulink" href="#om-oss" data-i18n="nav.about">Om oss</a></li>
                                         <li><a class="nav__page ulink" href="#prosess" data-i18n="nav.process">Prosess</a></li>
+                                        <li><a class="nav__page ulink" href="#om-oss" data-i18n="nav.about">Om oss</a></li>
+                                        <li><a class="nav__page ulink" href="#sporsmal" data-i18n="nav.faq">Spørsmål og svar</a></li>
                                         <li><a class="nav__page ulink" href="#booking" data-i18n="nav.book">Book en samtale</a></li>
                                         <li><a class="nav__page ulink" href="#kontakt" data-i18n="nav.contact">Kontakt</a></li>
                                     </ul>
@@ -1995,20 +2056,20 @@
                                                 <div class="nav__group">
                                                     <p class="nav__group-label" data-i18n="nav.groupWeb">Nettsider</p>
                                                     <ul>
-                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.web">Web Design &amp; Utvikling</span><span class="nav__svc-blurb" data-i18n="svc.webNote">Skreddersydde nettsider med scroll-animasjoner, smooth UX og lynrask lastetid.</span></a></li>
+                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.web">Webdesign og utvikling</span><span class="nav__svc-blurb" data-i18n="nav.webBlurb">Raske, skreddersydde nettsider som fungerer på alle skjermer.</span></a></li>
                                                     </ul>
                                                 </div>
                                                 <div class="nav__group">
                                                     <p class="nav__group-label">AI</p>
                                                     <ul>
-                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.ai">AI Automatisering</span><span class="nav__svc-blurb" data-i18n="svc.aiNote">Smarte arbeidsflyter og AI-løsninger som sparer tid, penger og frustrasjon.</span></a></li>
+                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.ai">AI-automatisering</span><span class="nav__svc-blurb" data-i18n="nav.aiBlurb">Automatisering som tar seg av de repeterende oppgavene.</span></a></li>
                                                     </ul>
                                                 </div>
                                                 <div class="nav__group">
                                                     <p class="nav__group-label">Design</p>
                                                     <ul>
-                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title">UI / UX Design</span><span class="nav__svc-blurb" data-i18n="svc.uxNote">Brukeropplevelser som konverterer — vakre, intuitive og gjennomtenkte.</span></a></li>
-                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title">Brand Identity</span><span class="nav__svc-blurb" data-i18n="svc.brandNote">Visuell identitet som er konsistent, minneverdig og bygget for å vokse med deg.</span></a></li>
+                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.ux">UI/UX-design</span><span class="nav__svc-blurb" data-i18n="nav.uxBlurb">Grensesnitt som er enkle å forstå og å bruke.</span></a></li>
+                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.brand">Visuell identitet</span><span class="nav__svc-blurb" data-i18n="nav.brandBlurb">Logo, farger og typografi som henger sammen.</span></a></li>
                                                     </ul>
                                                 </div>
                                             </div>
@@ -2061,31 +2122,37 @@
             <!-- ✏️ Merke over overskriften -->
             <p class="intro-tag">
                 <svg class="mark" viewBox="0 0 9 7" aria-hidden="true"><path d="M0 0h2v7H0zM2 0h3v1H2zM2 6h3v1H2zM5 1h2v5H5zM8 6h1v1H8z"/></svg>
-                <span class="intro-tag__text">Web Design &amp; AI Automation</span>
+                <span class="intro-tag__text" data-i18n="hero.tag">Webdesign og <span class="nowrap">AI-automatisering</span></span>
                 <span class="intro-tag__chip">Studio</span>
             </p>
-            <!-- ✏️ Hovedoverskrift: den blå delen står i <span class="accent"> -->
-            <h1 class="hero__heading" id="hero-title">Making Brands <span class="accent">Digitally Unforgettable</span>.</h1>
+            <!-- ✏️ Hovedoverskrift: den blå delen står i <span class="accent">.
+                 Engelsk versjon står i I18N.en under 'hero.title'. -->
+            <h1 class="hero__heading" id="hero-title" data-i18n="hero.title">Design. Utvikling. <span class="accent">Vekst.</span></h1>
             <!-- ✏️ Ingress -->
-            <p class="hero__lead" data-i18n="hero.lead">Vi kombinerer premiumdesign, moderne teknologi og <span class="nowrap">AI-automatisering</span> — og bygger digitale opplevelser som skiller seg ut og faktisk leverer resultater.</p>
+            <p class="hero__lead" data-i18n="hero.lead">Vi designer og utvikler skreddersydde nettsider som styrker merkevaren din og hjelper bedriften å vokse.</p>
+            <!-- ✏️ Knappen og lenken under ingressen -->
+            <div class="hero__actions">
+                <a class="sbtn" href="#booking">
+                    <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                    <span class="sbtn__txt" data-i18n="nav.book">Book en samtale</span>
+                    <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                </a>
+                <a class="hero__link ulink ulink--on" href="#prosjekter" data-i18n="hero.work">Se arbeidet vårt</a>
+            </div>
         </div>
     </div>
 
     <div class="hero__lower">
         <div class="container hero__lower-inner">
-            <!-- ✏️ «Hvorfor oss»-kortet: tre rader, kopier <li> for flere -->
+            <!-- ✏️ «Hvorfor oss»-kortet: tre rader, kopier <li> for flere.
+                 Løftene må være sanne (markedsføringsloven), se punkt 9 i guiden. -->
             <div class="proof on-dark">
                 <p class="proof__label" data-i18n="proof.label">Hvorfor oss</p>
                 <ul>
-                    <li class="proof__row"><strong data-i18n="proof.1">100&nbsp;% Dedikasjon</strong><span data-i18n="proof.1t">Hvert prosjekt får vår fulle oppmerksomhet — ingen shortcuts.</span></li>
-                    <li class="proof__row"><strong data-i18n="proof.2">2× Perspektiver</strong><span data-i18n="proof.2t">To barndomskompiser, to tanker, ett studio med ett felles mål.</span></li>
-                    <li class="proof__row"><strong data-i18n="proof.3">24&nbsp;t Responstid</strong><span data-i18n="proof.3t">Vi svarer alltid innen 24&nbsp;timer — fordi din tid er verdifull.</span></li>
+                    <li class="proof__row"><strong data-i18n="proof.1">Direkte kontakt</strong><span data-i18n="proof.1t">Du snakker med de to som designer og bygger løsningen. Ingen mellomledd.</span></li>
+                    <li class="proof__row"><strong data-i18n="proof.2">Svar innen 24&nbsp;t</strong><span data-i18n="proof.2t">Vi svarer alltid innen 24&nbsp;timer, fordi tiden din er verdifull.</span></li>
+                    <li class="proof__row"><strong data-i18n="proof.3">Uforpliktende start</strong><span data-i18n="proof.3t">Vi starter med en kort samtale på video eller telefon. Helt uten forpliktelser.</span></li>
                 </ul>
-                <a class="sbtn sbtn--block" href="#booking">
-                    <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                    <span class="sbtn__txt" data-i18n="btn.start">Start et prosjekt</span>
-                    <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                </a>
             </div>
 
             <!-- ✏️ «Hva vi skaper»: fagområdene vist som en ordvegg -->
@@ -2102,6 +2169,48 @@
     </div>
 </section>
 
+<!-- ════ SEKSJON: Prosjekter ════ -->
+<section class="section work" id="prosjekter" aria-labelledby="prosjekter-title">
+    <div class="container">
+        <div class="work__head">
+            <h2 class="work__title" id="prosjekter-title" data-i18n="nav.work">Prosjekter</h2>
+            <a class="work__more ulink" href="#booking" data-i18n="work.talk">Snakk med oss →</a>
+        </div>
+        <div class="work__grid">
+            <!-- ── Prosjekt: DJ Tiny (stort kort med kundens ord: case--wide case--feature) ──
+                 ✏️ Nytt prosjekt: kopier hele <article>. Har dere to eller flere, fjern
+                 case--wide og case--feature (kortene står da to og to) og ta sitatet
+                 (.case__quote) med bare på det kortet der kunden har sagt noe. -->
+            <article class="case case--photo case--wide case--feature">
+                <div class="case__media">
+                    <!-- ✏️ BILDE: skjermbilde av forsiden ligger i bilder/djtiny.jpg -->
+                    <img class="case__cover" src="bilder/djtiny.jpg" alt="Forsiden til djtiny.no: DJ Tiny-logoen i neon over et fullt dansegulv" data-i18n-attr="alt:work.djAlt" width="1200" height="750" loading="lazy">
+                </div>
+                <!-- ✏️ Stikkord -->
+                <ul class="case__chips">
+                    <li class="case__chip"><strong data-i18n="svc.web">Webdesign og utvikling</strong><span data-i18n="work.service">Tjeneste</span></li>
+                    <li class="case__chip"><strong data-i18n="work.ent">Underholdning</strong><span data-i18n="work.industry">Bransje</span></li>
+                </ul>
+                <!-- ✏️ Beskrivelse -->
+                <p class="case__desc" data-i18n="work.djDesc">Nettside for DJ Tiny, DJ på Østlandet for bryllup, firmafest og klubb. Mørkt neonuttrykk, tjenester, kommende bookinger, musikkbingo og bookingforespørsel rett fra siden.</p>
+                <!-- ✏️ Kundens ord. La kunden godkjenne ordlyden før publisering. -->
+                <figure class="case__quote">
+                    <blockquote><p data-i18n="rev.quote">«Jeg ville ha en nettside som føles som en god kveld på dansegulvet, og det var akkurat det jeg fikk. Alt fra uttrykket og tekstene til bookingskjemaet ble gjennomtenkt, og jeg fikk svar raskt hele veien. Nå ser folk med en gang hva jeg tilbyr, og de kan sende forespørsel rett fra siden.»</p></blockquote>
+                    <figcaption><strong>DJ Tiny</strong> · <span data-i18n="rev.where">DJ på Østlandet</span></figcaption>
+                </figure>
+                <div class="case__bar">
+                    <h3 class="case__name">DJ Tiny</h3>
+                    <a class="sbtn sbtn--white" href="https://djtiny.no" target="_blank" rel="noopener" aria-label="Se nettsiden djtiny.no (åpnes i ny fane)" data-i18n-attr="aria-label:work.visitLabel">
+                        <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                        <span class="sbtn__txt" data-i18n="work.visit">Se nettsiden</span>
+                        <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                    </a>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
 <!-- ════ SEKSJON: Tjenester ════ -->
 <section class="section services" id="tjenester" aria-labelledby="tjenester-title">
     <div class="container">
@@ -2109,7 +2218,7 @@
             <p class="kicker" data-i18n="nav.services">Tjenester</p>
             <!-- ✏️ Overskrift og ingress: den blå delen står i <span class="accent"> -->
             <h2 class="services__title" id="tjenester-title" data-i18n="svc.title">Nettsider som gjør<br><span class="accent">varig inntrykk</span></h2>
-            <p class="services__intro" data-i18n="svc.intro">Skreddersydde løsninger som kombinerer premiumdesign med teknologi som faktisk funker — fra første skisse til lansering.</p>
+            <p class="services__intro" data-i18n="svc.intro">Skreddersydde løsninger som kombinerer godt design med teknologi som fungerer, fra første skisse til lansering. Velg én tjeneste, eller la oss ta helheten.</p>
         </div>
 
         <div class="services__grid">
@@ -2117,21 +2226,21 @@
             <article class="plan" data-plan>
                 <div class="plan__head">
                     <span class="chip">01</span>
-                    <button class="plan__toggle" type="button" aria-expanded="true" aria-controls="plan-1" hidden><span class="sr-only" data-i18n="svc.webMore">Vis detaljer: Web Design &amp; Utvikling</span><i aria-hidden="true"></i><i aria-hidden="true"></i></button>
+                    <button class="plan__toggle" type="button" aria-expanded="true" aria-controls="plan-1" hidden><span class="sr-only" data-i18n="svc.webMore">Vis detaljer: Webdesign og utvikling</span><i aria-hidden="true"></i><i aria-hidden="true"></i></button>
                 </div>
-                <h3 class="plan__title" data-i18n="svc.web">Web Design &amp; Utvikling</h3>
+                <h3 class="plan__title" data-i18n="svc.web">Webdesign og utvikling</h3>
                 <div class="plan__body" id="plan-1">
                     <div class="plan__body-inner">
                         <p class="plan__lead" data-i18n="svc.includes">Dette inkluderer</p>
                         <!-- ✏️ Punktliste -->
                         <ul class="plan__list">
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M6.5 6.5h.01M9 6.5h.01"/></svg><span data-i18n="svc.web1">Skreddersydde nettsider</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c2.5-6 5.5-6 9 0s6.5 6 9 0"/></svg><span data-i18n="svc.web2">Scroll-animasjoner</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5l12 7-5.2 1.6L10.5 18z"/></svg>Smooth UX</li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12z"/></svg><span data-i18n="svc.web4">Lynrask lastetid</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M6.5 6.5h.01M9 6.5h.01"/></svg><span data-i18n="svc.web1">Skreddersydd design og utvikling</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/></svg><span data-i18n="svc.web2">Tilpasset mobil, nettbrett og PC</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg><span data-i18n="svc.web3">Bygget for å bli funnet i Google</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12z"/></svg><span data-i18n="svc.web4">Rask lastetid</span></li>
                         </ul>
-                        <!-- ✏️ Beskrivelse -->
-                        <p class="plan__note" data-i18n="svc.webNote">Skreddersydde nettsider med scroll-animasjoner, smooth UX og lynrask lastetid.</p>
+                        <!-- ✏️ Hvem tjenesten passer for -->
+                        <p class="plan__note" data-i18n="svc.webNote"><strong>Passer for</strong> bedrifter som trenger en ny nettside, eller som har vokst fra den gamle.</p>
                         <div class="plan__cta">
                             <a class="sbtn sbtn--black" href="#booking">
                                 <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
@@ -2148,19 +2257,20 @@
                 <canvas class="plan__canvas px" data-pixel="field" data-variant="plan" data-seed="17" aria-hidden="true"></canvas>
                 <div class="plan__head">
                     <span class="chip chip--blue">02</span>
-                    <button class="plan__toggle" type="button" aria-expanded="true" aria-controls="plan-2" hidden><span class="sr-only" data-i18n="svc.aiMore">Vis detaljer: AI Automatisering</span><i aria-hidden="true"></i><i aria-hidden="true"></i></button>
+                    <button class="plan__toggle" type="button" aria-expanded="true" aria-controls="plan-2" hidden><span class="sr-only" data-i18n="svc.aiMore">Vis detaljer: AI-automatisering</span><i aria-hidden="true"></i><i aria-hidden="true"></i></button>
                 </div>
-                <h3 class="plan__title" data-i18n="svc.ai">AI Automatisering</h3>
+                <h3 class="plan__title" data-i18n="svc.ai">AI-automatisering</h3>
                 <div class="plan__body" id="plan-2">
                     <div class="plan__body-inner">
                         <p class="plan__lead" data-i18n="svc.includes">Dette inkluderer</p>
+                        <!-- ✏️ Eksempler: skriv bare det dere faktisk leverer -->
                         <ul class="plan__list">
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8.5 6h7M7.2 8.2l3.6 7.6M16.8 8.2l-3.6 7.6"/></svg><span data-i18n="svc.ai1">Smarte arbeidsflyter</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/><path d="M9.5 3v3.5M14.5 3v3.5M9.5 17.5V21M14.5 17.5V21M3 9.5h3.5M3 14.5h3.5M17.5 9.5H21M17.5 14.5H21"/></svg><span data-i18n="svc.ai2">AI-løsninger</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg><span data-i18n="svc.ai3">Sparer tid og penger</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1.9 2 5.1 2 7 0M9 9.5h.01M15 9.5h.01"/></svg><span data-i18n="svc.ai4">Mindre frustrasjon</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/></svg><span data-i18n="svc.ai1">Svar på og sortering av henvendelser</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9.5L4 20z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></svg><span data-i18n="svc.ai2">Chatbot som svarer kundene dine</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8.5 6h7M7.2 8.2l3.6 7.6M16.8 8.2l-3.6 7.6"/></svg><span data-i18n="svc.ai3">Koble sammen verktøyene dere bruker</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8.5L18 6.5V21H6z"/><path d="M9 11h6M9 14.5h6M9 18h3.5"/></svg><span data-i18n="svc.ai4">Rapporter som lager seg selv</span></li>
                         </ul>
-                        <p class="plan__note" data-i18n="svc.aiNote">Smarte arbeidsflyter og AI-løsninger som sparer tid, penger og frustrasjon.</p>
+                        <p class="plan__note" data-i18n="svc.aiNote"><strong>Passer for</strong> bedrifter som bruker mye tid på manuelle og repeterende oppgaver.</p>
                         <div class="plan__cta">
                             <a class="sbtn" href="#booking">
                                 <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
@@ -2176,19 +2286,19 @@
             <article class="plan" data-plan>
                 <div class="plan__head">
                     <span class="chip">03</span>
-                    <button class="plan__toggle" type="button" aria-expanded="true" aria-controls="plan-3" hidden><span class="sr-only" data-i18n="svc.uxMore">Vis detaljer: UI / UX Design</span><i aria-hidden="true"></i><i aria-hidden="true"></i></button>
+                    <button class="plan__toggle" type="button" aria-expanded="true" aria-controls="plan-3" hidden><span class="sr-only" data-i18n="svc.uxMore">Vis detaljer: UI/UX-design</span><i aria-hidden="true"></i><i aria-hidden="true"></i></button>
                 </div>
-                <h3 class="plan__title">UI / UX Design</h3>
+                <h3 class="plan__title" data-i18n="svc.ux">UI/UX-design</h3>
                 <div class="plan__body" id="plan-3">
                     <div class="plan__body-inner">
                         <p class="plan__lead" data-i18n="svc.includes">Dette inkluderer</p>
                         <ul class="plan__list">
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span data-i18n="svc.ux1">Brukeropplevelser som konverterer</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/></svg><span data-i18n="svc.ux2">Vakre grensesnitt</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span data-i18n="svc.ux3">Intuitiv bruk</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M15.5 4.5a2.1 2.1 0 013 3L8 18l-4 1 1-4z"/></svg><span data-i18n="svc.ux4">Gjennomtenkt design</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span data-i18n="svc.ux1">Kartlegging av brukerreiser</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span data-i18n="svc.ux2">Skisser og klikkbare prototyper</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/></svg><span data-i18n="svc.ux3">Grensesnitt som er enkle å bruke</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="1.8"/><path d="M5 8.5l7 1.5 7-1.5M12 10v4.5l-3 6M12 14.5l3 6"/></svg><span data-i18n="svc.ux4">Universell utforming (WCAG)</span></li>
                         </ul>
-                        <p class="plan__note" data-i18n="svc.uxNote">Brukeropplevelser som konverterer — vakre, intuitive og gjennomtenkte.</p>
+                        <p class="plan__note" data-i18n="svc.uxNote"><strong>Passer for</strong> nye digitale produkter, og nettsider som får besøk, men ikke henvendelser.</p>
                         <div class="plan__cta">
                             <a class="sbtn sbtn--black" href="#booking">
                                 <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
@@ -2204,19 +2314,19 @@
             <article class="plan" data-plan>
                 <div class="plan__head">
                     <span class="chip">04</span>
-                    <button class="plan__toggle" type="button" aria-expanded="true" aria-controls="plan-4" hidden><span class="sr-only" data-i18n="svc.brandMore">Vis detaljer: Brand Identity</span><i aria-hidden="true"></i><i aria-hidden="true"></i></button>
+                    <button class="plan__toggle" type="button" aria-expanded="true" aria-controls="plan-4" hidden><span class="sr-only" data-i18n="svc.brandMore">Vis detaljer: Visuell identitet</span><i aria-hidden="true"></i><i aria-hidden="true"></i></button>
                 </div>
-                <h3 class="plan__title">Brand Identity</h3>
+                <h3 class="plan__title" data-i18n="svc.brand">Visuell identitet</h3>
                 <div class="plan__body" id="plan-4">
                     <div class="plan__body-inner">
                         <p class="plan__lead" data-i18n="svc.includes">Dette inkluderer</p>
                         <ul class="plan__list">
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 9-8 9-8-9z"/></svg><span data-i18n="svc.brand1">Visuell identitet</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg><span data-i18n="svc.brand2">Konsistent uttrykk</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="svc.brand3">Minneverdig merkevare</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 9-8 9-8-9z"/></svg><span data-i18n="svc.brand1">Logo og visuell profil</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg><span data-i18n="svc.brand2">Farger og typografi</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="svc.brand3">Profilmanual som holder uttrykket likt</span></li>
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span data-i18n="svc.brand4">Bygget for å vokse med deg</span></li>
                         </ul>
-                        <p class="plan__note" data-i18n="svc.brandNote">Visuell identitet som er konsistent, minneverdig og bygget for å vokse med deg.</p>
+                        <p class="plan__note" data-i18n="svc.brandNote"><strong>Passer for</strong> nye bedrifter, og bedrifter som trenger et tydeligere uttrykk.</p>
                         <div class="plan__cta">
                             <a class="sbtn sbtn--black" href="#booking">
                                 <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
@@ -2230,122 +2340,6 @@
         </div>
     </div>
 </section>
-
-<!-- ════ SEKSJON: Visjon ════ -->
-<section class="vision on-dark" aria-labelledby="visjon-title">
-    <canvas class="field-bg px" data-pixel="field" data-variant="quote" data-seed="9" aria-hidden="true"></canvas>
-    <div class="container vision__inner">
-        <div class="vision__head">
-            <p class="kicker kicker--light" data-i18n="vision.kicker">Vår visjon</p>
-            <!-- ✏️ data-scramble gir bokstav-animasjonen; fjern attributtet for vanlig tekst -->
-            <h2 class="vision__title" id="visjon-title" data-scramble data-i18n="vision.title">Vi bygger fremtidens<br>digitale verden</h2>
-        </div>
-        <div class="vision__body">
-            <div>
-                <p class="vision__quote" data-i18n="vision.quote">Premiumdesign møter <span class="nowrap">AI-teknologi</span>.</p>
-                <a class="vision__link ulink ulink--on" href="#prosjekter" data-i18n="vision.link">Se prosjektene våre</a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ════ SEKSJON: Kundeomtaler ════ -->
-<!-- ✏️ Én omtale foreløpig (DJ Tiny). Flere omtaler: kopier <figure class="review">
-     og fjern klassen reviews__grid--single, så står kortene tre og tre igjen.
-     Omtalen står i DJ Tinys navn: la ham godkjenne ordlyden før publisering.
-     DJ Tiny er i familie med en av oss. Vil dere være helt åpne om det,
-     skriv det i etiketten (f.eks. «Vår første kunde – og familie»). -->
-<section class="reviews" aria-labelledby="omtaler-title">
-    <div class="container reviews__inner">
-        <div class="reviews__head">
-            <span class="reviews__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V13a6 6 0 016-6M14 19v-6a6 6 0 016-6"/><path d="M4 13h5v6H4zM14 13h5v6h-5z"/></svg></span>
-            <div>
-                <h2 class="reviews__title" id="omtaler-title" data-i18n="rev.title">Kundeomtaler</h2>
-                <p class="reviews__sub" data-i18n="rev.sub">Hva kundene sier om samarbeidet</p>
-            </div>
-            <a class="reviews__link ulink" href="#booking" data-i18n="rev.next">Bli vår neste kunde →</a>
-        </div>
-        <div class="reviews__grid reviews__grid--single">
-            <!-- ── Omtale: DJ Tiny ── -->
-            <figure class="review review--feature">
-                <p class="review__src" data-i18n="rev.src">Vår første kunde</p>
-                <blockquote class="review__quote"><p data-i18n="rev.quote">«Jeg ville ha en nettside som føles som en god kveld på dansegulvet, og det var akkurat det jeg fikk. Alt fra uttrykket og tekstene til bookingskjemaet ble gjennomtenkt, og jeg fikk svar raskt hele veien. Nå ser folk med en gang hva jeg tilbyr, og de kan sende forespørsel rett fra siden.»</p></blockquote>
-                <figcaption class="review__by"><span class="review__name">DJ Tiny</span><span><a class="ulink" href="https://djtiny.no" target="_blank" rel="noopener">djtiny.no</a> · <span data-i18n="rev.where">DJ på Østlandet</span></span></figcaption>
-            </figure>
-        </div>
-    </div>
-</section>
-
-<!-- ════ SEKSJON: Prosjekter ════ -->
-<section class="section work" id="prosjekter" aria-labelledby="prosjekter-title">
-    <div class="container">
-        <div class="work__head">
-            <h2 class="work__title" id="prosjekter-title" data-i18n="nav.work">Prosjekter</h2>
-            <a class="work__more ulink" href="#booking" data-i18n="work.talk">Snakk med oss →</a>
-        </div>
-        <div class="work__grid">
-            <!-- ── Prosjektkort: DJ Tiny (ekte prosjekt med skjermbilde: case--photo) ── -->
-            <article class="case case--photo">
-                <div class="case__media">
-                    <!-- ✏️ BILDE: skjermbilde av forsiden ligger i bilder/djtiny.jpg -->
-                    <img class="case__cover" src="bilder/djtiny.jpg" alt="Forsiden til djtiny.no: DJ Tiny-logoen i neon over et fullt dansegulv" data-i18n-attr="alt:work.djAlt" width="1200" height="750" loading="lazy">
-                </div>
-                <!-- ✏️ Stikkord -->
-                <ul class="case__chips">
-                    <li class="case__chip"><strong data-i18n="svc.web">Web Design &amp; Utvikling</strong><span data-i18n="work.service">Tjeneste</span></li>
-                    <li class="case__chip"><strong data-i18n="work.ent">Underholdning</strong><span data-i18n="work.industry">Bransje</span></li>
-                </ul>
-                <!-- ✏️ Beskrivelse -->
-                <p class="case__desc" data-i18n="work.djDesc">Nettside for DJ Tiny, DJ på Østlandet for bryllup, firmafest og klubb. Mørkt neonuttrykk, tjenester, kommende bookinger, musikkbingo og bookingforespørsel rett fra siden.</p>
-                <div class="case__bar">
-                    <h3 class="case__name">DJ Tiny</h3>
-                    <a class="sbtn sbtn--white" href="https://djtiny.no" target="_blank" rel="noopener" aria-label="Se nettsiden djtiny.no (åpnes i ny fane)" data-i18n-attr="aria-label:work.visitLabel">
-                        <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                        <span class="sbtn__txt" data-i18n="work.visit">Se nettsiden</span>
-                        <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                    </a>
-                </div>
-            </article>
-
-            <!-- ── Prosjektkort: Ledig plass ──
-                 ✏️ Når dere har et nytt prosjekt: kopier DJ Tiny-kortet over og
-                 erstatt dette kortet med det. -->
-            <article class="case">
-                <div class="case__media">
-                    <canvas class="case__cover px" data-pixel="cover" data-variant="streak" data-seed="21" aria-hidden="true"></canvas>
-                    <div class="case__cover-text" aria-hidden="true">
-                        <p class="case__cat" data-i18n="work.openCat">02 — Ledig plass</p>
-                        <p class="case__tagline" data-i18n="work.openTag">Neste prosjekt kan være ditt</p>
-                    </div>
-                </div>
-                <ul class="case__chips">
-                    <li class="case__chip"><strong>Web Design</strong><span data-i18n="work.service">Tjeneste</span></li>
-                    <li class="case__chip"><strong data-i18n="svc.ai">AI Automatisering</strong><span data-i18n="work.service">Tjeneste</span></li>
-                </ul>
-                <p class="case__desc" data-i18n="work.openDesc">Vi tar imot nye prosjekter nå. Book en uforpliktende samtale, så finner vi ut hva vi kan bygge for deg.</p>
-                <div class="case__bar">
-                    <h3 class="case__name" data-i18n="work.yours">Ditt prosjekt</h3>
-                    <a class="sbtn sbtn--white" href="#booking">
-                        <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                        <span class="sbtn__txt" data-i18n="nav.book">Book en samtale</span>
-                        <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                    </a>
-                </div>
-            </article>
-        </div>
-    </div>
-</section>
-
-<!-- ════ SEKSJON: Løpebånd ════ -->
-<!-- Dekorativt: fagområdene gjentas langs en bue. ✏️ Endre teksten i <textPath>.
-     Frasen står tre ganger; endrer du antallet, sett data-reps til samme tall. -->
-<div class="marquee" aria-hidden="true">
-    <canvas class="field-bg px" data-pixel="field" data-variant="band" data-seed="11" aria-hidden="true"></canvas>
-    <svg class="marquee__svg" viewBox="0 0 1728 294" preserveAspectRatio="xMidYMid slice" focusable="false">
-        <path id="marquee-path" d="M-240 345Q864-95 1968 345" fill="none"/>
-        <text class="marquee__text"><textPath href="#marquee-path" data-marquee data-reps="3" data-i18n="marquee">Web Design · AI Automatisering · UI/UX Design · Brand Identity — Web Design · AI Automatisering · UI/UX Design · Brand Identity — Web Design · AI Automatisering · UI/UX Design · Brand Identity — </textPath></text>
-    </svg>
-</div>
 
 <!-- ════ SEKSJON: Prosess ════ -->
 <section class="section process" id="prosess" aria-labelledby="prosess-title">
@@ -2394,6 +2388,34 @@
         <!-- ✏️ Etikett og overskrift -->
         <p class="kicker kicker--light" data-i18n="nav.about">Om oss</p>
         <h2 class="about__title" id="om-oss-title" data-i18n="about.title">To barndoms&shy;kompiser.<br>Ett studio.</h2>
+
+        <!-- ✏️ TEAM: fyll inn navn, rolle, et par setninger og LinkedIn-lenke for hver av dere,
+             og slett de to linjene «TEAM START» og «TEAM SLUTT» under, så vises blokken.
+             Legg bildene i bilder/ (stående, f.eks. 800 × 1000 px). Engelsk: legg til
+             data-i18n på rolle og tekst, og nøklene i I18N.en (se punkt 10 i guiden). -->
+        <!-- TEAM START
+        <ul class="team" aria-label="Teamet">
+            <li class="person">
+                <img class="person__photo" src="bilder/fornavn1.jpg" alt="Fornavn Etternavn" width="800" height="1000" loading="lazy">
+                <div>
+                    <h3 class="person__name">Fornavn Etternavn</h3>
+                    <p class="person__role">Design og utvikling</p>
+                    <p class="person__bio">To–tre setninger om bakgrunn, hva du er god på og hva du gjør i prosjektene.</p>
+                    <a class="person__link ulink ulink--on" href="https://www.linkedin.com/in/brukernavn" target="_blank" rel="noopener">LinkedIn</a>
+                </div>
+            </li>
+            <li class="person">
+                <img class="person__photo" src="bilder/fornavn2.jpg" alt="Fornavn Etternavn" width="800" height="1000" loading="lazy">
+                <div>
+                    <h3 class="person__name">Fornavn Etternavn</h3>
+                    <p class="person__role">AI og automatisering</p>
+                    <p class="person__bio">To–tre setninger om bakgrunn, hva du er god på og hva du gjør i prosjektene.</p>
+                    <a class="person__link ulink ulink--on" href="https://www.linkedin.com/in/brukernavn" target="_blank" rel="noopener">LinkedIn</a>
+                </div>
+            </li>
+        </ul>
+        TEAM SLUTT -->
+
         <div class="about__track">
             <div class="about__panel">
                 <ol class="about__items">
@@ -2403,7 +2425,7 @@
                             <span class="about__num">01</span>
                             <!-- ✏️ Tittel og tekst -->
                             <h3 data-i18n="about.1">Hvem vi er</h3>
-                            <p data-i18n="about.1t">Vi er DOTDEV — et kreativt web- og teknologistudio grunnlagt av to barndomskompiser med en felles lidenskap for design og innovasjon.</p>
+                            <p data-i18n="about.1t">Et lite studio for nettsider og AI-automatisering. Du har de samme to personene med deg fra første skisse til lansering.</p>
                         </div>
                         <!-- Illustrasjon: data-variant = duo | browser | mark -->
                         <canvas class="about__visual px" data-pixel="scene" data-variant="duo" data-seed="5" aria-hidden="true"></canvas>
@@ -2413,7 +2435,7 @@
                         <div class="about__copy">
                             <span class="about__num">02</span>
                             <h3 data-i18n="about.2">Hva vi tror på</h3>
-                            <p data-i18n="about.2t">Vi tror på at gode nettsider gjør en ekte forskjell. Ikke bare vakre — men strategiske, raske og bygget for å konvertere besøkende til kunder.</p>
+                            <p data-i18n="about.2t">Gode nettsider gjør en ekte forskjell. Ikke bare vakre, men raske, tydelige og bygget for å gjøre besøkende til kunder.</p>
                         </div>
                         <canvas class="about__visual px" data-pixel="scene" data-variant="browser" data-seed="6" aria-hidden="true"></canvas>
                     </li>
@@ -2422,13 +2444,48 @@
                         <div class="about__copy">
                             <span class="about__num">03</span>
                             <h3 data-i18n="about.3">Hvordan vi jobber</h3>
-                            <p data-i18n="about.3t">Når vi kombinerer kreativitet med AI og moderne webutvikling, skaper vi digitale opplevelser som faktisk skiller seg ut i mengden.</p>
+                            <p data-i18n="about.3t">Vi designer alt fra grunnen av og bygger med ren kode. Fokuset er detaljene som gjør at du skiller deg ut i mengden.</p>
                         </div>
                         <canvas class="about__visual px" data-pixel="scene" data-variant="mark" data-seed="7" aria-hidden="true"></canvas>
                     </li>
                 </ol>
                 <div class="about__progress" aria-hidden="true"><span data-sticky-progress></span></div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════ SEKSJON: Spørsmål og svar ════ -->
+<!-- ✏️ Spørsmål og svar: kopier en hel <details> for et nytt spørsmål (husk nøklene i I18N.en).
+     Tips: når dere har bestemt en startpris, skriv den i svaret på «Hva koster en nettside?». -->
+<section class="section faq" id="sporsmal" aria-labelledby="faq-title">
+    <div class="container faq__inner">
+        <div class="faq__intro">
+            <p class="kicker" data-i18n="faq.kicker">Spørsmål og svar</p>
+            <h2 class="faq__title" id="faq-title" data-i18n="faq.title">Spørsmål vi ofte får</h2>
+            <p class="faq__lead" data-i18n="faq.lead">Finner du ikke svaret her? <a class="ulink ulink--on" href="#booking">Book en samtale</a> eller skriv til <a class="ulink ulink--on" href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>.</p>
+        </div>
+        <div class="faq__list">
+            <details class="faq__item">
+                <summary><span data-i18n="faq.q1">Hva koster en nettside?</span><span class="faq__icon" aria-hidden="true"></span></summary>
+                <div class="faq__answer"><p data-i18n="faq.a1">Det kommer an på hva du trenger. Etter en uforpliktende samtale får du et konkret tilbud, så du vet hva det koster før vi setter i gang.</p></div>
+            </details>
+            <details class="faq__item">
+                <summary><span data-i18n="faq.q2">Kan dere forbedre nettsiden jeg allerede har?</span><span class="faq__icon" aria-hidden="true"></span></summary>
+                <div class="faq__answer"><p data-i18n="faq.a2">Ja. Velg «Prosjektgjennomgang» når du booker, så går vi gjennom nettsiden din og gir konkrete forslag til forbedringer.</p></div>
+            </details>
+            <details class="faq__item">
+                <summary><span data-i18n="faq.q3">Hva er AI-automatisering, og passer det for oss?</span><span class="faq__icon" aria-hidden="true"></span></summary>
+                <div class="faq__answer"><p data-i18n="faq.a3">Det betyr at repeterende oppgaver gjøres automatisk, for eksempel å svare på og sortere henvendelser eller å lage rapporter. I en kort samtale finner vi ut om noe hos dere lønner seg å automatisere.</p></div>
+            </details>
+            <details class="faq__item">
+                <summary><span data-i18n="faq.q4">Må jeg vite nøyaktig hva jeg vil ha?</span><span class="faq__icon" aria-hidden="true"></span></summary>
+                <div class="faq__answer"><p data-i18n="faq.a4">Nei. Vi starter alltid med å forstå deg, merkevaren din og målene dine, og hjelper deg å finne ut hva som gir mest verdi.</p></div>
+            </details>
+            <details class="faq__item">
+                <summary><span data-i18n="faq.q5">Hva skjer etter lansering?</span><span class="faq__icon" aria-hidden="true"></span></summary>
+                <div class="faq__answer"><p data-i18n="faq.a5">Vi følger deg videre med justeringer, oppdateringer og løpende forbedringer, så nettsiden fortsetter å jobbe for deg.</p></div>
+            </details>
         </div>
     </div>
 </section>
@@ -2692,7 +2749,7 @@
                 <svg class="mark" viewBox="0 0 9 7" aria-hidden="true"><path d="M0 0h2v7H0zM2 0h3v1H2zM2 6h3v1H2zM5 1h2v5H5zM8 6h1v1H8z"/></svg>
             </a>
             <!-- ✏️ Slagord i footeren -->
-            <p class="footer__tagline" data-i18n="footer.tagline">Web Design &amp; AI Automation — bygget med lidenskap av to barndomskompiser.</p>
+            <p class="footer__tagline" data-i18n="footer.tagline">Nettsider og AI-automatisering for bedrifter som vil skille seg ut.</p>
         </div>
         <nav class="footer__links" aria-labelledby="footer-nav">
             <h2 id="footer-nav" data-i18n="footer.nav">Navigasjon</h2>
@@ -2700,16 +2757,17 @@
                 <li><a class="ulink" href="#prosjekter" data-i18n="nav.work">Prosjekter</a></li>
                 <li><a class="ulink" href="#tjenester" data-i18n="nav.services">Tjenester</a></li>
                 <li><a class="ulink" href="#om-oss" data-i18n="nav.about">Om oss</a></li>
+                <li><a class="ulink" href="#sporsmal" data-i18n="nav.faq">Spørsmål og svar</a></li>
                 <li><a class="ulink" href="#kontakt" data-i18n="nav.contact">Kontakt</a></li>
             </ul>
         </nav>
         <div class="footer__links">
             <h2 data-i18n="nav.services">Tjenester</h2>
             <ul>
-                <li><a class="ulink" href="#tjenester">Web Design</a></li>
-                <li><a class="ulink" href="#tjenester" data-i18n="svc.ai">AI Automatisering</a></li>
-                <li><a class="ulink" href="#tjenester">UI / UX Design</a></li>
-                <li><a class="ulink" href="#tjenester">Brand Identity</a></li>
+                <li><a class="ulink" href="#tjenester" data-i18n="footer.web">Webdesign</a></li>
+                <li><a class="ulink" href="#tjenester" data-i18n="svc.ai">AI-automatisering</a></li>
+                <li><a class="ulink" href="#tjenester" data-i18n="svc.ux">UI/UX-design</a></li>
+                <li><a class="ulink" href="#tjenester" data-i18n="svc.brand">Visuell identitet</a></li>
             </ul>
         </div>
         <div class="footer__links">
@@ -2718,6 +2776,14 @@
             <ul>
                 <li><a class="ulink" href="mailto:kontakt@dotdev.no" data-i18n="mail.send">Send e-post</a></li>
                 <li><a class="ulink" href="#booking" data-i18n="nav.book">Book en samtale</a></li>
+                <!-- ✏️ Telefon og sosiale medier: fyll inn ekte nummer og lenker, og slett linjene
+                     «KONTAKT START» og «KONTAKT SLUTT» under. Legg dem også inn som "telephone"
+                     og "sameAs" i JSON-LD i <head>. -->
+                <!-- KONTAKT START
+                <li><a class="ulink" href="tel:+4700000000">Ring oss</a></li>
+                <li><a class="ulink" href="https://www.linkedin.com/company/…" target="_blank" rel="noopener">LinkedIn</a></li>
+                <li><a class="ulink" href="https://www.instagram.com/…" target="_blank" rel="noopener">Instagram</a></li>
+                KONTAKT SLUTT -->
             </ul>
             <p class="footer__mail">kontakt@dotdev.no</p>
         </div>
@@ -2728,7 +2794,7 @@
         <!-- ✏️ LOVPÅLAGT (ehandelsloven § 8): registrert foretaksnavn, org.nr. og
              adresse (fra Brønnøysundregistrene). Blir foretaket MVA-registrert,
              skriv «Org.nr. 936 133 231 MVA». -->
-        <p class="footer__company" data-i18n="footer.company">DOTDEV drives av Nerland Consulting · Org.nr. 936 133 231 · Skovengvegen 3, 2008 Fjerdingby</p>
+        <p class="footer__company" data-i18n="footer.company">DOTDEV drives av Nerland Consulting · Org.nr. 936 133 231</p>
         <ul class="footer__meta">
             <li><a class="ulink" href="personvern.html" data-i18n="footer.privacy">Personvern</a></li>
             <li><a class="ulink" href="#hjem" data-i18n="footer.top">Til toppen ↑</a></li>
@@ -2817,7 +2883,7 @@ const I18N = {
     en: {
         // <head>
         'meta.title': 'DOTDEV · Web Design & AI Automation',
-        'meta.description': 'DOTDEV is a creative web and technology studio run by two childhood friends. We combine premium design, modern technology and AI automation.',
+        'meta.description': 'DOTDEV designs and builds custom websites and AI automation for businesses. Book a no-obligation call – we reply within 24 hours.',
 
         // Header og meny
         'skip': 'Skip to content',
@@ -2831,9 +2897,14 @@ const I18N = {
         'nav.services': 'Services',
         'nav.about': 'About us',
         'nav.process': 'Process',
+        'nav.faq': 'FAQ',
         'nav.book': 'Book a call',
         'nav.contact': 'Contact',
         'nav.groupWeb': 'Websites',
+        'nav.webBlurb': 'Fast, custom websites that work on every screen.',
+        'nav.aiBlurb': 'Automation that takes care of the repetitive tasks.',
+        'nav.uxBlurb': 'Interfaces that are easy to understand and use.',
+        'nav.brandBlurb': 'A logo, colours and typography that fit together.',
 
         // Knapper som går igjen
         'btn.start': 'Start a project',
@@ -2841,60 +2912,19 @@ const I18N = {
         'mail.send': 'Send an email',
         'mail.or': 'or email',
 
-        // Hero
-        'hero.lead': 'We combine premium design, modern technology and AI automation to build digital experiences that stand out and deliver real results.',
+        // Hero (den engelske overskriften er slagordet)
+        'hero.tag': 'Web Design &amp; AI Automation',
+        'hero.title': 'Design. Development. <span class="accent">Growth.</span>',
+        'hero.lead': 'We design and develop custom websites that strengthen your brand and help your business grow.',
+        'hero.work': 'See our work',
         'proof.label': 'Why us',
-        'proof.1': '100% Dedication',
-        'proof.1t': 'Every project gets our full attention — no shortcuts.',
-        'proof.2': '2× Perspectives',
-        'proof.2t': 'Two childhood friends, two minds, one studio with a shared goal.',
-        'proof.3': '24&nbsp;h Response time',
-        'proof.3t': 'We always reply within 24&nbsp;hours — because your time matters.',
+        'proof.1': 'Direct contact',
+        'proof.1t': 'You talk to the two people who design and build your solution. No middlemen.',
+        'proof.2': 'Reply within 24&nbsp;h',
+        'proof.2t': 'We always reply within 24&nbsp;hours, because your time matters.',
+        'proof.3': 'No-obligation start',
+        'proof.3t': 'We start with a short call on video or by phone. No strings attached.',
         'made.label': 'What we create',
-
-        // Tjenester
-        'svc.title': 'Websites that make<br><span class="accent">a lasting impression</span>',
-        'svc.intro': 'Tailored solutions that pair premium design with technology that actually works — from first sketch to launch.',
-        'svc.includes': 'What’s included',
-        'svc.web': 'Web Design &amp; Development',
-        'svc.webMore': 'Show details: Web Design &amp; Development',
-        'svc.web1': 'Custom websites',
-        'svc.web2': 'Scroll animations',
-        'svc.web4': 'Lightning-fast load times',
-        'svc.webNote': 'Custom websites with scroll animations, smooth UX and lightning-fast load times.',
-        'svc.ai': 'AI Automation',
-        'svc.aiMore': 'Show details: AI Automation',
-        'svc.ai1': 'Smart workflows',
-        'svc.ai2': 'AI solutions',
-        'svc.ai3': 'Saves time and money',
-        'svc.ai4': 'Less frustration',
-        'svc.aiNote': 'Smart workflows and AI solutions that save time, money and frustration.',
-        'svc.uxMore': 'Show details: UI / UX Design',
-        'svc.ux1': 'User experiences that convert',
-        'svc.ux2': 'Beautiful interfaces',
-        'svc.ux3': 'Intuitive to use',
-        'svc.ux4': 'Thoughtful design',
-        'svc.uxNote': 'User experiences that convert — beautiful, intuitive and well thought out.',
-        'svc.brandMore': 'Show details: Brand Identity',
-        'svc.brand1': 'Visual identity',
-        'svc.brand2': 'Consistent look and feel',
-        'svc.brand3': 'Memorable brand',
-        'svc.brand4': 'Built to grow with you',
-        'svc.brandNote': 'A visual identity that is consistent, memorable and built to grow with you.',
-
-        // Visjon
-        'vision.kicker': 'Our vision',
-        'vision.title': 'We build tomorrow’s<br>digital world',
-        'vision.quote': 'Premium design meets AI technology.',
-        'vision.link': 'See our projects',
-
-        // Kundeomtaler
-        'rev.title': 'Client reviews',
-        'rev.sub': 'What our clients say about working with us',
-        'rev.next': 'Become our next client →',
-        'rev.src': 'Our first client',
-        'rev.quote': '“I wanted a website that feels like a great night on the dance floor, and that’s exactly what I got. Everything from the look and the copy to the booking form was carefully thought through, and I got quick answers the whole way. Now people can see straight away what I offer, and they can send an enquiry right from the site.”',
-        'rev.where': 'DJ in Eastern Norway',
 
         // Prosjekter
         'work.talk': 'Talk to us →',
@@ -2905,13 +2935,41 @@ const I18N = {
         'work.djDesc': 'Website for DJ Tiny, a DJ in Eastern Norway for weddings, corporate parties and clubs. A dark neon look, services, upcoming bookings, music bingo and booking requests straight from the site.',
         'work.visitLabel': 'Visit djtiny.no (opens in a new tab)',
         'work.visit': 'Visit the site',
-        'work.openCat': '02 — Open slot',
-        'work.openTag': 'Your project could be next',
-        'work.openDesc': 'We’re taking on new projects now. Book a no-obligation call and we’ll work out what we can build for you.',
-        'work.yours': 'Your project',
+        'rev.quote': '“I wanted a website that feels like a great night on the dance floor, and that’s exactly what I got. Everything from the look and the copy to the booking form was carefully thought through, and I got quick answers the whole way. Now people can see straight away what I offer, and they can send an enquiry right from the site.”',
+        'rev.where': 'DJ in Eastern Norway',
 
-        // Løpebånd (frasen tre ganger, som på norsk)
-        'marquee': 'Web Design · AI Automation · UI/UX Design · Brand Identity — Web Design · AI Automation · UI/UX Design · Brand Identity — Web Design · AI Automation · UI/UX Design · Brand Identity — ',
+        // Tjenester
+        'svc.title': 'Websites that make<br><span class="accent">a lasting impression</span>',
+        'svc.intro': 'Tailored solutions that pair good design with technology that works, from first sketch to launch. Pick one service, or let us handle the whole thing.',
+        'svc.includes': 'What’s included',
+        'svc.web': 'Web design &amp; development',
+        'svc.webMore': 'Show details: Web design &amp; development',
+        'svc.web1': 'Custom design and development',
+        'svc.web2': 'Works on mobile, tablet and desktop',
+        'svc.web3': 'Built to be found on Google',
+        'svc.web4': 'Fast load times',
+        'svc.webNote': '<strong>Right for</strong> businesses that need a new website, or have outgrown the old one.',
+        'svc.ai': 'AI automation',
+        'svc.aiMore': 'Show details: AI automation',
+        'svc.ai1': 'Replying to and sorting enquiries',
+        'svc.ai2': 'A chatbot that answers your customers',
+        'svc.ai3': 'Connecting the tools you already use',
+        'svc.ai4': 'Reports that write themselves',
+        'svc.aiNote': '<strong>Right for</strong> businesses that spend a lot of time on manual, repetitive tasks.',
+        'svc.ux': 'UI/UX design',
+        'svc.uxMore': 'Show details: UI/UX design',
+        'svc.ux1': 'Mapping user journeys',
+        'svc.ux2': 'Wireframes and clickable prototypes',
+        'svc.ux3': 'Interfaces that are easy to use',
+        'svc.ux4': 'Accessibility (WCAG)',
+        'svc.uxNote': '<strong>Right for</strong> new digital products, and websites that get visits but not enquiries.',
+        'svc.brand': 'Brand identity',
+        'svc.brandMore': 'Show details: Brand identity',
+        'svc.brand1': 'Logo and visual identity',
+        'svc.brand2': 'Colours and typography',
+        'svc.brand3': 'Brand guidelines that keep things consistent',
+        'svc.brand4': 'Built to grow with you',
+        'svc.brandNote': '<strong>Right for</strong> new businesses, and businesses that need a clearer look.',
 
         // Prosess
         'proc.kicker': 'Our process',
@@ -2928,11 +2986,26 @@ const I18N = {
         // Om oss
         'about.title': 'Two childhood friends.<br>One studio.',
         'about.1': 'Who we are',
-        'about.1t': 'We are DOTDEV — a creative web and technology studio founded by two childhood friends with a shared passion for design and innovation.',
+        'about.1t': 'A small studio for websites and AI automation. The same two people are with you from first sketch to launch.',
         'about.2': 'What we believe',
-        'about.2t': 'We believe great websites make a real difference. Not just beautiful — but strategic, fast and built to turn visitors into customers.',
+        'about.2t': 'Good websites make a real difference. Not just beautiful, but fast, clear and built to turn visitors into customers.',
         'about.3': 'How we work',
-        'about.3t': 'By combining creativity with AI and modern web development, we create digital experiences that genuinely stand out from the crowd.',
+        'about.3t': 'We design everything from the ground up and build with clean code. Our focus is the details that make you stand out from the crowd.',
+
+        // Spørsmål og svar
+        'faq.kicker': 'FAQ',
+        'faq.title': 'Questions we often get',
+        'faq.lead': 'Can’t find the answer here? <a class="ulink ulink--on" href="#booking">Book a call</a> or email <a class="ulink ulink--on" href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>.',
+        'faq.q1': 'How much does a website cost?',
+        'faq.a1': 'It depends on what you need. After a no-obligation call, you get a concrete quote, so you know the cost before we start.',
+        'faq.q2': 'Can you improve the website I already have?',
+        'faq.a2': 'Yes. Choose “Project review” when you book, and we’ll go through your website and give you concrete suggestions for improvements.',
+        'faq.q3': 'What is AI automation, and is it right for us?',
+        'faq.a3': 'It means repetitive tasks are done automatically, such as replying to and sorting enquiries or creating reports. In a short call, we’ll find out whether anything in your business is worth automating.',
+        'faq.q4': 'Do I need to know exactly what I want?',
+        'faq.a4': 'No. We always start by understanding you, your brand and your goals, and help you work out what will add the most value.',
+        'faq.q5': 'What happens after launch?',
+        'faq.a5': 'We stay with you with tweaks, updates and ongoing improvements, so your website keeps working for you.',
 
         // Booking (tekstene i HTML-en; meldingene står i MSG i modul 11)
         'bk.title': 'Book a no-obligation call',
@@ -3007,10 +3080,11 @@ const I18N = {
         'cta.copy': 'Tell us about your project. We always reply within 24 hours and we’re ready to help.',
 
         // Footer
-        'footer.tagline': 'Web Design &amp; AI Automation — built with passion by two childhood friends.',
+        'footer.tagline': 'Websites and AI automation for businesses that want to stand out.',
         'footer.nav': 'Navigation',
+        'footer.web': 'Web design',
         'footer.rights': 'All rights reserved.',
-        'footer.company': 'DOTDEV is operated by Nerland Consulting · Org. no. 936 133 231 · Skovengvegen 3, 2008 Fjerdingby, Norway',
+        'footer.company': 'DOTDEV is operated by Nerland Consulting · Org. no. 936 133 231',
         'footer.privacy': 'Privacy',
         'footer.top': 'Back to top ↑'
     }
@@ -3672,49 +3746,6 @@ const I18N = {
         return { refresh: (scope = document) => $$('canvas[data-pixel]', scope).forEach(cv => requestAnimationFrame(() => setTimeout(() => draw(cv), 450))) };
     })();
     window.PIXEL = PIXEL;
-
-    /* ── 6. Løpebånd: teksten glir langs buen ──────────────────── */
-    // Går bare når båndet er på skjermen, fanen er synlig og besøkende ikke
-    // har valgt redusert bevegelse (også hvis innstillingen endres underveis).
-    const tp = $('[data-marquee]');
-    if (tp) {
-        const band = tp.closest('.marquee');
-        const reps = parseInt(tp.dataset.reps, 10) || 3;
-        let unit = 0, offset = 0, last = 0, running = false, raf = 0, inView = !band || !('IntersectionObserver' in window);
-        const speed = 55;                                    // enheter per sekund
-        const measure = () => { try { unit = tp.getComputedTextLength() / reps; } catch (e) { unit = 0; } };
-        const frame = now => {
-            if (!running) return;
-            const dt = last ? Math.min(.05, (now - last) / 1000) : 0;
-            last = now;
-            if (!unit) measure();
-            if (unit) {
-                offset -= speed * dt;
-                if (offset <= -unit) offset += unit;
-                tp.setAttribute('startOffset', offset.toFixed(1));
-            }
-            raf = requestAnimationFrame(frame);
-        };
-        const start = () => { if (running) return; running = true; last = 0; raf = requestAnimationFrame(frame); };
-        const stop = () => { running = false; cancelAnimationFrame(raf); };
-        const sync = () => {
-            if (reduced()) { stop(); offset = 0; tp.removeAttribute('startOffset'); return; }
-            if (inView && !document.hidden) start(); else stop();
-        };
-        if (band && 'IntersectionObserver' in window) {
-            new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }).observe(band);
-        }
-        document.addEventListener('visibilitychange', sync);
-        onMQ(reduceMQ, sync);
-        sync();
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
-        // Nytt språk = ny tekstlengde: mål på nytt og start fra begynnelsen
-        LANG.on(() => {
-            offset = 0;
-            tp.removeAttribute('startOffset');
-            measure();
-        });
-    }
 
     /* ── 7. Kontakt: pause den roterende buen når den er utenfor skjermen ── */
     const cta = $('.cta');

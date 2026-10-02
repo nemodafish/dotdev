@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<!--
+  DOTDEV · 404-side. Netlify viser denne siden automatisk når en adresse ikke finnes.
+  Alle lenker og filer bruker absolutte adresser (/…), fordi siden kan vises på
+  hvilken som helst adresse, f.eks. dotdev.no/gammel/side.
+-->
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Siden finnes ikke · DOTDEV</title>
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#0004f6">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-1 -2 11 11'%3E%3Crect x='-1' y='-2' width='11' height='11' rx='2' fill='%230004f6'/%3E%3Cpath fill='%23fff' d='M0 0h2v7H0zM2 0h3v1H2zM2 6h3v1H2zM5 1h2v5H5zM8 6h1v1H8z'/%3E%3C/svg%3E">
+    <link rel="preload" href="/fonter/inter-tight-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <style>
+    @font-face { font-family: 'Inter Tight'; font-style: normal; font-weight: 400 700; font-display: swap; src: url("/fonter/inter-tight-latin.woff2") format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+    @font-face { font-family: 'Outfit'; font-style: normal; font-weight: 300 700; font-display: swap; src: url("/fonter/outfit-latin.woff2") format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+    :root {
+        --c-blue:  #0004f6;
+        --c-ink:   #111111;
+        --c-bg:    #f2f2f2;
+        --c-white: #ffffff;
+        --c-muted: #5c5c5c;
+        --c-tint:  #c9caff;
+        --f-title: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+        --f-body:  "Outfit", "Helvetica Neue", Arial, sans-serif;
+        --pad-x: clamp(20px, 2.9vw, 50px);
+        --r: 12px;
+        --r-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+        display: flex; flex-direction: column;
+        min-height: 100vh; min-height: 100svh;
+        background: var(--c-bg); color: var(--c-ink);
+        font-family: var(--f-body); font-size: 1.0625rem; line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    :focus-visible { outline: 2px solid var(--c-blue); outline-offset: 3px; border-radius: 4px; }
+    .wrap { width: 100%; max-width: 1728px; margin-inline: auto; padding-inline: var(--pad-x); }
+
+    .top { padding-top: clamp(16px, 3.1vw, 54px); }
+    .top__bar {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        max-width: 792px; min-height: 64px; padding: 8px 12px 8px 20px;
+        border-radius: var(--r); background: var(--c-white);
+        box-shadow: 0 1px 4px color-mix(in srgb, var(--c-ink) 6%, transparent);
+    }
+    .logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+    .logo svg { width: 40px; fill: var(--c-blue); }
+    .logo span { font-family: var(--f-title); font-size: 1.6rem; font-weight: 600; letter-spacing: -.05em; }
+
+    main { flex: 1; display: flex; align-items: center; padding-block: clamp(3rem, 8vw, 6rem); }
+    .lost { max-width: 640px; }
+    .lost__art { display: block; width: min(100%, 380px); height: auto; margin-bottom: clamp(2rem, 4vw, 3rem); }
+    .lost__art .shade { fill: var(--c-tint); }
+    .lost__art .ink { fill: var(--c-blue); }
+    .lost__label { color: var(--c-blue); font-family: var(--f-title); font-size: .9375rem; font-weight: 500; }
+    h1 { margin-top: .5rem; font-family: var(--f-title); font-size: clamp(2.4rem, 5vw, 4.2rem); font-weight: 590; letter-spacing: -.045em; line-height: 1.05; text-wrap: balance; }
+    .lost__text { max-width: 46ch; margin-top: 1.25rem; color: var(--c-muted); font-size: clamp(1.0625rem, 1.25vw, 1.25rem); line-height: 1.45; }
+    .lost__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 2rem; }
+    .btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-height: 56px; padding: 0 1.6em;
+        border-radius: var(--r-sm);
+        background: var(--c-blue); color: var(--c-white);
+        font-size: 1.0625rem; text-decoration: none;
+        transition: background-color .3s;
+    }
+    .btn:hover { background: color-mix(in srgb, var(--c-blue) 85%, var(--c-ink)); }
+    .btn--ghost { background: var(--c-white); color: var(--c-ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-ink) 14%, transparent); }
+    .btn--ghost:hover { background: var(--c-white); color: var(--c-blue); }
+    .lost__mail { margin-top: 1.5rem; color: var(--c-muted); }
+    .lost__mail a { color: var(--c-ink); text-underline-offset: 3px; }
+    .lost__en { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid color-mix(in srgb, var(--c-ink) 12%, transparent); color: var(--c-muted); font-size: .9375rem; }
+    .lost__en a { color: var(--c-ink); text-underline-offset: 3px; }
+
+    .foot { padding-block: 2rem; background: var(--c-blue); color: var(--c-white); font-size: .9375rem; }
+    @media (max-width: 480px) { .btn { width: 100%; } }
+    @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+    </style>
+</head>
+<body>
+
+<header class="top">
+    <div class="wrap">
+        <div class="top__bar">
+            <a class="logo" href="/" aria-label="DOTDEV, til forsiden">
+                <svg viewBox="0 0 9 7" aria-hidden="true"><path d="M0 0h2v7H0zM2 0h3v1H2zM2 6h3v1H2zM5 1h2v5H5zM8 6h1v1H8z"/></svg>
+                <span>DOTDEV</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="wrap">
+        <div class="lost">
+            <!-- «404» i piksler: lavendel skygge bak, blå piksler foran -->
+            <svg class="lost__art" viewBox="-0.2 -0.2 17.6 7.6" aria-hidden="true">
+                <g class="shade" transform="translate(.28 .28)"><path d="M3 0h.86v.86h-.86zM2 1h.86v.86h-.86zM3 1h.86v.86h-.86zM1 2h.86v.86h-.86zM3 2h.86v.86h-.86zM0 3h.86v.86h-.86zM3 3h.86v.86h-.86zM0 4h.86v.86h-.86zM1 4h.86v.86h-.86zM2 4h.86v.86h-.86zM3 4h.86v.86h-.86zM4 4h.86v.86h-.86zM3 5h.86v.86h-.86zM3 6h.86v.86h-.86zM7 0h.86v.86h-.86zM8 0h.86v.86h-.86zM9 0h.86v.86h-.86zM6 1h.86v.86h-.86zM10 1h.86v.86h-.86zM6 2h.86v.86h-.86zM9 2h.86v.86h-.86zM10 2h.86v.86h-.86zM6 3h.86v.86h-.86zM8 3h.86v.86h-.86zM10 3h.86v.86h-.86zM6 4h.86v.86h-.86zM7 4h.86v.86h-.86zM10 4h.86v.86h-.86zM6 5h.86v.86h-.86zM10 5h.86v.86h-.86zM7 6h.86v.86h-.86zM8 6h.86v.86h-.86zM9 6h.86v.86h-.86zM15 0h.86v.86h-.86zM14 1h.86v.86h-.86zM15 1h.86v.86h-.86zM13 2h.86v.86h-.86zM15 2h.86v.86h-.86zM12 3h.86v.86h-.86zM15 3h.86v.86h-.86zM12 4h.86v.86h-.86zM13 4h.86v.86h-.86zM14 4h.86v.86h-.86zM15 4h.86v.86h-.86zM16 4h.86v.86h-.86zM15 5h.86v.86h-.86zM15 6h.86v.86h-.86z"/></g>
+                <g class="ink"><path d="M3 0h.86v.86h-.86zM2 1h.86v.86h-.86zM3 1h.86v.86h-.86zM1 2h.86v.86h-.86zM3 2h.86v.86h-.86zM0 3h.86v.86h-.86zM3 3h.86v.86h-.86zM0 4h.86v.86h-.86zM1 4h.86v.86h-.86zM2 4h.86v.86h-.86zM3 4h.86v.86h-.86zM4 4h.86v.86h-.86zM3 5h.86v.86h-.86zM3 6h.86v.86h-.86zM7 0h.86v.86h-.86zM8 0h.86v.86h-.86zM9 0h.86v.86h-.86zM6 1h.86v.86h-.86zM10 1h.86v.86h-.86zM6 2h.86v.86h-.86zM9 2h.86v.86h-.86zM10 2h.86v.86h-.86zM6 3h.86v.86h-.86zM8 3h.86v.86h-.86zM10 3h.86v.86h-.86zM6 4h.86v.86h-.86zM7 4h.86v.86h-.86zM10 4h.86v.86h-.86zM6 5h.86v.86h-.86zM10 5h.86v.86h-.86zM7 6h.86v.86h-.86zM8 6h.86v.86h-.86zM9 6h.86v.86h-.86zM15 0h.86v.86h-.86zM14 1h.86v.86h-.86zM15 1h.86v.86h-.86zM13 2h.86v.86h-.86zM15 2h.86v.86h-.86zM12 3h.86v.86h-.86zM15 3h.86v.86h-.86zM12 4h.86v.86h-.86zM13 4h.86v.86h-.86zM14 4h.86v.86h-.86zM15 4h.86v.86h-.86zM16 4h.86v.86h-.86zM15 5h.86v.86h-.86zM15 6h.86v.86h-.86z"/></g>
+            </svg>
+            <p class="lost__label">Feil 404</p>
+            <h1>Siden finnes ikke</h1>
+            <p class="lost__text">Lenken kan være feil, eller siden er flyttet. Gå til forsiden, eller book en samtale hvis du lette etter oss.</p>
+            <div class="lost__actions">
+                <a class="btn" href="/">Til forsiden</a>
+                <a class="btn btn--ghost" href="/#booking">Book en samtale</a>
+            </div>
+            <p class="lost__mail">Eller skriv til <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>.</p>
+            <p class="lost__en" lang="en">Page not found. <a href="/?lang=en">Go to the homepage</a>.</p>
+        </div>
+    </div>
+</main>
+
+<footer class="foot">
+    <div class="wrap">
+        <p>© 2026 DOTDEV · Nerland Consulting · Org.nr. 936 133 231</p>
+    </div>
+</footer>
+
+</body>
+</html>
