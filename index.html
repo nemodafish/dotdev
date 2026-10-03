@@ -31,7 +31,7 @@
 
   2. FARGER, FONTER OG AVSTANDER
      Alle designverdier er tokens i :root øverst i <style>: farger (--c-…),
-     fonter (--f-title, --f-body, --f-serif), tekststørrelser (--fs-…),
+     fonter (--f-title, --f-body), tekststørrelser (--fs-…),
      avstander (--sp-…), radius (--r…) og bevegelse (--ease…, --dur…).
      Endrer du --c-blue, endres aksentfargen overalt, også i pikselkunsten.
      Unntak: <head> kan ikke lese tokens, så bytt også #0004f6 i
@@ -51,8 +51,6 @@
                         Kort med ekte skjermbilde (som DJ Tiny) får klassen
                         case--photo, som fjerner den mørke tonen over bildet.
                         Bildene ligger i mappen bilder/ ved siden av filen.
-     • «Hva vi skaper»  SEKSJON: Hero, <li class="made__item">. Fire ord i
-                        logostil; JS bytter skriftstil på to og to av og til.
      • Prosesskort .... SEKSJON: Prosess, <li class="step">.
      • Team ........... SEKSJON: Om oss, blokken merket ✏️ TEAM (skjult). Fyll
                         inn navn, rolle, bilde og LinkedIn for hver av dere, og
@@ -65,7 +63,7 @@
      • Menyen ......... SEKSJON: Header og meny. Tjenestene står i grupper
                         (.nav__group) med blå etikett; kopier en <li> inn i en
                         gruppe eller kopier en hel gruppe.
-     • Footer ......... tre lenkekolonner (.footer__links). Telefon, LinkedIn
+     • Footer ......... to lenkekolonner (.footer__links). Telefon, LinkedIn
                         og Instagram står klare (skjult mellom «KONTAKT START»
                         og «KONTAKT SLUTT») i Kontakt-kolonnen. Nederst står firmaopplysningene
                         (.footer__company: org.nr. og adresse, lovpålagt) og
@@ -78,8 +76,8 @@
      eller slett alt mellom to SEKSJON-bannere. JavaScript tåler at en seksjon
      mangler. Fjern da også lenkene til den i menyen og footeren.
      Skjuler eller sletter du Booking, sender JavaScript automatisk knappene
-     «Start et prosjekt», «Book en samtale», «Diskuter prosjektet» og
-     «Snakk med oss» (href="#booking") til #kontakt, og skjuler
+     «Book en samtale» og «Snakk med oss» (href="#booking") til #kontakt,
+     og skjuler
      «Book en samtale» i menyen og footeren. Uten JavaScript må du endre
      disse lenkene selv.
 
@@ -105,9 +103,8 @@
      data-seed (et tall) gir et nytt mønster, data-variant velger motiv.
      Uten JavaScript vises enklere CSS-mønstre i stedet.
      Overskrifter med data-scramble får bokstav-effekten (fjern attributtet
-     for vanlig tekst). Pikselovergangen ved lasting er JS-modul 10; slett
-     den blokken hvis du ikke vil ha den. All bevegelse slås av når
-     besøkende har valgt «redusert bevegelse».
+     for vanlig tekst). All bevegelse slås av når besøkende har valgt
+     «redusert bevegelse».
 
   8. BOOKING «Book en samtale» (SEKSJON: Booking)
      Alle innstillinger står i objektet BOOKING helt øverst i <script>
@@ -179,8 +176,8 @@
      • Universell utforming: nettsider for allmennheten skal oppfylle
        WCAG-kravene (likestillings- og diskrimineringsloven § 18). Malen er
        laget for WCAG AA. Hold kontrasten og alt-tekstene når dere endrer.
-     • Markedsføring: tall og løfter («Svar innen én arbeidsdag», «Direkte
-       kontakt») må være sanne (markedsføringsloven). Det gjelder også
+     • Markedsføring: tall og løfter («Svar innen én arbeidsdag»,
+       «uforpliktende samtale») må være sanne (markedsføringsloven). Det gjelder også
        kundeomtaler: har kunden en nær relasjon til dere (familie, venner),
        bør det komme frem.
 
@@ -349,7 +346,6 @@
         /* Fonter */
         --f-title: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
         --f-body:  "Outfit", "Helvetica Neue", Arial, sans-serif;
-        --f-serif: Georgia, "Times New Roman", serif;   /* ett av ordene i «Hva vi skaper» */
         --fw-title: 590;
 
         /* Tekststørrelser (flytende) */
@@ -895,72 +891,12 @@
     .hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); margin-top: calc(var(--sp-4) + var(--sp-1)); margin-bottom: var(--sp-6); }
     .hero__link { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-sm); font-weight: 500; }
 
-    .hero__lower { position: relative; z-index: 1; }
-    @media (min-width: 901px) {
-        .hero__lower {
-            padding-bottom: var(--sp-5);
-            background: linear-gradient(to bottom, var(--c-white) calc(100% - var(--sp-5)), var(--c-bg) calc(100% - var(--sp-5)));
-        }
-        .proof { margin-bottom: calc(var(--sp-5) * -1); }
-    }
-    .hero__lower-inner {
-        display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end;
-        gap: var(--sp-5);
-        padding-block: var(--sp-4);
-    }
-
-    /* Svart «Hvorfor oss»-kort */
-    .proof {
-        display: flex; flex-direction: column; gap: var(--sp-3);
-        flex: 0 1 560px;
-        min-width: min(412px, 100%);
-        max-width: min(560px, 100%);
-        margin-top: calc(var(--sp-5) * -1);
-        padding: 30px var(--sp-3) var(--sp-3);
-        border-radius: var(--r);
-        background: var(--c-black);
-        color: var(--c-white);
-    }
-    .proof__label { margin-bottom: calc(var(--sp-2) * -1); font-size: var(--fs-sm); letter-spacing: .04em; text-transform: uppercase; opacity: .62; }
-    .proof__row {
-        display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2);
-        padding-block: 1.3em;
-        border-bottom: 1px solid color-mix(in srgb, var(--c-white) 20%, transparent);
-    }
-    .proof__row:last-child { border-bottom: 0; }
-    .proof__row strong { flex: 0 0 40%; font-family: var(--f-title); font-size: var(--fs-h5); font-weight: 500; letter-spacing: -.03em; line-height: 1.15; }
-    .proof__row span { max-width: 60%; text-align: right; line-height: 1.3; opacity: .8; }
-
-    /* «Hva vi skaper»: ordvegg i logostil */
-    .made { flex: 1; align-self: center; min-width: min(500px, 100%); }
-    .made__label { display: block; margin-bottom: var(--sp-2); font-size: var(--fs-sm); }
-    /* Fire «logoer» i et 2 × 2-rutenett. Med JS bytter to og to ord skriftstil
-       med jevne mellomrom (som en logovegg som roterer). */
-    .made__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .made__item {
-        display: flex; align-items: center; justify-content: center; gap: .45em;
-        min-width: 0;
-        overflow: hidden;              /* sikkerhetsnett: et langt ord kan aldri treffe naboen */
-        aspect-ratio: 3.4 / 1;
-        color: color-mix(in srgb, var(--c-ink) 78%, var(--c-white));
-        font-size: clamp(1.05rem, 1.9vw, 1.9rem);
-        line-height: 1.1;
-        white-space: nowrap;
-        transition: opacity .45s var(--ease);
-    }
-    .made__item.is-swapping { opacity: 0; }
-    .made__item svg { width: 1.15em; height: 1.15em; fill: currentColor; flex: none; }
-    .made__item--a { font-family: var(--f-title); font-weight: 700; letter-spacing: -.06em; }
-    .made__item--b { font-family: var(--f-body); font-weight: 500; font-size: clamp(.8rem, 1.2vw, 1.2rem); letter-spacing: .2em; text-transform: uppercase; }
-    .made__item--c { font-family: var(--f-serif); font-style: italic; letter-spacing: -.02em; font-size: clamp(1.15rem, 2.05vw, 2.05rem); }
-    .made__item--d { font-family: var(--f-title); font-weight: 500; letter-spacing: -.02em; }
-
     /* ═════════════════════════════════════════════════════════════════
        6. TJENESTER (kort i nivåer)
        ═════════════════════════════════════════════════════════════════ */
     .services { padding-top: var(--sp-5); }
     section.services { scroll-margin-top: 3rem; }
-    .services__head { margin-bottom: calc(var(--sp-5) + var(--sp-3)); text-align: center; }
+    .services__head { margin-bottom: var(--sp-5); text-align: center; }
     .services__title { font-size: var(--fs-h2); line-height: 1.12; }
     .services__intro { max-width: 60ch; margin: var(--sp-3) auto 0; color: var(--c-muted); font-size: var(--fs-para); line-height: 1.45; }
     .services__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(20px, 2vw, 32px); }
@@ -995,12 +931,9 @@
     .plan__title { max-width: 14ch; min-height: calc(2em * 1.12); margin-bottom: var(--sp-4); font-size: var(--fs-h4); line-height: 1.12; }
     .plan__body { flex: 1; display: grid; grid-template-rows: 1fr; }
     .plan__body-inner { display: flex; flex-direction: column; min-height: 0; }
-    .plan__lead { margin-bottom: var(--sp-2); font-weight: 700; }
     .plan__list li { display: flex; align-items: center; gap: .9em; margin-bottom: .9em; line-height: 1.3; }
-    .plan__note { margin-top: var(--sp-2); opacity: .82; line-height: 1.45; }
-    .plan__cta { margin-top: auto; padding-top: var(--sp-4); }
-    .plan__cta .sbtn { display: flex; width: 100%; }
-    .plan__cta .sbtn__txt { padding-inline: 1.2em; }
+    .plan__note { margin-top: auto; padding-top: var(--sp-2); opacity: .82; line-height: 1.45; }
+    .services__cta { display: flex; justify-content: center; margin-top: var(--sp-4); }
 
     /* Fremhevet (mørkt) kort */
     .plan--featured { overflow: hidden; background: var(--c-night); color: var(--c-white); }
@@ -1026,6 +959,7 @@
     .work__title { font-size: var(--fs-h2); line-height: 1; }
     .work__more { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-para); }
     .work__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+    .hero + .work { padding-top: var(--sp-5); }
     .case {
         display: flex; flex-direction: column;
         overflow: hidden;
@@ -1090,17 +1024,12 @@
     .process__inner { text-align: center; }
     .process__title { margin-bottom: var(--sp-5); font-size: var(--fs-h2); line-height: 1.12; }
     .process__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(20px, 2vw, 32px); text-align: left; }
+    /* Lette steg: en tynn linje over hvert steg i stedet for hvite kort */
     .step {
-        padding: var(--sp-4) var(--sp-3);
-        border-radius: var(--r);
-        background: var(--c-white);
-        transition: transform .5s var(--ease-out);
+        padding-top: var(--sp-3);
+        border-top: 1px solid color-mix(in srgb, var(--c-black) 14%, transparent);
     }
-    @media (hover: hover) and (pointer: fine) {
-        .step:hover { transform: translateY(-4px); }
-        .step:hover .ichip { transform: rotate(-8deg) scale(1.05); }
-    }
-    .step .ichip { margin-bottom: var(--sp-3); transition: transform .5s var(--ease-out); }
+    .step .ichip { margin-bottom: var(--sp-3); }
     .step__title { max-width: 16ch; margin-bottom: var(--sp-3); font-size: var(--fs-h4); line-height: 1.12; }
     .step__text { max-width: 40ch; line-height: 1.45; }
 
@@ -1208,7 +1137,7 @@
        fortsatt kan lese alle tre punktene. */
     .about.is-sticky { --panel-h: min(85vh, 840px, 62vw + 160px); }
     @supports (height: 1svh) { .about.is-sticky { --panel-h: min(85svh, 840px, 62vw + 160px); } }
-    .about.is-sticky .about__track { height: calc(var(--panel-h) + 170vh); }
+    .about.is-sticky .about__track { height: calc(var(--panel-h) + 110vh); }
     .about.is-sticky .about__panel {
         position: sticky;
         top: calc((100vh - var(--panel-h)) / 2);
@@ -1253,16 +1182,14 @@
     .about__progress span { display: block; width: 100%; height: 100%; background: var(--c-white); transform: scaleX(0); transform-origin: left; }
     /* Lys pause mellom Om oss og Kontakt (to mørke seksjoner etter hverandre),
        også når Booking-seksjonen mellom dem er skjult med hidden */
-    .about + .cta, .about + .faq[hidden] + .booking[hidden] + .cta { margin-top: clamp(64px, 8.4vw, 120px); }
+    .about + .cta, .about + .process[hidden] + .faq[hidden] + .booking[hidden] + .cta { margin-top: clamp(64px, 8.4vw, 120px); }
 
     /* ═════════════════════════════════════════════════════════════════
        12b. SPØRSMÅL OG SVAR (trekkspill med <details>, virker uten JS)
        ═════════════════════════════════════════════════════════════════ */
-    .faq + .booking { padding-top: 0; }
+    .faq + .booking, .process:not([hidden]) + .faq { padding-top: 0; }
     .faq__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
     .faq__title { max-width: 11em; font-size: var(--fs-h2); line-height: 1.08; }
-    .faq__lead { max-width: 44ch; margin-top: var(--sp-3); color: var(--c-muted); font-size: var(--fs-para); line-height: 1.45; }
-    .faq__lead a { color: var(--c-black); }
     .faq__list { display: flex; flex-direction: column; gap: 10px; }
     .faq__item { border-radius: var(--r); background: var(--c-white); box-shadow: 0 1px 4px color-mix(in srgb, var(--c-black) 6%, transparent); }
     .faq__item summary {
@@ -1700,7 +1627,7 @@
         position: relative;
         isolation: isolate;
         display: flex; justify-content: center; align-items: center;
-        min-height: clamp(560px, 60vw, 1046px);
+        min-height: clamp(520px, 48vw, 820px);
         overflow: hidden;
         background: var(--c-black);
         color: var(--c-white);
@@ -1751,7 +1678,7 @@
     .footer { padding-block: var(--sp-5) var(--sp-3); background: var(--c-blue); color: var(--c-white); }
     .footer__cols {
         display: grid;
-        grid-template-columns: minmax(0, 320px) repeat(3, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 320px) repeat(2, minmax(0, 1fr));
         align-items: start;
         gap: var(--sp-4);
         padding-bottom: var(--sp-5);
@@ -1797,15 +1724,13 @@
         .plan__title { min-height: 0; }
     }
     @media (max-width: 1200px) {
-        .footer__cols { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .footer__id { grid-column: 1 / -1; }
     }
     @media (max-width: 1100px) and (min-width: 901px) {
         .hero__visual { --fade-a: 53%; --fade-b: 62%; }
         .hero__heading { max-width: 9em; }     /* tre linjer, så teksten holder avstand til planeten */
         .hero__lead { max-width: 52%; }
-        .proof { flex-basis: 440px; }
-        .made { min-width: min(400px, 100%); }
     }
     @media (max-width: 991px) {
         .nav__wrap { padding-top: 16px; }
@@ -1860,9 +1785,13 @@
         .hero__visual::before { top: 18%; left: 72%; height: 150%; }
         .hero__visual::after { top: 60%; left: 5%; }
         .hero__actions { margin-bottom: var(--sp-4); }
-        .hero__lower-inner { padding-top: 0; }
-        .proof { flex-basis: 100%; }
-        .made { flex-basis: 100%; }
+        /* Planeten stikker under lerretet på smal skjerm: ton den mykt ut nederst */
+        .hero__visual {
+            -webkit-mask-image: linear-gradient(110deg, transparent var(--fade-a), var(--c-black) var(--fade-b)), linear-gradient(var(--c-black) 68%, transparent);
+            -webkit-mask-composite: source-in;
+            mask-image: linear-gradient(110deg, transparent var(--fade-a), var(--c-black) var(--fade-b)), linear-gradient(var(--c-black) 68%, transparent);
+            mask-composite: intersect;
+        }
         .work__grid { grid-template-columns: 1fr; }
         .team { grid-template-columns: minmax(0, 1fr); }
         .footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4) var(--sp-3); }
@@ -1875,7 +1804,6 @@
         .brandword { font-size: 24px; }
         .nav.is-open .nav__top::after { left: 0; right: 0; }
         .services__grid, .process__grid { grid-template-columns: 1fr; }
-        .made__item { aspect-ratio: 2.6 / 1; }
         .work__head { flex-direction: column; align-items: flex-start; gap: 8px; }
         .case__tagline { font-size: 1.25rem; }
         .case__cat { margin-bottom: 8px; font-size: .625rem; }
@@ -1892,17 +1820,9 @@
     @media (max-width: 600px) {
         .case__bar { flex-direction: column; align-items: stretch; padding: 12px; }
         .case__bar .sbtn { display: flex; width: 100%; }
-        /* «Hvorfor oss» på mobil: tittel over teksten, begge venstrestilt */
-        .proof__row { flex-direction: column; gap: .35rem; }
-        .proof__row span { max-width: none; text-align: left; }
         .person { grid-template-columns: minmax(0, 1fr); }
         .faq__item summary { padding-left: var(--sp-2); }
         .faq__answer { padding-inline: var(--sp-2); }
-    }
-    @media (max-width: 400px) {
-        /* «Hva vi skaper»: smalere logostil så de lengste ordene får plass */
-        .made__item--b { font-size: .75rem; letter-spacing: .08em; }
-        .made__item--c { font-size: 1.05rem; }
     }
     @media (max-width: 480px) {
         .sbtn { display: flex; width: 100%; font-size: 15px; }
@@ -1924,9 +1844,6 @@
         .footer__logo { gap: 12px; }
         .footer__logo .brandword { font-size: 2.1rem; }
         .footer__logo .mark { width: 40px; }
-        .made__item { font-size: .9rem; }
-        .made__item--b { font-size: .7rem; letter-spacing: .06em; }
-        .made__item--c { font-size: 1rem; }
         .intro-tag { gap: 8px; }
         .intro-tag .mark { width: 24px; }
         .intro-tag__text { font-size: .9375rem; }
@@ -1945,18 +1862,6 @@
         .nav__top .lang { margin-right: 0; }
     }
 
-    /* Pikselovergang ved sidelasting (lages av JS, fjernes etter ca. 1 s) */
-    .veil {
-        position: fixed; inset: 0; z-index: 300;
-        display: grid;
-        grid-template-columns: repeat(var(--cols, 12), var(--size, 96px));
-        grid-auto-rows: var(--size, 96px);
-        overflow: hidden;
-        pointer-events: none;
-    }
-    .veil i { background: var(--c-bg); animation: veil-out .32s steps(3, end) forwards; }
-    .veil i.is-blue { background: var(--c-blue); }
-    @keyframes veil-out { to { opacity: 0; } }
 
     /* ═════════════════════════════════════════════════════════════════
        18. REDUSERT BEVEGELSE
@@ -1968,7 +1873,6 @@
             animation: none !important;
         }
         .scr__c { opacity: 1 !important; transform: none !important; }
-        .veil { display: none; }
     }
     </style>
 </head>
@@ -2014,8 +1918,8 @@
                                         <li><a class="nav__page ulink" href="#hjem" data-i18n="nav.home">Hjem</a></li>
                                         <li><a class="nav__page ulink" href="#prosjekter" data-i18n="nav.work">Prosjekter</a></li>
                                         <li><a class="nav__page ulink" href="#tjenester" data-i18n="nav.services">Tjenester</a></li>
-                                        <li><a class="nav__page ulink" href="#prosess" data-i18n="nav.process">Prosess</a></li>
                                         <li><a class="nav__page ulink" href="#om-oss" data-i18n="nav.about">Om oss</a></li>
+                                        <li><a class="nav__page ulink" href="#prosess" data-i18n="nav.process">Prosess</a></li>
                                         <li><a class="nav__page ulink" href="#sporsmal" data-i18n="nav.faq">Spørsmål og svar</a></li>
                                         <li><a class="nav__page ulink" href="#booking" data-i18n="nav.book">Book en samtale</a></li>
                                         <li><a class="nav__page ulink" href="#kontakt" data-i18n="nav.contact">Kontakt</a></li>
@@ -2068,7 +1972,7 @@
                                         <p class="nav__book-title" data-i18n="cta.title">Skal vi ta en prat?</p>
                                         <a class="sbtn" href="#booking">
                                             <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                                            <span class="sbtn__txt" data-i18n="btn.start">Start et prosjekt</span>
+                                            <span class="sbtn__txt" data-i18n="nav.book">Book en samtale</span>
                                             <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
                                         </a>
                                     </div>
@@ -2082,7 +1986,7 @@
             <div class="nav__mobile-cta">
                 <a class="sbtn sbtn--block" href="#booking">
                     <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                    <span class="sbtn__txt" data-i18n="btn.start">Start et prosjekt</span>
+                    <span class="sbtn__txt" data-i18n="nav.book">Book en samtale</span>
                     <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
                 </a>
             </div>
@@ -2091,7 +1995,7 @@
         <div class="nav__cta">
             <a class="sbtn" href="#booking">
                 <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                <span class="sbtn__txt" data-i18n="btn.start">Start et prosjekt</span>
+                <span class="sbtn__txt" data-i18n="nav.book">Book en samtale</span>
                 <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
             </a>
         </div>
@@ -2126,32 +2030,6 @@
                     <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
                 </a>
                 <a class="hero__link ulink ulink--on" href="#prosjekter" data-i18n="hero.work">Se arbeidet vårt</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="hero__lower">
-        <div class="container hero__lower-inner">
-            <!-- ✏️ «Hvorfor oss»-kortet: tre rader, kopier <li> for flere.
-                 Løftene må være sanne (markedsføringsloven), se punkt 9 i guiden. -->
-            <div class="proof on-dark">
-                <p class="proof__label" data-i18n="proof.label">Hvorfor oss</p>
-                <ul>
-                    <li class="proof__row"><strong data-i18n="proof.1">Direkte kontakt</strong><span data-i18n="proof.1t">Du snakker med de to som designer og bygger løsningen. Ingen mellomledd.</span></li>
-                    <li class="proof__row"><strong data-i18n="proof.2">Raskt svar</strong><span data-i18n="proof.2t">Du hører fra oss innen én&nbsp;arbeidsdag.</span></li>
-                    <li class="proof__row"><strong data-i18n="proof.3">Uforpliktende start</strong><span data-i18n="proof.3t">Vi starter med en kort samtale på video eller telefon.</span></li>
-                </ul>
-            </div>
-
-            <!-- ✏️ «Hva vi skaper»: fagområdene vist som en ordvegg -->
-            <div class="made">
-                <p class="made__label" data-i18n="made.label">Hva vi skaper</p>
-                <ul class="made__list">
-                    <li class="made__item made__item--a"><svg viewBox="0 0 4 4" aria-hidden="true"><path d="M0 0h2v2H0zM2 2h2v2H2z"/></svg>Web Design</li>
-                    <li class="made__item made__item--b"><svg viewBox="0 0 5 5" aria-hidden="true"><path d="M2 0h1v1H2zM0 2h1v1H0zM4 2h1v1H4zM2 4h1v1H2zM1 1h3v3H1z"/></svg>AI Automation</li>
-                    <li class="made__item made__item--c">Brand Identity</li>
-                    <li class="made__item made__item--d"><svg viewBox="0 0 4 4" aria-hidden="true"><path d="M0 0h4v1H0zM0 1h1v3H0zM2 2h2v2H2z"/></svg>UI / UX Design</li>
-                </ul>
             </div>
         </div>
     </div>
@@ -2237,7 +2115,6 @@
                 <h3 class="plan__title" data-i18n="svc.web">Webdesign og utvikling</h3>
                 <div class="plan__body" id="plan-1">
                     <div class="plan__body-inner">
-                        <p class="plan__lead" data-i18n="svc.includes">Dette inkluderer</p>
                         <!-- ✏️ Punktliste -->
                         <ul class="plan__list">
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M6.5 6.5h.01M9 6.5h.01"/></svg><span data-i18n="svc.web1">Skreddersydd design og utvikling</span></li>
@@ -2247,13 +2124,6 @@
                         </ul>
                         <!-- ✏️ Hvem tjenesten passer for -->
                         <p class="plan__note" data-i18n="svc.webNote"><strong>Passer for</strong> bedrifter som trenger en ny nettside, eller som har vokst fra den gamle.</p>
-                        <div class="plan__cta">
-                            <a class="sbtn sbtn--black" href="#booking">
-                                <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                                <span class="sbtn__txt" data-i18n="btn.discuss">Diskuter prosjektet</span>
-                                <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                            </a>
-                        </div>
                     </div>
                 </div>
             </article>
@@ -2268,7 +2138,6 @@
                 <h3 class="plan__title" data-i18n="svc.ai">AI-automatisering</h3>
                 <div class="plan__body" id="plan-2">
                     <div class="plan__body-inner">
-                        <p class="plan__lead" data-i18n="svc.includes">Dette inkluderer</p>
                         <!-- ✏️ Eksempler: skriv bare det dere faktisk leverer -->
                         <ul class="plan__list">
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/></svg><span data-i18n="svc.ai1">Henvendelser som besvares og sorteres automatisk</span></li>
@@ -2277,13 +2146,6 @@
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8.5L18 6.5V21H6z"/><path d="M9 11h6M9 14.5h6M9 18h3.5"/></svg><span data-i18n="svc.ai4">Rapporter som lager seg selv</span></li>
                         </ul>
                         <p class="plan__note" data-i18n="svc.aiNote"><strong>Passer for</strong> bedrifter som bruker mye tid på manuelle og repeterende oppgaver.</p>
-                        <div class="plan__cta">
-                            <a class="sbtn" href="#booking">
-                                <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                                <span class="sbtn__txt" data-i18n="btn.discuss">Diskuter prosjektet</span>
-                                <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                            </a>
-                        </div>
                     </div>
                 </div>
             </article>
@@ -2297,7 +2159,6 @@
                 <h3 class="plan__title" data-i18n="svc.ux">UI/UX-design</h3>
                 <div class="plan__body" id="plan-3">
                     <div class="plan__body-inner">
-                        <p class="plan__lead" data-i18n="svc.includes">Dette inkluderer</p>
                         <ul class="plan__list">
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span data-i18n="svc.ux1">Kartlegging av brukerreiser</span></li>
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span data-i18n="svc.ux2">Skisser og klikkbare prototyper</span></li>
@@ -2305,13 +2166,6 @@
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="1.8"/><path d="M5 8.5l7 1.5 7-1.5M12 10v4.5l-3 6M12 14.5l3 6"/></svg><span data-i18n="svc.ux4">Universell utforming (WCAG)</span></li>
                         </ul>
                         <p class="plan__note" data-i18n="svc.uxNote"><strong>Passer for</strong> nye digitale produkter, og nettsider som får besøk, men ikke henvendelser.</p>
-                        <div class="plan__cta">
-                            <a class="sbtn sbtn--black" href="#booking">
-                                <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                                <span class="sbtn__txt" data-i18n="btn.discuss">Diskuter prosjektet</span>
-                                <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                            </a>
-                        </div>
                     </div>
                 </div>
             </article>
@@ -2325,7 +2179,6 @@
                 <h3 class="plan__title" data-i18n="svc.brand">Visuell identitet</h3>
                 <div class="plan__body" id="plan-4">
                     <div class="plan__body-inner">
-                        <p class="plan__lead" data-i18n="svc.includes">Dette inkluderer</p>
                         <ul class="plan__list">
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 9-8 9-8-9z"/></svg><span data-i18n="svc.brand1">Logo og visuell profil</span></li>
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg><span data-i18n="svc.brand2">Farger og typografi</span></li>
@@ -2333,53 +2186,19 @@
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span data-i18n="svc.brand4">Lett å bygge videre på</span></li>
                         </ul>
                         <p class="plan__note" data-i18n="svc.brandNote"><strong>Passer for</strong> nye bedrifter, og bedrifter som trenger et tydeligere uttrykk.</p>
-                        <div class="plan__cta">
-                            <a class="sbtn sbtn--black" href="#booking">
-                                <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                                <span class="sbtn__txt" data-i18n="btn.discuss">Diskuter prosjektet</span>
-                                <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                            </a>
-                        </div>
                     </div>
                 </div>
             </article>
         </div>
-    </div>
-</section>
 
-<!-- ════ SEKSJON: Prosess ════ -->
-<section class="section process" id="prosess" aria-labelledby="prosess-title">
-    <div class="container process__inner">
-        <!-- ✏️ Etikett, overskrift (data-scramble gir bokstav-effekten) og stegene under -->
-        <p class="kicker" data-i18n="proc.kicker">Vår prosess</p>
-        <h2 class="process__title" id="prosess-title" data-scramble data-i18n="proc.title">Enkelt.<br>Effektivt.</h2>
-        <ol class="process__grid">
-            <!-- ── Steg 1 (kopier hele <li> for et nytt steg) ── -->
-            <li class="step">
-                <!-- ✏️ Ikon (inline SVG), tittel og tekst -->
-                <span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg></span>
-                <h3 class="step__title" data-i18n="proc.1">Kartlegging</h3>
-                <p class="step__text" data-i18n="proc.1t">Først blir vi kjent med deg og bedriften din. Hva skal nettsiden få til, og hvem skal den nå?</p>
-            </li>
-            <!-- ── Steg 2 ── -->
-            <li class="step">
-                <span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg></span>
-                <h3 class="step__title" data-i18n="proc.2">Design og strategi</h3>
-                <p class="step__text" data-i18n="proc.2t">Vi designer siden ut fra bedriften din, så uttrykk, innhold og oppbygging trekker i samme retning.</p>
-            </li>
-            <!-- ── Steg 3 ── -->
-            <li class="step">
-                <span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4.5l-3 15"/></svg></span>
-                <h3 class="step__title" data-i18n="proc.3">Utvikling</h3>
-                <p class="step__text" data-i18n="proc.3t">Vi bygger siden med ren kode, så den lastes raskt, fungerer like godt på mobil, kan brukes av alle og er lett å finne i Google.</p>
-            </li>
-            <!-- ── Steg 4 ── -->
-            <li class="step">
-                <span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5.5 15.5C4 17 3.5 19.5 3.5 20.5c1 0 3.5-.5 5-2"/><path d="M9 15l-3-3c1.2-4.2 5.2-8.5 12.5-8.5 0 7.3-4.3 11.3-8.5 12.5z"/><circle cx="14.5" cy="9.5" r="1.5"/></svg></span>
-                <h3 class="step__title" data-i18n="proc.4">Lansering</h3>
-                <p class="step__text" data-i18n="proc.4t">Vi publiserer siden og sjekker at alt virker. Etterpå hjelper vi deg når noe skal endres.</p>
-            </li>
-        </ol>
+        <!-- Én knapp for alle tjenestene -->
+        <div class="services__cta">
+            <a class="sbtn" href="#booking">
+                <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                <span class="sbtn__txt" data-i18n="nav.book">Book en samtale</span>
+                <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+            </a>
+        </div>
     </div>
 </section>
 
@@ -2461,15 +2280,49 @@
     </div>
 </section>
 
+<!-- ════ SEKSJON: Prosess ════ -->
+<section class="section process" id="prosess" aria-labelledby="prosess-title">
+    <div class="container process__inner">
+        <!-- ✏️ Etikett, overskrift (data-scramble gir bokstav-effekten) og stegene under -->
+        <p class="kicker" data-i18n="proc.kicker">Vår prosess</p>
+        <h2 class="process__title" id="prosess-title" data-scramble data-i18n="proc.title">Enkelt.<br>Effektivt.</h2>
+        <ol class="process__grid">
+            <!-- ── Steg 1 (kopier hele <li> for et nytt steg) ── -->
+            <li class="step">
+                <!-- ✏️ Ikon (inline SVG), tittel og tekst -->
+                <span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg></span>
+                <h3 class="step__title" data-i18n="proc.1">Kartlegging</h3>
+                <p class="step__text" data-i18n="proc.1t">Først blir vi kjent med deg og bedriften din. Hva skal nettsiden få til, og hvem skal den nå?</p>
+            </li>
+            <!-- ── Steg 2 ── -->
+            <li class="step">
+                <span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg></span>
+                <h3 class="step__title" data-i18n="proc.2">Design og strategi</h3>
+                <p class="step__text" data-i18n="proc.2t">Vi designer siden ut fra bedriften din, så uttrykk, innhold og oppbygging trekker i samme retning.</p>
+            </li>
+            <!-- ── Steg 3 ── -->
+            <li class="step">
+                <span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4.5l-3 15"/></svg></span>
+                <h3 class="step__title" data-i18n="proc.3">Utvikling</h3>
+                <p class="step__text" data-i18n="proc.3t">Vi bygger siden med ren kode, så den lastes raskt, fungerer like godt på mobil, kan brukes av alle og er lett å finne i Google.</p>
+            </li>
+            <!-- ── Steg 4 ── -->
+            <li class="step">
+                <span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5.5 15.5C4 17 3.5 19.5 3.5 20.5c1 0 3.5-.5 5-2"/><path d="M9 15l-3-3c1.2-4.2 5.2-8.5 12.5-8.5 0 7.3-4.3 11.3-8.5 12.5z"/><circle cx="14.5" cy="9.5" r="1.5"/></svg></span>
+                <h3 class="step__title" data-i18n="proc.4">Lansering</h3>
+                <p class="step__text" data-i18n="proc.4t">Vi publiserer siden og sjekker at alt virker. Etterpå hjelper vi deg når noe skal endres.</p>
+            </li>
+        </ol>
+    </div>
+</section>
+
 <!-- ════ SEKSJON: Spørsmål og svar ════ -->
 <!-- ✏️ Spørsmål og svar: kopier en hel <details> for et nytt spørsmål (husk nøklene i I18N.en).
      Tips: når dere har bestemt en startpris, skriv den i svaret på «Hva koster en nettside?». -->
 <section class="section faq" id="sporsmal" aria-labelledby="faq-title">
     <div class="container faq__inner">
         <div class="faq__intro">
-            <p class="kicker" data-i18n="faq.kicker">Spørsmål og svar</p>
             <h2 class="faq__title" id="faq-title" data-i18n="faq.title">Spørsmål vi ofte får</h2>
-            <p class="faq__lead" data-i18n="faq.lead">Finner du ikke svaret her? <a class="ulink ulink--on" href="#booking">Book en samtale</a> eller skriv til <a class="ulink ulink--on" href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>.</p>
         </div>
         <div class="faq__list">
             <details class="faq__item">
@@ -2768,19 +2621,9 @@
             </ul>
         </nav>
         <div class="footer__links">
-            <h2 data-i18n="nav.services">Tjenester</h2>
-            <ul>
-                <li><a class="ulink" href="#tjenester" data-i18n="footer.web">Webdesign</a></li>
-                <li><a class="ulink" href="#tjenester" data-i18n="svc.ai">AI-automatisering</a></li>
-                <li><a class="ulink" href="#tjenester" data-i18n="svc.ux">UI/UX-design</a></li>
-                <li><a class="ulink" href="#tjenester" data-i18n="svc.brand">Visuell identitet</a></li>
-            </ul>
-        </div>
-        <div class="footer__links">
             <h2 data-i18n="nav.contact">Kontakt</h2>
             <!-- ✏️ E-post -->
             <ul>
-                <li><a class="ulink" href="mailto:kontakt@dotdev.no" data-i18n="mail.send">Send e-post</a></li>
                 <li><a class="ulink" href="#booking" data-i18n="nav.book">Book en samtale</a></li>
                 <!-- ✏️ Telefon og sosiale medier: fyll inn ekte nummer og lenker, og slett linjene
                      «KONTAKT START» og «KONTAKT SLUTT» under. Legg dem også inn som "telephone"
@@ -2914,7 +2757,6 @@ const I18N = {
 
         // Knapper som går igjen
         'btn.start': 'Start a project',
-        'btn.discuss': 'Discuss your project',
         'mail.send': 'Send an email',
         'mail.or': 'or email',
 
@@ -2923,14 +2765,6 @@ const I18N = {
         'hero.title': 'Design. Development. <span class="accent">Growth.</span>',
         'hero.lead': 'We design and develop custom websites that strengthen your brand and help your business grow.',
         'hero.work': 'See our work',
-        'proof.label': 'Why us',
-        'proof.1': 'Direct contact',
-        'proof.1t': 'You talk to the two people who design and build your solution. No middlemen.',
-        'proof.2': 'Quick replies',
-        'proof.2t': 'You’ll hear from us within one working&nbsp;day.',
-        'proof.3': 'No-obligation start',
-        'proof.3t': 'We start with a short call on video or by phone.',
-        'made.label': 'What we create',
 
         // Prosjekter
         'work.talk': 'Talk to us →',
@@ -2949,7 +2783,6 @@ const I18N = {
         // Tjenester
         'svc.title': 'Websites that make<br><span class="accent">a lasting impression</span>',
         'svc.intro': 'Tailored solutions that pair good design with technology that works, from first sketch to launch. Pick one service, or let us handle the whole thing.',
-        'svc.includes': 'What’s included',
         'svc.web': 'Web design &amp; development',
         'svc.webMore': 'Show details: Web design &amp; development',
         'svc.web1': 'Custom design and development',
@@ -3001,9 +2834,7 @@ const I18N = {
         'about.3t': 'We design everything from the ground up and take time over the details, so your site doesn’t look like everyone else’s.',
 
         // Spørsmål og svar
-        'faq.kicker': 'FAQ',
         'faq.title': 'Questions we often get',
-        'faq.lead': 'Can’t find the answer here? <a class="ulink ulink--on" href="#booking">Book a call</a> or email <a class="ulink ulink--on" href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>.',
         'faq.q1': 'How much does a website cost?',
         'faq.a1': 'It depends on what you need. After a no-obligation call, you get a concrete quote, so you know the cost before we start.',
         'faq.q2': 'Can you improve the website I already have?',
@@ -3090,7 +2921,6 @@ const I18N = {
         // Footer
         'footer.tagline': 'Websites and AI automation for businesses that want to stand out.',
         'footer.nav': 'Navigation',
-        'footer.web': 'Web design',
         'footer.rights': 'All rights reserved.',
         'footer.company': 'DOTDEV is operated by Nerland Consulting · Org. no. 936 133 231',
         'footer.privacy': 'Privacy',
@@ -3813,65 +3643,6 @@ const I18N = {
         onMQ(mq, mode);
         onMQ(reduceMQ, mode);
         mode();
-    }
-
-    /* ── 9. «Hva vi skaper»: to og to ord bytter skriftstil ────────── */
-    // Etterligner en logovegg som roterer. Kun når veggen er på skjermen,
-    // og aldri ved redusert bevegelse.
-    const made = $('.made__list');
-    if (made && 'IntersectionObserver' in window) {
-        const words = $$('.made__item', made);
-        const STYLES = ['made__item--a', 'made__item--b', 'made__item--c', 'made__item--d'];
-        const styleOf = el => STYLES.find(c => el.classList.contains(c));
-        let timer = 0, onScreen = false;
-        const swap = () => {
-            if (words.length < 2) return;
-            const i = Math.floor(Math.random() * words.length);
-            let j = Math.floor(Math.random() * (words.length - 1));
-            if (j >= i) j++;
-            const a = words[i], b = words[j], sa = styleOf(a), sb = styleOf(b);
-            if (!sa || !sb) return;
-            a.classList.add('is-swapping');
-            b.classList.add('is-swapping');
-            setTimeout(() => {
-                a.classList.replace(sa, sb);
-                b.classList.replace(sb, sa);
-                a.classList.remove('is-swapping');
-                b.classList.remove('is-swapping');
-            }, 450);
-        };
-        const run = () => {
-            clearInterval(timer);
-            timer = onScreen && !document.hidden && !reduced() ? setInterval(swap, 4000) : 0;
-        };
-        new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; run(); }).observe(made);
-        document.addEventListener('visibilitychange', run);
-        onMQ(reduceMQ, run);
-    }
-
-    /* ── 10. Pikselovergang når siden lastes ───────────────────────── */
-    // Et rutenett av blokker i bakgrunnsfargen (noen blå) dekker skjermen et
-    // øyeblikk og forsvinner i tilfeldig rekkefølge. Hoppes over ved redusert
-    // bevegelse og finnes ikke uten JS. Fjernes helt etterpå.
-    if (!reduced() && document.body) {
-        const veil = document.createElement('div');
-        veil.className = 'veil';
-        veil.setAttribute('aria-hidden', 'true');
-        const vw = window.innerWidth, vh = window.innerHeight;
-        const cols = Math.max(4, Math.round(vw / (vw < 768 ? 56 : 96)));
-        const size = vw / cols, rows = Math.ceil(vh / size);
-        veil.style.setProperty('--cols', String(cols));
-        veil.style.setProperty('--size', size.toFixed(2) + 'px');
-        const frag = document.createDocumentFragment();
-        for (let n = 0; n < cols * rows; n++) {
-            const block = document.createElement('i');
-            if (Math.random() < .12) block.className = 'is-blue';
-            block.style.animationDelay = (.05 + Math.random() * .45).toFixed(3) + 's';
-            frag.appendChild(block);
-        }
-        veil.appendChild(frag);
-        document.body.appendChild(veil);
-        setTimeout(() => veil.remove(), 1300);
     }
 
     /* ── 11. Booking «Book en samtale» ─────────────────────────────── */

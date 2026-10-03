@@ -25,7 +25,7 @@ Bare `dist/` blir publisert, så guiden, kommentarene, `LES-MEG.md` og `bygg.py`
 - **Team:** navn, roller, bilder og LinkedIn. Blokken ✏️ TEAM i SEKSJON: Om oss.
 - **Telefon og sosiale medier:** linjene står klare i footeren og som `telephone`/`sameAs` i JSON-LD i `<head>`.
 - **Startpris:** skriv den i svaret på «Hva koster en nettside?».
-- **Les gjennom de nye tekstene:** tjenestene (særlig AI-eksemplene), «Hvorfor oss» og spørsmål og svar. Alt skal stemme med det dere faktisk leverer.
+- **Les gjennom de nye tekstene:** tjenestene (særlig AI-eksemplene), Om oss og spørsmål og svar. Alt skal stemme med det dere faktisk leverer.
 
 ## Etter publisering
 
