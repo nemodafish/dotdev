@@ -2334,7 +2334,7 @@
             </details>
             <details class="faq__item">
                 <summary><span data-i18n="faq.q2">Kan dere forbedre nettsiden jeg allerede har?</span><span class="faq__icon" aria-hidden="true"></span></summary>
-                <div class="faq__answer"><p data-i18n="faq.a2">Ja. Velg «Prosjektgjennomgang» når du booker, så går vi gjennom nettsiden din og gir konkrete forslag til forbedringer.</p></div>
+                <div class="faq__answer"><p data-i18n="faq.a2">Ja. Book en introsamtale, så ser vi på nettsiden din sammen og gir konkrete forslag til forbedringer.</p></div>
             </details>
             <details class="faq__item">
                 <summary><span data-i18n="faq.q3">Hva er AI-automatisering, og passer det for oss?</span><span class="faq__icon" aria-hidden="true"></span></summary>
@@ -2362,7 +2362,7 @@
             <p class="kicker">Booking</p>
             <!-- ✏️ Overskrift og ingress -->
             <h2 class="booking__title" id="booking-title" data-i18n="bk.title">Book en uforpliktende samtale</h2>
-            <p class="booking__lead" data-i18n="bk.lead">Lurer du på hva vi kan gjøre for deg? Velg en type samtale og et tidspunkt som passer, så snakker vi sammen om prosjektet ditt.</p>
+            <p class="booking__lead" data-i18n="bk.lead">Lurer du på hva vi kan gjøre for deg? Velg et tidspunkt som passer, så snakker vi sammen om prosjektet ditt.</p>
             <!-- ✏️ Tre korte punkter. «15–45» regnes ut av JS fra BOOKING.types.
                  Punktet om bekreftelse byttes med teksten i data-ext når en ekstern
                  kalender (externalUrl) er i bruk. Tilpass «video eller telefon» selv. -->
@@ -2547,7 +2547,7 @@
                 <p class="sr-only" aria-live="polite" data-bk-status></p>
             </div>
 
-            <!-- Ekstern kalender (Cal.com / Calendly): vises i stedet for skjemaet
+            <!-- Ekstern kalender (Google Kalender, Cal.com, Calendly): vises i stedet for skjemaet
                  når BOOKING.externalUrl er fylt ut. Lenken settes av JavaScript. -->
             <div class="bk-ext" data-bk-ext hidden>
                 <div class="bk-ext__head on-dark">
@@ -2685,7 +2685,9 @@ const BOOKING = {
     studio: 'DOTDEV',            // navnet som brukes i e-posten og kalenderfilen
     email: 'kontakt@dotdev.no',       // hit går forespørslene i modus 1
     formEndpoint: '',                 // modus 2, f.eks. 'https://formspree.io/f/dinkode'
-    externalUrl: '',                  // modus 3, f.eks. 'https://cal.com/dotdev'
+    // modus 3: bookingsiden «Introsamtale med DOTDEV» i Google Kalender (kontakt@dotdev.no).
+    // Bruk den lange adressen med ?hl=no (kortlenken calendar.app.google mister språket).
+    externalUrl: 'https://calendar.google.com/calendar/appointments/schedules/AcZssZ3D9coY1AykZQDfDVF3EKbgtgS4DjhijDuONKMRV1ynmMh1uin8-eJXwwtpp4HUXAClbdlJyZIz?hl=no',
 
     // Samtaletyper. title = navn, minutes = varighet, where = 'video' eller
     // 'telefon' (telefon gjør telefonfeltet påkrevd), text = én kort linje.
@@ -2693,12 +2695,10 @@ const BOOKING = {
     // de, brukes den norske teksten også på engelsk.
     // Kopier en blokk for en ny type, eller slett en blokk for å fjerne den.
     types: [
+        // Samme samtale som bookingsiden i Google Kalender (externalUrl). Lager dere flere
+        // samtaletyper der, legg dem til her også, så kortet på nettsiden stemmer.
         { id: 'intro',  title: 'Introsamtale',        minutes: 30, where: 'video',   text: 'Bli kjent med oss, fortell om ideen din og hør hvordan vi kan hjelpe.',
-          titleEn: 'Intro call',     textEn: 'Get to know us, tell us about your idea and hear how we can help.' },
-        { id: 'review', title: 'Prosjektgjennomgang', minutes: 45, where: 'video',   text: 'Vi går gjennom nettsiden eller prosjektet ditt og gir konkrete forslag.',
-          titleEn: 'Project review', textEn: 'We go through your website or project and give you concrete suggestions.' },
-        { id: 'phone',  title: 'Telefonsamtale',      minutes: 15, where: 'telefon', text: 'En kort prat på telefon når du bare har et par spørsmål.',
-          titleEn: 'Phone call',     textEn: 'A quick chat on the phone if you just have a few questions.' }
+          titleEn: 'Intro call',     textEn: 'Get to know us, tell us about your idea and hear how we can help.' }
     ],
 
     days: [1, 2, 3, 4, 5],       // ukedager: 1 = mandag … 5 = fredag, 6 = lørdag, 7 = søndag
@@ -2841,7 +2841,7 @@ const I18N = {
         'faq.q1': 'How much does a website cost?',
         'faq.a1': 'It depends on what you need. After a no-obligation call, you get a concrete quote, so you know the cost before we start.',
         'faq.q2': 'Can you improve the website I already have?',
-        'faq.a2': 'Yes. Choose “Project review” when you book, and we’ll go through your website and give you concrete suggestions for improvements.',
+        'faq.a2': 'Yes. Book an intro call, and we’ll look at your website together and give you concrete suggestions for improvements.',
         'faq.q3': 'What is AI automation, and is it right for us?',
         'faq.a3': 'It means repetitive tasks are done automatically, such as replying to and sorting enquiries or creating reports. In a short call, we’ll find out whether anything in your business is worth automating.',
         'faq.q4': 'Do I need to know exactly what I want?',
@@ -2851,7 +2851,7 @@ const I18N = {
 
         // Booking (tekstene i HTML-en; meldingene står i MSG i modul 11)
         'bk.title': 'Book a no-obligation call',
-        'bk.lead': 'Wondering what we can do for you? Pick a type of call and a time that suits you, and we’ll talk about your project.',
+        'bk.lead': 'Wondering what we can do for you? Pick a time that suits you, and we’ll talk about your project.',
         'bk.factMin': 'minutes, no obligation',
         'bk.factWhere': 'On video or by phone – your choice',
         'bk.factConfirm': 'We’ll confirm the time by email within one working&nbsp;day',
@@ -4513,6 +4513,7 @@ const I18N = {
             const c = cfg();
             types = normTypes(c.types);
             let ext = String(c.externalUrl || '').trim();
+            if (LANG.en()) ext = ext.replace(/([?&]hl=)no(?=&|$)/, '$1en');   // Google-siden på engelsk ved ?lang=en
             if (ext && !/^https?:\/\//i.test(ext) && /^[\w-]+(\.[\w-]+)+(\/|$)/.test(ext)) ext = 'https://' + ext;
             const external = /^https?:\/\/\S+$/i.test(ext) && !!el.ext;
             isExternal = external;
