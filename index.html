@@ -895,7 +895,8 @@
        6. TJENESTER (kort i nivåer)
        ═════════════════════════════════════════════════════════════════ */
     .services { padding-top: var(--sp-5); }
-    section.services { scroll-margin-top: 3rem; }
+    /* Mindre toppluft enn andre seksjoner: ankeret regnes fra menylinja, så etiketten ikke havner bak den */
+    section.services { scroll-margin-top: calc(var(--nav-top) + var(--nav-h) + var(--sp-2) - var(--sp-5)); }
     .services__head { margin-bottom: var(--sp-5); text-align: center; }
     .services__title { font-size: var(--fs-h2); line-height: 1.12; }
     .services__intro { max-width: 60ch; margin: var(--sp-3) auto 0; color: var(--c-muted); font-size: var(--fs-para); line-height: 1.45; }
@@ -959,7 +960,6 @@
     .work__title { font-size: var(--fs-h2); line-height: 1; }
     .work__more { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-para); }
     .work__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
-    .hero + .work { padding-top: var(--sp-5); }
     .case {
         display: flex; flex-direction: column;
         overflow: hidden;
@@ -1022,6 +1022,8 @@
        11. PROSESS
        ═════════════════════════════════════════════════════════════════ */
     .process__inner { text-align: center; }
+    /* Rett etter den lyse Prosjekter-seksjonen: mindre luft, som Tjenester etter hero */
+    .work:not([hidden]) + .process { padding-top: var(--sp-5); scroll-margin-top: calc(var(--nav-top) + var(--nav-h) + var(--sp-2) - var(--sp-5)); }
     .process__title { margin-bottom: var(--sp-5); font-size: var(--fs-h2); line-height: 1.12; }
     .process__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(20px, 2vw, 32px); text-align: left; }
     /* Lette steg: en tynn linje over hvert steg i stedet for hvite kort */
@@ -1181,13 +1183,14 @@
     }
     .about__progress span { display: block; width: 100%; height: 100%; background: var(--c-white); transform: scaleX(0); transform-origin: left; }
     /* Lys pause mellom Om oss og Kontakt (to mørke seksjoner etter hverandre),
-       også når Booking-seksjonen mellom dem er skjult med hidden */
-    .about + .cta, .about + .process[hidden] + .faq[hidden] + .booking[hidden] + .cta { margin-top: clamp(64px, 8.4vw, 120px); }
+       også når alle seksjonene mellom dem er skjult med hidden eller slettet */
+    .about + .cta, .about + .work[hidden] + .process[hidden] + .faq[hidden] + .booking[hidden] + .cta, .about + .process[hidden] + .faq[hidden] + .booking[hidden] + .cta { margin-top: clamp(64px, 8.4vw, 120px); }
 
     /* ═════════════════════════════════════════════════════════════════
        12b. SPØRSMÅL OG SVAR (trekkspill med <details>, virker uten JS)
        ═════════════════════════════════════════════════════════════════ */
-    .faq + .booking, .process:not([hidden]) + .faq { padding-top: 0; }
+    /* Ingen toppluft: ankeret (f.eks. alle «Book en samtale»-knapper) regnes fra menylinja */
+    .faq + .booking, .process:not([hidden]) + .faq, .work:not([hidden]) + .process[hidden] + .faq { padding-top: 0; scroll-margin-top: calc(var(--nav-top) + var(--nav-h) + var(--sp-2)); }
     .faq__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
     .faq__title { max-width: 11em; font-size: var(--fs-h2); line-height: 1.08; }
     .faq__list { display: flex; flex-direction: column; gap: 10px; }
@@ -1916,9 +1919,9 @@
                                     <!-- ✏️ Sider i menyen -->
                                     <ul class="nav__pages">
                                         <li><a class="nav__page ulink" href="#hjem" data-i18n="nav.home">Hjem</a></li>
-                                        <li><a class="nav__page ulink" href="#prosjekter" data-i18n="nav.work">Prosjekter</a></li>
                                         <li><a class="nav__page ulink" href="#tjenester" data-i18n="nav.services">Tjenester</a></li>
                                         <li><a class="nav__page ulink" href="#om-oss" data-i18n="nav.about">Om oss</a></li>
+                                        <li><a class="nav__page ulink" href="#prosjekter" data-i18n="nav.work">Prosjekter</a></li>
                                         <li><a class="nav__page ulink" href="#prosess" data-i18n="nav.process">Prosess</a></li>
                                         <li><a class="nav__page ulink" href="#sporsmal" data-i18n="nav.faq">Spørsmål og svar</a></li>
                                         <li><a class="nav__page ulink" href="#booking" data-i18n="nav.book">Book en samtale</a></li>
@@ -2031,66 +2034,6 @@
                 </a>
                 <a class="hero__link ulink ulink--on" href="#prosjekter" data-i18n="hero.work">Se arbeidet vårt</a>
             </div>
-        </div>
-    </div>
-</section>
-
-<!-- ════ SEKSJON: Prosjekter ════ -->
-<section class="section work" id="prosjekter" aria-labelledby="prosjekter-title">
-    <div class="container">
-        <div class="work__head">
-            <h2 class="work__title" id="prosjekter-title" data-i18n="nav.work">Prosjekter</h2>
-            <a class="work__more ulink" href="#booking" data-i18n="work.talk">Snakk med oss →</a>
-        </div>
-        <div class="work__grid">
-            <!-- ── Prosjektkort: DJ Tiny (ekte prosjekt med skjermbilde: case--photo) ── -->
-            <article class="case case--photo">
-                <div class="case__media">
-                    <!-- ✏️ BILDE: skjermbilde av forsiden ligger i bilder/djtiny.jpg -->
-                    <img class="case__cover" src="bilder/djtiny.jpg" alt="Forsiden til djtiny.no: DJ Tiny-logoen i neon over et fullt dansegulv" data-i18n-attr="alt:work.djAlt" width="1200" height="750" loading="lazy">
-                </div>
-                <!-- ✏️ Stikkord -->
-                <ul class="case__chips">
-                    <li class="case__chip"><strong data-i18n="svc.web">Webdesign og utvikling</strong><span data-i18n="work.service">Tjeneste</span></li>
-                    <li class="case__chip"><strong data-i18n="work.ent">Underholdning</strong><span data-i18n="work.industry">Bransje</span></li>
-                </ul>
-                <!-- ✏️ Beskrivelse -->
-                <p class="case__desc" data-i18n="work.djDesc">Nettside for DJ Tiny, DJ på Østlandet for bryllup, firmafest og klubb. Mørkt neonuttrykk, tjenester, kommende bookinger, musikkbingo og bookingforespørsel rett fra siden.</p>
-                <div class="case__bar">
-                    <h3 class="case__name">DJ Tiny</h3>
-                    <a class="sbtn sbtn--white" href="https://djtiny.no" target="_blank" rel="noopener" aria-label="Se nettsiden djtiny.no (åpnes i ny fane)" data-i18n-attr="aria-label:work.visitLabel">
-                        <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                        <span class="sbtn__txt" data-i18n="work.visit">Se nettsiden</span>
-                        <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                    </a>
-                </div>
-            </article>
-
-            <!-- ── Prosjektkort: Ledig plass ──
-                 ✏️ Når dere har et nytt prosjekt: kopier DJ Tiny-kortet over og
-                 erstatt dette kortet med det. -->
-            <article class="case">
-                <div class="case__media">
-                    <canvas class="case__cover px" data-pixel="cover" data-variant="streak" data-seed="21" aria-hidden="true"></canvas>
-                    <div class="case__cover-text" aria-hidden="true">
-                        <p class="case__cat" data-i18n="work.openCat">02 – Ledig plass</p>
-                        <p class="case__tagline" data-i18n="work.openTag">Neste prosjekt kan være ditt</p>
-                    </div>
-                </div>
-                <ul class="case__chips">
-                    <li class="case__chip"><strong data-i18n="svc.web">Webdesign og utvikling</strong><span data-i18n="work.service">Tjeneste</span></li>
-                    <li class="case__chip"><strong data-i18n="svc.ai">AI-automatisering</strong><span data-i18n="work.service">Tjeneste</span></li>
-                </ul>
-                <p class="case__desc" data-i18n="work.openDesc">Vi tar imot nye prosjekter nå. Book en uforpliktende samtale, så finner vi ut hva vi kan bygge for deg.</p>
-                <div class="case__bar">
-                    <h3 class="case__name" data-i18n="work.yours">Ditt prosjekt</h3>
-                    <a class="sbtn sbtn--white" href="#booking">
-                        <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                        <span class="sbtn__txt" data-i18n="nav.book">Book en samtale</span>
-                        <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                    </a>
-                </div>
-            </article>
         </div>
     </div>
 </section>
@@ -2276,6 +2219,66 @@
                 </ol>
                 <div class="about__progress" aria-hidden="true"><span data-sticky-progress></span></div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════ SEKSJON: Prosjekter ════ -->
+<section class="section work" id="prosjekter" aria-labelledby="prosjekter-title">
+    <div class="container">
+        <div class="work__head">
+            <h2 class="work__title" id="prosjekter-title" data-i18n="nav.work">Prosjekter</h2>
+            <a class="work__more ulink" href="#booking" data-i18n="work.talk">Snakk med oss →</a>
+        </div>
+        <div class="work__grid">
+            <!-- ── Prosjektkort: DJ Tiny (ekte prosjekt med skjermbilde: case--photo) ── -->
+            <article class="case case--photo">
+                <div class="case__media">
+                    <!-- ✏️ BILDE: skjermbilde av forsiden ligger i bilder/djtiny.jpg -->
+                    <img class="case__cover" src="bilder/djtiny.jpg" alt="Forsiden til djtiny.no: DJ Tiny-logoen i neon over et fullt dansegulv" data-i18n-attr="alt:work.djAlt" width="1200" height="750" loading="lazy">
+                </div>
+                <!-- ✏️ Stikkord -->
+                <ul class="case__chips">
+                    <li class="case__chip"><strong data-i18n="svc.web">Webdesign og utvikling</strong><span data-i18n="work.service">Tjeneste</span></li>
+                    <li class="case__chip"><strong data-i18n="work.ent">Underholdning</strong><span data-i18n="work.industry">Bransje</span></li>
+                </ul>
+                <!-- ✏️ Beskrivelse -->
+                <p class="case__desc" data-i18n="work.djDesc">Nettside for DJ Tiny, DJ på Østlandet for bryllup, firmafest og klubb. Mørkt neonuttrykk, tjenester, kommende bookinger, musikkbingo og bookingforespørsel rett fra siden.</p>
+                <div class="case__bar">
+                    <h3 class="case__name">DJ Tiny</h3>
+                    <a class="sbtn sbtn--white" href="https://djtiny.no" target="_blank" rel="noopener" aria-label="Se nettsiden djtiny.no (åpnes i ny fane)" data-i18n-attr="aria-label:work.visitLabel">
+                        <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                        <span class="sbtn__txt" data-i18n="work.visit">Se nettsiden</span>
+                        <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                    </a>
+                </div>
+            </article>
+
+            <!-- ── Prosjektkort: Ledig plass ──
+                 ✏️ Når dere har et nytt prosjekt: kopier DJ Tiny-kortet over og
+                 erstatt dette kortet med det. -->
+            <article class="case">
+                <div class="case__media">
+                    <canvas class="case__cover px" data-pixel="cover" data-variant="streak" data-seed="21" aria-hidden="true"></canvas>
+                    <div class="case__cover-text" aria-hidden="true">
+                        <p class="case__cat" data-i18n="work.openCat">02 – Ledig plass</p>
+                        <p class="case__tagline" data-i18n="work.openTag">Neste prosjekt kan være ditt</p>
+                    </div>
+                </div>
+                <ul class="case__chips">
+                    <li class="case__chip"><strong data-i18n="svc.web">Webdesign og utvikling</strong><span data-i18n="work.service">Tjeneste</span></li>
+                    <li class="case__chip"><strong data-i18n="svc.ai">AI-automatisering</strong><span data-i18n="work.service">Tjeneste</span></li>
+                </ul>
+                <p class="case__desc" data-i18n="work.openDesc">Vi tar imot nye prosjekter nå. Book en uforpliktende samtale, så finner vi ut hva vi kan bygge for deg.</p>
+                <div class="case__bar">
+                    <h3 class="case__name" data-i18n="work.yours">Ditt prosjekt</h3>
+                    <a class="sbtn sbtn--white" href="#booking">
+                        <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                        <span class="sbtn__txt" data-i18n="nav.book">Book en samtale</span>
+                        <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                    </a>
+                </div>
+            </article>
         </div>
     </div>
 </section>
@@ -2613,9 +2616,9 @@
         <nav class="footer__links" aria-labelledby="footer-nav">
             <h2 id="footer-nav" data-i18n="footer.nav">Navigasjon</h2>
             <ul>
-                <li><a class="ulink" href="#prosjekter" data-i18n="nav.work">Prosjekter</a></li>
                 <li><a class="ulink" href="#tjenester" data-i18n="nav.services">Tjenester</a></li>
                 <li><a class="ulink" href="#om-oss" data-i18n="nav.about">Om oss</a></li>
+                <li><a class="ulink" href="#prosjekter" data-i18n="nav.work">Prosjekter</a></li>
                 <li><a class="ulink" href="#sporsmal" data-i18n="nav.faq">Spørsmål og svar</a></li>
                 <li><a class="ulink" href="#kontakt" data-i18n="nav.contact">Kontakt</a></li>
             </ul>
