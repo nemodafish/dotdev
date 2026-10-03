@@ -6,6 +6,12 @@
   command = "python3 bygg.py"
   publish = "dist"
 
+# Kundeportalen (dotdev.no/kunde): serverfunksjonen som sjekker innloggingen og
+# henter tallene fra Plausible. Nøklene ligger som miljøvariabler i Netlify,
+# aldri her (repoet er offentlig). Se «Kundeportalen» i LES-MEG.md.
+[functions]
+  directory = "netlify/functions"
+
 # Besøksstatistikk (Plausible) via eget domene: skriptet og hendelsene går gjennom
 # dotdev.no, så CSP i _headers kan stå som 'self', og færre besøk blokkeres.
 # Unngå ord som «analytics», «stats» og «plausible» i stiene (blokkeres av adblock).

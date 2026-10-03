@@ -6,6 +6,9 @@
 #   • Formspree (modus 2 i BOOKING): legg til https://formspree.io i connect-src
 #   • Cal.com/Calendly som lenke (modus 3): trengs ingen endring
 #   • Innebygd kalender, video, analyse o.l.: legg til domenet i riktig direktiv
+#   • Kundeportalen (/api/kunde/…) ligger på dotdev.no, så den trenger ingen endring.
+#     Svarene fra serverfunksjonen får sine egne headere (Netlify bruker ikke denne
+#     filen på dem), se netlify/functions/kunde-api.mjs.
 
 /*
   X-Content-Type-Options: nosniff
@@ -21,3 +24,10 @@
 # Bilder: én uke (bytt filnavn hvis dere bytter et bilde og vil at endringen vises med en gang)
 /bilder/*
   Cache-Control: public, max-age=604800
+
+# Kundeportalen skal ikke vises i Google
+/kunde
+  X-Robots-Tag: noindex
+
+/kunde.html
+  X-Robots-Tag: noindex

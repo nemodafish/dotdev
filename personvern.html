@@ -188,12 +188,12 @@
             <p class="label">Personvern</p>
             <h1>Personvern&shy;erklæring</h1>
             <!-- ✏️ Oppdater datoen når teksten endres (også i den engelske artikkelen) -->
-            <p class="updated">Sist oppdatert: 3. oktober 2026</p>
+            <p class="updated">Sist oppdatert: 4. oktober 2026</p>
 
             <section class="summary" aria-labelledby="kort">
                 <h2 id="kort">Kort fortalt</h2>
                 <ul>
-                    <li>Vi bruker ikke informasjonskapsler (cookies) og sporer deg ikke på tvers av nettsteder. Vi teller besøk med Plausible, som ikke lagrer noe på enheten din og ikke vet hvem du er.</li>
+                    <li>Vi bruker ikke informasjonskapsler (cookies) og sporer deg ikke på tvers av nettsteder. Vi teller besøk med Plausible, som ikke lagrer noe på enheten din og ikke vet hvem du er. Eneste unntak er kundeportalen, som setter én nødvendig cookie når en kunde logger inn.</li>
                     <li>Vi samler bare inn opplysninger du selv sender oss, via bookingsiden eller på e-post.</li>
                     <li>Vi bruker opplysningene bare til å svare deg og gjennomføre samtalen eller oppdraget.</li>
                     <li>Vi selger aldri opplysningene dine, og vi deler dem bare med leverandører vi trenger for å drive (se avsnitt 6).</li>
@@ -224,6 +224,11 @@
                         <td data-th="Når">Du blir kunde</td>
                         <td data-th="Opplysninger">Kontakt- og faktureringsopplysninger og korrespondanse om oppdraget.</td>
                         <td data-th="Formål og grunnlag">Levere oppdraget og fakturere. Grunnlag: avtale (art. 6 nr. 1 b) og rettslig plikt etter bokføringsloven (art. 6 nr. 1 c).</td>
+                    </tr>
+                    <tr>
+                        <td data-th="Når">Du logger inn i kundeportalen (bare for kunder)</td>
+                        <td data-th="Opplysninger">E-postadressen din, passordet (lagret bare som en hash som ikke kan gjøres om til passordet) og en innloggingscookie (se avsnitt 5).</td>
+                        <td data-th="Formål og grunnlag">Gi deg tilgang til besøksstatistikken for nettsiden dere har kjøpt av oss. Grunnlag: avtale (art. 6 nr. 1 b), eller berettiget interesse (art. 6 nr. 1 f) når du logger inn på vegne av en bedrift.</td>
                     </tr>
                     <tr>
                         <td data-th="Når">Du besøker nettsiden</td>
@@ -259,12 +264,14 @@
                 <li>Er du kunde, lagrer vi korrespondanse og kontaktopplysninger så lenge kundeforholdet varer, og deretter i opptil 12 måneder.</li>
                 <li>Regnskapsmateriale (som fakturaer) lagres i 5 år etter regnskapsårets slutt, slik bokføringsloven krever.</li>
                 <li>Besøksstatistikken lagres hos Plausible uten IP-adresse så lenge vi bruker tjenesten. Koden som skiller besøkende fra hverandre, byttes hver dag og kan ikke kobles til deg etter at døgnet er omme.</li>
+                <li>Innloggingen til kundeportalen slettes når kundeforholdet avsluttes. Innloggingscookien slettes når du logger ut, og ellers etter 14 dager.</li>
             </ul>
 
             <h2 id="cookies">5. Informasjonskapsler (cookies)</h2>
-            <p>Nettsiden bruker ingen informasjonskapsler og lagrer ingen opplysninger om deg på enheten din. Fontene og statistikkskriptet lastes fra vårt eget domene, så nettleseren din henter ikke innhold direkte fra andre nettsteder. Derfor ber vi heller ikke om samtykke til cookies.</p>
+            <p>Nettsiden bruker ingen informasjonskapsler og lagrer ingen opplysninger om deg på enheten din (unntaket er kundeportalen, se under). Fontene og statistikkskriptet lastes fra vårt eget domene, så nettleseren din henter ikke innhold direkte fra andre nettsteder. Derfor ber vi heller ikke om samtykke til cookies.</p>
             <p>Vi teller besøk med Plausible Analytics. Plausible bruker ingen informasjonskapsler. IP-adressen din brukes bare til å finne omtrentlig sted og, sammen med nettlesertypen, til å lage en kode som byttes hver dag. IP-adressen lagres ikke. Derfor kan Plausible ikke kjenne deg igjen fra dag til dag eller på tvers av nettsteder. Vi ser bare samlede tall, for eksempel antall besøk, hvilke sider som leses, hvilke nettsteder besøkende kommer fra, land og type enhet. Statistikken sendes via vårt eget domene til Plausible og lagres i EU.</p>
             <p>Velger du engelsk, ligger språkvalget bare i nettadressen (?lang=en). Det lagres ikke på enheten din.</p>
+            <p>Kundeportalen (dotdev.no/kunde) er bare for kunder. Når du logger inn der, setter vi én informasjonskapsel som holder deg innlogget i 14 dager, eller til du logger ut. Den er nødvendig for at innloggingen skal virke, og krever derfor ikke samtykke (ekomloven § 3-15). Den inneholder ikke e-posten eller passordet ditt, kan ikke leses av skript på siden og brukes ikke til noe annet. Kundeportalen har ingen besøksstatistikk.</p>
             <p>Lenker til andre nettsider, for eksempel prosjektene våre, tar deg til nettsteder med egne personvernregler.</p>
 
             <h2 id="deling">6. Hvem vi deler opplysningene med</h2>
@@ -295,7 +302,7 @@
 
             <h2 id="sikkerhet">8. Sikkerhet</h2>
             <!-- ✏️ Skriv bare det som faktisk stemmer (slå på tofaktor hvis dere ikke har det) -->
-            <p>Nettsiden bruker kryptert forbindelse (HTTPS). Bare vi har tilgang til e-posten og kundeopplysningene, og kontoene er beskyttet med tofaktorinnlogging.</p>
+            <p>Nettsiden bruker kryptert forbindelse (HTTPS). Bare vi har tilgang til e-posten og kundeopplysningene, og kontoene er beskyttet med tofaktorinnlogging. Passordene til kundeportalen er lange og tilfeldige, og vi lagrer dem bare som hasher.</p>
 
             <h2 id="endringer">9. Endringer</h2>
             <p>Vi oppdaterer denne erklæringen når vi endrer hvordan vi behandler personopplysninger. Datoen øverst viser når den sist ble endret.</p>
@@ -306,12 +313,12 @@
             <p class="label">Privacy</p>
             <h1>Privacy policy</h1>
             <!-- ✏️ Oppdater datoen når teksten endres (også i den norske artikkelen) -->
-            <p class="updated">Last updated: 3 October 2026</p>
+            <p class="updated">Last updated: 4 October 2026</p>
 
             <section class="summary" aria-labelledby="en-short">
                 <h2 id="en-short">In short</h2>
                 <ul>
-                    <li>We do not use cookies and do not track you across websites. We count visits with Plausible, which stores nothing on your device and does not know who you are.</li>
+                    <li>We do not use cookies and do not track you across websites. We count visits with Plausible, which stores nothing on your device and does not know who you are. The only exception is the client portal, which sets one necessary cookie when a customer logs in.</li>
                     <li>We only collect information you send us yourself, through the booking page or by e-mail.</li>
                     <li>We only use that information to reply to you and to carry out the call or the project.</li>
                     <li>We never sell your information, and we only share it with service providers we need to run our business (see section 6).</li>
@@ -342,6 +349,11 @@
                         <td data-th="When">You become a customer</td>
                         <td data-th="Information">Contact and billing details, and correspondence about the project.</td>
                         <td data-th="Purpose and basis">To deliver the project and send invoices. Basis: contract (<span class="nw">Art. 6(1)(b)</span>) and our legal obligation under the Norwegian Bookkeeping Act (<span class="nw">Art. 6(1)(c)</span>).</td>
+                    </tr>
+                    <tr>
+                        <td data-th="When">You log in to the client portal (customers only)</td>
+                        <td data-th="Information">Your e-mail address, your password (stored only as a hash that cannot be turned back into the password) and a login cookie (see section 5).</td>
+                        <td data-th="Purpose and basis">To give you access to the visitor statistics for the website you bought from us. Basis: contract (<span class="nw">Art. 6(1)(b)</span>), or legitimate interest (<span class="nw">Art. 6(1)(f)</span>) when you log in on behalf of a business.</td>
                     </tr>
                     <tr>
                         <td data-th="When">You visit the website</td>
@@ -377,12 +389,14 @@
                 <li>If you are a customer, we keep correspondence and contact details for as long as the customer relationship lasts, and then for up to 12 months.</li>
                 <li>Accounting records (such as invoices) are kept for 5 years after the end of the financial year, as required by the Norwegian Bookkeeping Act.</li>
                 <li>Visitor statistics are kept by Plausible, without IP addresses, for as long as we use the service. The code that tells visitors apart changes every day and cannot be linked to you once the day is over.</li>
+                <li>Your client portal login is deleted when the customer relationship ends. The login cookie is deleted when you log out, and otherwise after 14 days.</li>
             </ul>
 
             <h2 id="en-cookies">5. Cookies</h2>
-            <p>The website uses no cookies and stores no information about you on your device. The fonts and the statistics script are loaded from our own domain, so your browser does not load content directly from other sites. That is also why we do not ask for your consent to cookies.</p>
+            <p>The website uses no cookies and stores no information about you on your device (the exception is the client portal, see below). The fonts and the statistics script are loaded from our own domain, so your browser does not load content directly from other sites. That is also why we do not ask for your consent to cookies.</p>
             <p>We count visits with Plausible Analytics. Plausible uses no cookies. Your IP address is only used to find your approximate location and, together with your browser type, to create a code that changes every day. Your IP address is not stored. This means Plausible cannot recognise you from one day to the next or across websites. We only see totals, such as the number of visits, which pages are read, which websites visitors come from, country and device type. The statistics are sent via our own domain to Plausible and stored in the EU.</p>
             <p>If you choose English, your language choice is kept only in the web address (?lang=en). It is not stored on your device.</p>
+            <p>The client portal (dotdev.no/kunde) is for customers only. When you log in there, we set one cookie that keeps you logged in for 14 days, or until you log out. It is necessary for the login to work and therefore does not require consent (section 3-15 of the Norwegian Electronic Communications Act). It does not contain your e-mail address or password, cannot be read by scripts on the page and is not used for anything else. The client portal has no visitor statistics.</p>
             <p>Links to other websites, such as our projects, take you to sites with their own privacy rules.</p>
 
             <h2 id="en-sharing">6. Who we share the information with</h2>
@@ -413,7 +427,7 @@
 
             <h2 id="en-security">8. Security</h2>
             <!-- ✏️ Skriv bare det som faktisk stemmer (slå på tofaktor hvis dere ikke har det), også i den norske artikkelen -->
-            <p>The website uses an encrypted connection (HTTPS). Only we have access to the e-mail and customer information, and the accounts are protected with two-factor login.</p>
+            <p>The website uses an encrypted connection (HTTPS). Only we have access to the e-mail and customer information, and the accounts are protected with two-factor login. Client portal passwords are long and random, and we only store them as hashes.</p>
 
             <h2 id="en-changes">9. Changes</h2>
             <p>We update this policy when we change how we process personal data. The date at the top shows when it was last changed.</p>

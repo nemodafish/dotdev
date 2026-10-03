@@ -24,7 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 DIST = ROOT / "dist"
 
-HTML_FILES = ["index.html", "personvern.html", "404.html"]
+HTML_FILES = ["index.html", "personvern.html", "404.html", "kunde.html"]
 COPY = [
     "robots.txt", "sitemap.xml", "_headers", "site.webmanifest",
     "favicon.ico", "favicon-32.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png",
