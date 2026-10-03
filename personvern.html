@@ -152,6 +152,12 @@
     .foot .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; }
     .foot a { display: inline-flex; align-items: center; min-height: 44px; }
     </style>
+    <!-- Besøksstatistikk uten cookies (Plausible). Lastes og sendes via eget domene (/dd/ i netlify.toml), så CSP kan stå som 'self'. -->
+    <script async src="/dd/js/s.js"></script>
+    <script>
+        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+        plausible.init({ endpoint: "/dd/api/e" })
+    </script>
 </head>
 <body>
 <a class="skip" href="#innhold" data-i18n="skip">Hopp til innholdet</a>
@@ -187,7 +193,7 @@
             <section class="summary" aria-labelledby="kort">
                 <h2 id="kort">Kort fortalt</h2>
                 <ul>
-                    <li>Vi bruker ikke informasjonskapsler (cookies), analyseverktøy eller sporing.</li>
+                    <li>Vi bruker ikke informasjonskapsler (cookies) og sporer deg ikke på tvers av nettsteder. Vi teller besøk med Plausible, som ikke lagrer noe på enheten din og ikke vet hvem du er.</li>
                     <li>Vi samler bare inn opplysninger du selv sender oss, via bookingsiden eller på e-post.</li>
                     <li>Vi bruker opplysningene bare til å svare deg og gjennomføre samtalen eller oppdraget.</li>
                     <li>Vi selger aldri opplysningene dine, og vi deler dem bare med leverandører vi trenger for å drive (se avsnitt 6).</li>
@@ -224,6 +230,11 @@
                         <td data-th="Opplysninger">Tekniske logger hos webhotellet: IP-adresse, tidspunkt, side og nettlesertype.</td>
                         <td data-th="Formål og grunnlag">Drift og sikkerhet (for eksempel å stoppe angrep). Grunnlag: berettiget interesse (art. 6 nr. 1 f).</td>
                     </tr>
+                    <tr>
+                        <td data-th="Når">Du besøker nettsiden (statistikk)</td>
+                        <td data-th="Opplysninger">Side, hvor lenge du er der og hvor langt du blar, nettstedet du kom fra, omtrentlig sted (land, region og by), type enhet, operativsystem og nettleser, og hvilke lenker til andre nettsteder du trykker på (for eksempel «Velg tidspunkt»). IP-adressen lagres ikke (se avsnitt 5).</td>
+                        <td data-th="Formål og grunnlag">Se hvor mange som besøker nettsiden og hvilke sider som blir brukt, så vi kan forbedre den. Vi ser bare samlede tall. Grunnlag: berettiget interesse (art. 6 nr. 1 f).</td>
+                    </tr>
                 </tbody>
             </table>
             <p>Vi bruker ikke opplysningene til profilering eller automatiserte avgjørelser.</p>
@@ -247,10 +258,12 @@
                 <li>Bookinger, forespørsler og e-poster som ikke fører til oppdrag, slettes senest 12 måneder etter siste kontakt.</li>
                 <li>Er du kunde, lagrer vi korrespondanse og kontaktopplysninger så lenge kundeforholdet varer, og deretter i opptil 12 måneder.</li>
                 <li>Regnskapsmateriale (som fakturaer) lagres i 5 år etter regnskapsårets slutt, slik bokføringsloven krever.</li>
+                <li>Besøksstatistikken lagres hos Plausible uten IP-adresse så lenge vi bruker tjenesten. Koden som skiller besøkende fra hverandre, byttes hver dag og kan ikke kobles til deg etter at døgnet er omme.</li>
             </ul>
 
             <h2 id="cookies">5. Informasjonskapsler (cookies)</h2>
-            <p>Nettsiden bruker ingen informasjonskapsler og ingen analyse- eller sporingsverktøy. Fontene ligger på vår egen server, så nettsiden henter ikke innhold fra andre nettsteder når du besøker den. Derfor ber vi heller ikke om samtykke til cookies.</p>
+            <p>Nettsiden bruker ingen informasjonskapsler og lagrer ingen opplysninger om deg på enheten din. Fontene og statistikkskriptet lastes fra vårt eget domene, så nettleseren din henter ikke innhold direkte fra andre nettsteder. Derfor ber vi heller ikke om samtykke til cookies.</p>
+            <p>Vi teller besøk med Plausible Analytics. Plausible bruker ingen informasjonskapsler. IP-adressen din brukes bare til å finne omtrentlig sted og, sammen med nettlesertypen, til å lage en kode som byttes hver dag. IP-adressen lagres ikke. Derfor kan Plausible ikke kjenne deg igjen fra dag til dag eller på tvers av nettsteder. Vi ser bare samlede tall, for eksempel antall besøk, hvilke sider som leses, hvilke nettsteder besøkende kommer fra, land og type enhet. Statistikken sendes via vårt eget domene til Plausible og lagres i EU.</p>
             <p>Velger du engelsk, ligger språkvalget bare i nettadressen (?lang=en). Det lagres ikke på enheten din.</p>
             <p>Lenker til andre nettsider, for eksempel prosjektene våre, tar deg til nettsteder med egne personvernregler.</p>
 
@@ -259,6 +272,7 @@
             <ul>
                 <li>E-post og bookingkalender: Google (Google Workspace)</li>
                 <li>Webhotell og drift av nettsiden: Netlify, Inc. (USA)</li>
+                <li>Besøksstatistikk: Plausible Insights OÜ (Estland, data lagres i EU)</li>
                 <!-- ✏️ Regnskapssystem: fjern kommentartegnene og skriv inn leverandøren når dere tar det i bruk (også i den engelske artikkelen)
                 <li>Regnskapssystem (for kunder): Leverandørnavn (land)</li>
                 -->
@@ -275,6 +289,7 @@
                 <li>protestere mot behandling som bygger på berettiget interesse</li>
                 <li>få utlevert opplysninger du har gitt oss, i et maskinlesbart format (dataportabilitet)</li>
             </ul>
+            <p>Besøksstatistikken kan ikke knyttes til deg, så vi kan ikke finne frem til eller slette dine besøk i den (GDPR art. 11).</p>
             <p>Send en e-post til <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>, så svarer vi innen en måned. Det er gratis.</p>
             <p>Mener du at vi behandler opplysningene dine i strid med regelverket, kan du klage til <a href="https://www.datatilsynet.no/" target="_blank" rel="noopener">Datatilsynet</a>. Vi setter pris på om du tar kontakt med oss først, så vi kan rydde opp.</p>
 
@@ -296,7 +311,7 @@
             <section class="summary" aria-labelledby="en-short">
                 <h2 id="en-short">In short</h2>
                 <ul>
-                    <li>We do not use cookies, analytics tools or tracking.</li>
+                    <li>We do not use cookies and do not track you across websites. We count visits with Plausible, which stores nothing on your device and does not know who you are.</li>
                     <li>We only collect information you send us yourself, through the booking page or by e-mail.</li>
                     <li>We only use that information to reply to you and to carry out the call or the project.</li>
                     <li>We never sell your information, and we only share it with service providers we need to run our business (see section 6).</li>
@@ -333,12 +348,17 @@
                         <td data-th="Information">Technical logs at our hosting provider: IP address, time, page and browser type.</td>
                         <td data-th="Purpose and basis">Operation and security (for example, stopping attacks). Basis: legitimate interest (<span class="nw">Art. 6(1)(f)</span>).</td>
                     </tr>
+                    <tr>
+                        <td data-th="When">You visit the website (statistics)</td>
+                        <td data-th="Information">Page, how long you stay and how far you scroll, the website you came from, approximate location (country, region and city), device type, operating system and browser, and which links to other websites you click (such as “Choose a time”). Your IP address is not stored (see section 5).</td>
+                        <td data-th="Purpose and basis">To see how many people visit the website and which pages they use, so that we can improve it. We only see totals. Basis: legitimate interest (<span class="nw">Art. 6(1)(f)</span>).</td>
+                    </tr>
                 </tbody>
             </table>
             <p>We do not use the information for profiling or automated decision-making.</p>
 
             <h2 id="en-form">3. How booking works</h2>
-            <p>The “Pick a time” button opens our booking page in Google Calendar in a new tab. There you only see times that are free, and you book directly in our calendar. The information you enter is stored in Google Calendar in our Google Workspace account, and you get a confirmation by e-mail with a Google Meet link. Google processes the information on our behalf as a data processor. Nothing is stored on the website itself.</p>
+            <p>The “Choose a time” button opens our booking page in Google Calendar in a new tab. There you only see times that are free, and you book directly in our calendar. The information you enter is stored in Google Calendar in our Google Workspace account, and you get a confirmation by e-mail with a Google Meet link. Google processes the information on our behalf as a data processor. Nothing is stored on the website itself.</p>
             <p>The website is hosted by Netlify, which keeps technical logs (including IP addresses) for a limited period for operation and security.</p>
 
             <!-- ✏️ MODUS 2 (Formspree), engelsk: fjern kommentartegnene rundt avsnittet under hvis bookingen sendes via Formspree (gjør det samme i den norske artikkelen)
@@ -356,10 +376,12 @@
                 <li>Bookings, requests and e-mails that do not lead to a project are deleted no later than 12 months after our last contact.</li>
                 <li>If you are a customer, we keep correspondence and contact details for as long as the customer relationship lasts, and then for up to 12 months.</li>
                 <li>Accounting records (such as invoices) are kept for 5 years after the end of the financial year, as required by the Norwegian Bookkeeping Act.</li>
+                <li>Visitor statistics are kept by Plausible, without IP addresses, for as long as we use the service. The code that tells visitors apart changes every day and cannot be linked to you once the day is over.</li>
             </ul>
 
             <h2 id="en-cookies">5. Cookies</h2>
-            <p>The website uses no cookies and no analytics or tracking tools. The fonts are hosted on our own server, so the website does not load content from other sites when you visit it. That is also why we do not ask for your consent to cookies.</p>
+            <p>The website uses no cookies and stores no information about you on your device. The fonts and the statistics script are loaded from our own domain, so your browser does not load content directly from other sites. That is also why we do not ask for your consent to cookies.</p>
+            <p>We count visits with Plausible Analytics. Plausible uses no cookies. Your IP address is only used to find your approximate location and, together with your browser type, to create a code that changes every day. Your IP address is not stored. This means Plausible cannot recognise you from one day to the next or across websites. We only see totals, such as the number of visits, which pages are read, which websites visitors come from, country and device type. The statistics are sent via our own domain to Plausible and stored in the EU.</p>
             <p>If you choose English, your language choice is kept only in the web address (?lang=en). It is not stored on your device.</p>
             <p>Links to other websites, such as our projects, take you to sites with their own privacy rules.</p>
 
@@ -368,6 +390,7 @@
             <ul>
                 <li>E-mail and booking calendar: Google (Google Workspace)</li>
                 <li>Website hosting and operation: Netlify, Inc. (USA)</li>
+                <li>Visitor statistics: Plausible Insights OÜ (Estonia, data stored in the EU)</li>
                 <!-- ✏️ Regnskapssystem, engelsk: fjern kommentartegnene og skriv inn leverandøren når dere tar det i bruk (også i den norske artikkelen)
                 <li>Accounting system (for customers): Supplier name (country)</li>
                 -->
@@ -384,6 +407,7 @@
                 <li>object to processing based on legitimate interest</li>
                 <li>receive the information you have given us in a machine-readable format (data portability)</li>
             </ul>
+            <p>The visitor statistics cannot be linked to you, so we cannot find or delete your visits in them (GDPR Art. 11).</p>
             <p>Send an e-mail to <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a> and we will reply within one month. It is free of charge.</p>
             <p>If you believe we are processing your information in breach of the rules, you can complain to the Norwegian Data Protection Authority (<a href="https://www.datatilsynet.no/en/" target="_blank" rel="noopener">Datatilsynet</a>). We would appreciate it if you contacted us first, so that we can put things right.</p>
 

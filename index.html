@@ -164,12 +164,20 @@
        ✏️-felt der (org.nr., adresse, e-postleverandør, webhotell).
      • Firmaopplysninger nederst i footeren (.footer__company) er påkrevd
        etter ehandelsloven § 8: navn, adresse, e-post og org.nr.
-     • Informasjonskapsler: siden setter ingen cookies, bruker ingen
-       analyse og henter ingenting fra andre nettsteder (fontene ligger i
-       fonter/). Derfor trengs INGEN cookie-banner. Legger dere til Google
-       Analytics, Meta-piksel, YouTube-innbygging o.l., må dere ha et
-       samtykkebanner FØR noe lastes (ekomloven § 3-15 og GDPR), og
-       personvern.html må oppdateres.
+     • Informasjonskapsler: siden setter ingen cookies, og nettleseren
+       henter ingenting direkte fra andre nettsteder (fontene ligger i
+       fonter/, og Plausible går via /dd/ i netlify.toml, som sender
+       besøksdata videre til Plausible i EU). Besøk telles med Plausible,
+       som er cookiefritt. Klikk på «Velg tidspunkt» telles som hendelsen
+       «Book samtale» (klassen plausible-event-name=Book+samtale). Vanlig
+       praksis er at Plausible brukes uten cookie-banner, men ekomloven
+       § 3-15 gjelder også lesing fra enheten og har ikke eget unntak for
+       statistikk (skriptet leser bl.a. localStorage-flagget
+       plausible_ignore), så det er en liten restrisiko. Endrer dere
+       målingene i Plausible, må tabellen i personvern.html oppdateres.
+       Legger dere til Google Analytics, Meta-piksel, YouTube-innbygging
+       o.l., må dere ha et samtykkebanner FØR noe lastes (ekomloven
+       § 3-15 og GDPR), og personvern.html må oppdateres.
      • Prosjekter: få skriftlig ok (e-post holder) fra kunden før dere
        viser arbeidet og skjermbildet (gjelder også DJ Tiny og bildene i
        skjermbildet).
@@ -1878,6 +1886,12 @@
         .scr__c { opacity: 1 !important; transform: none !important; }
     }
     </style>
+    <!-- Besøksstatistikk uten cookies (Plausible). Lastes og sendes via eget domene (/dd/ i netlify.toml), så CSP kan stå som 'self'. -->
+    <script async src="/dd/js/s.js"></script>
+    <script>
+        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+        plausible.init({ endpoint: "/dd/api/e" })
+    </script>
 </head>
 <body>
 
@@ -2562,7 +2576,7 @@
                 <ul class="bk-ext__types" data-bk-ext-types></ul>
                 <p class="bk-ext__text" data-i18n="bk.extText">Kalenderen vår åpnes i en ny fane. Der ser du bare tider som faktisk er ledige, og du får bekreftelse på e-post med en gang.</p>
                 <div class="bk-ext__cta">
-                    <a class="sbtn sbtn--black" href="#booking" target="_blank" rel="noopener" data-bk-ext-link>
+                    <a class="sbtn sbtn--black plausible-event-name=Book+samtale" href="#booking" target="_blank" rel="noopener" data-bk-ext-link>
                         <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
                         <span class="sbtn__txt" data-i18n="bk.extBtn">Velg tidspunkt<span class="sr-only"> (åpnes i ny fane)</span></span>
                         <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>

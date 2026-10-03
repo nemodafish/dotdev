@@ -5,3 +5,18 @@
 [build]
   command = "python3 bygg.py"
   publish = "dist"
+
+# Besøksstatistikk (Plausible) via eget domene: skriptet og hendelsene går gjennom
+# dotdev.no, så CSP i _headers kan stå som 'self', og færre besøk blokkeres.
+# Unngå ord som «analytics», «stats» og «plausible» i stiene (blokkeres av adblock).
+[[redirects]]
+  from = "/dd/js/s.js"
+  to = "https://plausible.io/js/pa-BtOpdQu0BlUGAnXgx6ko4.js"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/dd/api/e"
+  to = "https://plausible.io/api/event"
+  status = 200
+  force = true
