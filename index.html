@@ -45,14 +45,12 @@
                         Gi .plan__body en ny, unik id og bruk samme verdi i
                         aria-controls på knappen .plan__toggle. Klassen
                         plan--featured gir det mørke, fremhevede kortet.
-     • Prosjektkort ... SEKSJON: Prosjekter, <article class="case">. Ett
-                        prosjekt vises stort (case--wide case--feature) med
-                        kundens ord (<figure class="case__quote">). Flere
-                        prosjekter: kopier <article>, fjern case--wide og
-                        case--feature, så står kortene to og to (oddetall:
-                        gi det siste kortet case--wide). Kort med ekte
-                        skjermbilde får klassen case--photo. Bildene ligger
-                        i mappen bilder/ ved siden av filen.
+     • Prosjektkort ... SEKSJON: Prosjekter, <article class="case">.
+                        Kortene står to og to. Har du et oddetall, gi det
+                        siste kortet klassen case--wide (fullbredde).
+                        Kort med ekte skjermbilde (som DJ Tiny) får klassen
+                        case--photo, som fjerner den mørke tonen over bildet.
+                        Bildene ligger i mappen bilder/ ved siden av filen.
      • «Hva vi skaper»  SEKSJON: Hero, <li class="made__item">. Fire ord i
                         logostil; JS bytter skriftstil på to og to av og til.
      • Prosesskort .... SEKSJON: Prosess, <li class="step">.
@@ -1024,7 +1022,7 @@
     /* ═════════════════════════════════════════════════════════════════
        9. PROSJEKTER (case-kort)
        ═════════════════════════════════════════════════════════════════ */
-    .work__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--sp-3); margin-bottom: var(--sp-5); }
+    .work__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--sp-3); margin-bottom: var(--sp-4); }
     .work__title { font-size: var(--fs-h2); line-height: 1; }
     .work__more { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-para); }
     .work__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
@@ -1084,19 +1082,6 @@
         .case--wide .case__chips, .case--wide .case__desc, .case--wide .case__bar { grid-column: 2; }
         .case--wide .case__chips { padding-top: 10px; }
         .case--wide .case__bar { align-self: end; margin-top: var(--sp-3); }
-    }
-
-    /* Hovedprosjekt med kundens ord (case--feature): større bilde, sitatet
-       står under beskrivelsen i høyre kolonne */
-    .case__quote { margin: 0 10px; padding: var(--sp-3); border-radius: var(--r-sm); background: var(--c-bg); }
-    .case__quote blockquote { font-family: var(--f-title); font-size: clamp(1.125rem, 1.3vw, 1.3125rem); letter-spacing: -.02em; line-height: 1.38; text-wrap: pretty; }
-    .case__quote figcaption { margin-top: var(--sp-2); color: var(--c-muted); font-size: var(--fs-sm); }
-    .case__quote figcaption strong { color: var(--c-black); font-family: var(--f-title); font-weight: 600; letter-spacing: -.02em; }
-    .case--feature .case__desc { padding-bottom: var(--sp-3); }
-    @media (min-width: 901px) {
-        .case--feature { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-rows: auto auto auto 1fr; }
-        .case--feature .case__media { grid-row: 1 / 5; min-height: clamp(380px, 36vw, 640px); }
-        .case--feature .case__quote { grid-column: 2; }
     }
 
     /* ═════════════════════════════════════════════════════════════════
@@ -1903,13 +1888,10 @@
         .about__copy { gap: var(--sp-2); padding: .75rem 12px var(--sp-2); }
         .about__item h3 { font-size: var(--fs-h4); }
         .about__visual { aspect-ratio: 1.08; }
-        .case__chip strong { font-size: 1.1875rem; }
     }
     @media (max-width: 600px) {
         .case__bar { flex-direction: column; align-items: stretch; padding: 12px; }
         .case__bar .sbtn { display: flex; width: 100%; }
-        .case__quote { padding: var(--sp-2); }
-        .case__chip { padding: .75em .95em; }
         /* «Hvorfor oss» på mobil: tittel over teksten, begge venstrestilt */
         .proof__row { flex-direction: column; gap: .35rem; }
         .proof__row span { max-width: none; text-align: left; }
@@ -2183,11 +2165,8 @@
             <a class="work__more ulink" href="#booking" data-i18n="work.talk">Snakk med oss →</a>
         </div>
         <div class="work__grid">
-            <!-- ── Prosjekt: DJ Tiny (stort kort med kundens ord: case--wide case--feature) ──
-                 ✏️ Nytt prosjekt: kopier hele <article>. Har dere to eller flere, fjern
-                 case--wide og case--feature (kortene står da to og to) og ta sitatet
-                 (.case__quote) med bare på det kortet der kunden har sagt noe. -->
-            <article class="case case--photo case--wide case--feature">
+            <!-- ── Prosjektkort: DJ Tiny (ekte prosjekt med skjermbilde: case--photo) ── -->
+            <article class="case case--photo">
                 <div class="case__media">
                     <!-- ✏️ BILDE: skjermbilde av forsiden ligger i bilder/djtiny.jpg -->
                     <img class="case__cover" src="bilder/djtiny.jpg" alt="Forsiden til djtiny.no: DJ Tiny-logoen i neon over et fullt dansegulv" data-i18n-attr="alt:work.djAlt" width="1200" height="750" loading="lazy">
@@ -2199,16 +2178,37 @@
                 </ul>
                 <!-- ✏️ Beskrivelse -->
                 <p class="case__desc" data-i18n="work.djDesc">Nettside for DJ Tiny, DJ på Østlandet for bryllup, firmafest og klubb. Mørkt neonuttrykk, tjenester, kommende bookinger, musikkbingo og bookingforespørsel rett fra siden.</p>
-                <!-- ✏️ Kundens ord. La kunden godkjenne ordlyden før publisering. -->
-                <figure class="case__quote">
-                    <blockquote><p data-i18n="rev.quote">«Jeg ville ha en nettside som føles som en god kveld på dansegulvet, og det var akkurat det jeg fikk. Alt fra uttrykket og tekstene til bookingskjemaet ble gjennomtenkt, og jeg fikk svar raskt hele veien. Nå ser folk med en gang hva jeg tilbyr, og de kan sende forespørsel rett fra siden.»</p></blockquote>
-                    <figcaption><strong>DJ Tiny</strong> · <span data-i18n="rev.where">DJ på Østlandet</span></figcaption>
-                </figure>
                 <div class="case__bar">
                     <h3 class="case__name">DJ Tiny</h3>
                     <a class="sbtn sbtn--white" href="https://djtiny.no" target="_blank" rel="noopener" aria-label="Se nettsiden djtiny.no (åpnes i ny fane)" data-i18n-attr="aria-label:work.visitLabel">
                         <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
                         <span class="sbtn__txt" data-i18n="work.visit">Se nettsiden</span>
+                        <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                    </a>
+                </div>
+            </article>
+
+            <!-- ── Prosjektkort: Ledig plass ──
+                 ✏️ Når dere har et nytt prosjekt: kopier DJ Tiny-kortet over og
+                 erstatt dette kortet med det. -->
+            <article class="case">
+                <div class="case__media">
+                    <canvas class="case__cover px" data-pixel="cover" data-variant="streak" data-seed="21" aria-hidden="true"></canvas>
+                    <div class="case__cover-text" aria-hidden="true">
+                        <p class="case__cat" data-i18n="work.openCat">02 – Ledig plass</p>
+                        <p class="case__tagline" data-i18n="work.openTag">Neste prosjekt kan være ditt</p>
+                    </div>
+                </div>
+                <ul class="case__chips">
+                    <li class="case__chip"><strong data-i18n="svc.web">Webdesign og utvikling</strong><span data-i18n="work.service">Tjeneste</span></li>
+                    <li class="case__chip"><strong data-i18n="svc.ai">AI-automatisering</strong><span data-i18n="work.service">Tjeneste</span></li>
+                </ul>
+                <p class="case__desc" data-i18n="work.openDesc">Vi tar imot nye prosjekter nå. Book en uforpliktende samtale, så finner vi ut hva vi kan bygge for deg.</p>
+                <div class="case__bar">
+                    <h3 class="case__name" data-i18n="work.yours">Ditt prosjekt</h3>
+                    <a class="sbtn sbtn--white" href="#booking">
+                        <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
+                        <span class="sbtn__txt" data-i18n="nav.book">Book en samtale</span>
                         <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
                     </a>
                 </div>
@@ -2941,8 +2941,10 @@ const I18N = {
         'work.djDesc': 'Website for DJ Tiny, a DJ in Eastern Norway for weddings, corporate parties and clubs. A dark neon look, services, upcoming bookings, music bingo and booking requests straight from the site.',
         'work.visitLabel': 'Visit djtiny.no (opens in a new tab)',
         'work.visit': 'Visit the site',
-        'rev.quote': '“I wanted a website that feels like a great night on the dance floor, and that’s exactly what I got. Everything from the look and the copy to the booking form was carefully thought through, and I got quick answers the whole way. Now people can see straight away what I offer, and they can send an enquiry right from the site.”',
-        'rev.where': 'DJ in Eastern Norway',
+        'work.openCat': '02 – Open slot',
+        'work.openTag': 'Your project could be next',
+        'work.openDesc': 'We’re taking on new projects now. Book a no-obligation call and we’ll work out what we can build for you.',
+        'work.yours': 'Your project',
 
         // Tjenester
         'svc.title': 'Websites that make<br><span class="accent">a lasting impression</span>',
