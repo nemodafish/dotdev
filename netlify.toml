@@ -1,0 +1,7 @@
+# Netlify leser denne filen ved hver publisering fra GitHub.
+# bygg.py lager dist/ uten guiden og kommentarene, og det er bare dist/ som
+# blir publisert. Kildefilene med guiden, LES-MEG.md og bygg.py blir ikke
+# synlige på nettsiden. Feiler byggingen, blir forrige versjon liggende ute.
+[build]
+  command = "python3 bygg.py"
+  publish = "dist"

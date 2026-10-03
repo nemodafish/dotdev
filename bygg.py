@@ -9,8 +9,8 @@ kommentarene, så de er lette å redigere. Kopien i dist/ får kommentarene og
 innrykkene fjernet, så «Vis kilde» på dotdev.no ser ryddig ut. Selve siden
 ser og virker helt likt.
 
-Publiser alltid mappen dist/ (dra den inn i Netlify), ikke hele mappen.
-Kjør skriptet på nytt hver gang du har endret noe.
+Netlify kjører skriptet selv ved hver publisering fra GitHub og publiserer
+bare dist/ (se netlify.toml). Kjør det lokalt bare hvis du vil se resultatet.
 """
 
 import json
@@ -288,7 +288,7 @@ def main():
 
     check_js(scripts)
     print(f"  HTML: {before / 1024:.0f} KB → {after / 1024:.0f} KB (uten kommentarer og innrykk)")
-    print(f"\nFerdig! Dra mappen «dist» inn i Netlify for å publisere:\n  {DIST}")
+    print(f"\nFerdig! Publiseringsklar kopi i:\n  {DIST}")
 
 
 if __name__ == "__main__":

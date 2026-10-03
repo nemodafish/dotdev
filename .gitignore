@@ -1,0 +1,2 @@
+# Lages av bygg.py. Netlify bygger den selv ved hver publisering (se netlify.toml).
+dist/

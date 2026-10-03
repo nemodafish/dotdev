@@ -9,8 +9,8 @@
   Grafikken er kode (pikselkunst på <canvas> og CSS-mønstre), bortsett fra
   skjermbildene av prosjekter i bilder/. Redigerbar tekst er merket med ✏️.
 
-  PUBLISERING: denne filen er kilden. Kjør «python3 bygg.py» og publiser
-  mappen dist/, så slipper guiden og kommentarene med ut (punkt 11).
+  PUBLISERING: denne filen er kilden. Netlify kjører bygg.py og publiserer
+  bare mappen dist/, så guiden og kommentarene slipper ikke ut (punkt 11).
 
   1. SØK OG ERSTATT (Ctrl+H / Cmd+Alt+F)
      • Navn ............ «DOTDEV»  (title, meta-tagger, JSON-LD, meny, footer
@@ -219,15 +219,18 @@
        norsk (se punkt 6).
 
   11. PUBLISERING (se også LES-MEG.md)
-     • Rediger kildefilene (index.html, personvern.html, 404.html), og kjør
-       «python3 bygg.py» i Terminal fra denne mappen. Skriptet lager
-       mappen dist/ uten guiden, kommentarene og innrykkene, og sjekker at
-       JavaScript-en fortsatt er gyldig.
-     • Publiser mappen dist/ (dra den inn i Netlify under «Deploys»), ikke
-       hele mappen.
+     • Rediger kildefilene (index.html, personvern.html, 404.html) og last
+       dem opp til GitHub. Netlify kjører da «python3 bygg.py» selv
+       (oppsettet står i netlify.toml) og publiserer bare mappen dist/:
+       uten guiden, kommentarene og innrykkene, og med en sjekk av at
+       JavaScript-en fortsatt er gyldig. Feiler byggingen, blir forrige
+       versjon liggende ute, og feilen står under «Deploys» i Netlify.
+     • dist/ lages på nytt ved hver publisering, så ikke rediger der.
      • _headers (sikkerhet og mellomlagring), robots.txt, sitemap.xml og
        404.html blir med i dist/ automatisk. Legger dere til en ny side,
-       legg den også i sitemap.xml og i HTML_FILES øverst i bygg.py.
+       legg den også i sitemap.xml og i HTML_FILES øverst i bygg.py. Andre
+       nye filer som skal være synlige på nettet (f.eks. en
+       verifiseringsfil fra Google), legges i COPY i bygg.py.
 ═══════════════════════════════════════════════════════════════════════════
 -->
 <html lang="no">
@@ -1773,6 +1776,7 @@
     .footer__links h2 { margin-bottom: var(--sp-2); font-size: var(--fs-h5); letter-spacing: -.035em; }
     .footer__links a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-sm); }
     .footer__mail { margin-top: var(--sp-2); font-family: var(--f-title); font-size: var(--fs-h5); font-weight: 500; letter-spacing: -.035em; line-height: 1.1; overflow-wrap: anywhere; color: color-mix(in srgb, var(--c-white) 74%, var(--c-blue)); }
+    .footer__mail a { font-size: inherit; }   /* samme store tekst som før, men klikkbar */
     .footer__base {
         display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--sp-1) var(--sp-3);
         padding-top: var(--sp-2);
@@ -2785,7 +2789,7 @@
                 <li><a class="ulink" href="https://www.instagram.com/…" target="_blank" rel="noopener">Instagram</a></li>
                 KONTAKT SLUTT -->
             </ul>
-            <p class="footer__mail">kontakt@dotdev.no</p>
+            <p class="footer__mail"><a class="ulink" href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a></p>
         </div>
     </div>
     <div class="container footer__base">
