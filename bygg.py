@@ -33,7 +33,7 @@ DIST = ROOT / "dist"
 HTML_FILES = ["index.html", "personvern.html", "404.html", "kunde.html"]
 COPY = [
     "robots.txt", "sitemap.xml", "site.webmanifest", ".well-known",
-    "favicon.ico", "favicon-32.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png",
+    "favicon.ico", "favicon.svg", "favicon-32.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png",
     "delingsbilde.png", "fonter", "bilder",
 ]
 # _headers kopieres ikke rett over: write_headers() fyller inn hashene først.

@@ -20,7 +20,11 @@
      • Overskrift ...... «Design. Utvikling. Vekst.» står i <h1> i hero, og den
                          engelske i I18N.en ('hero.title'). Den og
                          undertittelen står også på delingsbilde.png, så lag
-                         et nytt bilde hvis de endres.
+                         et nytt bilde hvis de endres. Overskriften er også
+                         og:title (teksten når lenken deles i Messenger o.l.).
+     • Logo/ikon ....... favicon.svg (Google og nettlesere), favicon.ico
+                         (16/32/48 px), favicon-32.png, icon-192.png og
+                         icon-512.png. Bytter dere logo, bytt alle sammen.
      • Undertittel ..... «Webdesign og AI-automatisering» (<title> og
                          hero-merket); engelsk «Web Design &amp; AI Automation»
                          står i I18N.en ('meta.title' og 'hero.tag'). Ordet
@@ -254,7 +258,7 @@
     <meta property="og:type" content="website">
     <meta property="og:locale" content="nb_NO">
     <meta property="og:site_name" content="DOTDEV">
-    <meta property="og:title" content="DOTDEV · Nettsider og AI som jobber for deg">
+    <meta property="og:title" content="DOTDEV · Design. Utvikling. Vekst.">
     <meta property="og:description" content="Skreddersydde nettsider og AI-automatisering for bedrifter som vil skille seg ut og spare tid.">
     <!-- ✏️ Domene: bytt til den ekte adressen til nettsiden -->
     <link rel="canonical" href="https://dotdev.no/">
@@ -273,11 +277,12 @@
     <!-- ✏️ Aksentfarge i nettleserlinjen og favicon (kan ikke lese tokens: bytt #0004f6 / %230004f6 selv).
          Ikonfilene (favicon.ico, favicon-32.png, apple-touch-icon.png, icon-192/512.png) er bilder: lag nye hvis logo eller farge endres. -->
     <meta name="theme-color" content="#0004f6">
-    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-1 -2 11 11'%3E%3Crect x='-1' y='-2' width='11' height='11' rx='2' fill='%230004f6'/%3E%3Cpath fill='%23fff' d='M0 0h2v7H0zM2 0h3v1H2zM2 6h3v1H2zM5 1h2v5H5zM8 6h1v1H8z'/%3E%3C/svg%3E">
     <link rel="preload" href="fonter/inter-tight-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonter/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Strukturerte data for Google (firmaopplysninger). ✏️ Får dere telefon eller sosiale
@@ -285,6 +290,17 @@
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
+        "@graph": [
+    {
+        "@type": "WebSite",
+        "@id": "https://dotdev.no/#nettsted",
+        "name": "DOTDEV",
+        "alternateName": "dotdev.no",
+        "url": "https://dotdev.no/",
+        "inLanguage": "nb-NO",
+        "publisher": { "@id": "https://dotdev.no/#studio" }
+    },
+    {
         "@type": "Organization",
         "@id": "https://dotdev.no/#studio",
         "name": "DOTDEV",
@@ -297,6 +313,8 @@
         "identifier": { "@type": "PropertyValue", "propertyID": "Organisasjonsnummer", "value": "936133231" },
         "areaServed": { "@type": "Country", "name": "Norge" },
         "knowsAbout": ["Webdesign", "Webutvikling", "AI-automatisering", "UI/UX-design", "Visuell identitet"]
+    }
+        ]
     }
     </script>
 
