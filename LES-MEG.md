@@ -57,7 +57,7 @@ Kunder som har kjøpt nettside av oss, kan logge inn på **dotdev.no/kunde** og 
    node lag-kunde.mjs --epost post@kunde.no --nettsted kunde.no --navn "Kunde AS"
    ```
 
-   Nettstedet skrives nøyaktig som i Plausible. Skriptet skriver ut en variabel (`KUNDE_…`) og et tilfeldig passord. Legg variabelen inn i Netlify på samme måte som nøklene over (secret, Functions, bare Production).
+   Nettstedet skrives nøyaktig som i Plausible. Skriptet skriver ut en variabel (`KUNDE_…`) og et tilfeldig passord, og legger dem på utklippstavlen etter tur: først verdien (lim inn i Netlify), så passordet når du trykker Enter (lim inn i SMS-en). Da slipper du å markere den lange linjen i terminalen. Legg variabelen inn i Netlify på samme måte som nøklene over (secret, Functions, bare Production).
 3. Publiser på nytt (Deploys → Trigger deploy → Deploy project).
 4. Send adressen og e-posten til kunden, og passordet i en annen kanal (for eksempel SMS). Lukk terminalen etterpå, og lagre aldri verdiene i en fil i denne mappen.
 

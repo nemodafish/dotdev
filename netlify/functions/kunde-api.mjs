@@ -82,13 +82,16 @@ function kunder() {
     for (const [navn, verdi] of Object.entries(process.env)) {
         if (!navn.startsWith('KUNDE_') || !verdi) continue;
         try {
-            const k = JSON.parse(verdi);
-            if (typeof k.epost !== 'string' || typeof k.nettsted !== 'string' || typeof k.passord !== 'string' || !k.passord.startsWith('scrypt$')) throw new Error();
+            // Verdien limes inn fra en terminal som kan ha brutt den lange linjen med linjeskift.
+            // Ingen av feltene skal ha linjeskift, og e-post, nettsted og hash ingen mellomrom heller.
+            const k = JSON.parse(verdi.replace(/[\r\n]+/g, ''));
+            const uten = (s) => s.replace(/\s+/g, '');
+            if (typeof k.epost !== 'string' || typeof k.nettsted !== 'string' || typeof k.passord !== 'string' || !uten(k.passord).startsWith('scrypt$')) throw new Error();
             liste.push({
-                epost: k.epost.trim().toLowerCase(),
-                nettsted: k.nettsted.trim(),
-                navn: typeof k.navn === 'string' && k.navn.trim() ? k.navn.trim() : k.nettsted.trim(),
-                passord: k.passord,
+                epost: uten(k.epost).toLowerCase(),
+                nettsted: uten(k.nettsted),
+                navn: typeof k.navn === 'string' && k.navn.trim() ? k.navn.trim() : uten(k.nettsted),
+                passord: uten(k.passord),
             });
         } catch {
             console.warn(`Miljøvariabelen ${navn} er ikke gyldig JSON fra lag-kunde.mjs og blir hoppet over.`);
