@@ -182,8 +182,8 @@
        Legger dere til Google Analytics, Meta-piksel, YouTube-innbygging
        o.l., må dere ha et samtykkebanner FØR noe lastes (ekomloven
        § 3-15 og GDPR), og personvern.html må oppdateres.
-       Unntaket er kundeportalen (kunde.html, «Logg inn» i headeren,
-       «Kundeinnlogging» i menyen på mobil og i footeren), som setter én
+       Unntaket er kundeportalen (kunde.html, «Logg inn» i headeren, også
+       på mobil, og «Kundeinnlogging» i footeren), som setter én
        nødvendig innloggingscookie for kunder som logger inn. Se «Kundeportalen» i LES-MEG.md.
      • Prosjekter: få skriftlig ok (e-post holder) fra kunden før dere
        viser arbeidet og skjermbildet (gjelder også DJ Tiny og bildene i
@@ -759,7 +759,7 @@
         .lang__btn[aria-pressed="false"]:hover .lang__chip { color: var(--c-blue); }
     }
     .nav__top .lang { margin-left: auto; margin-right: 14px; }
-    /* «Logg inn» for kunder, foran språkvelgeren. Under 768 px: i menyen i stedet (.nav__kunde) */
+    /* «Logg inn» for kunder, foran språkvelgeren. Under 768 px: knapp i stedet for NO/EN */
     .nav__login {
         display: inline-flex; align-items: center; gap: 8px;
         height: 44px; margin-left: auto; margin-right: 6px; padding-inline: 8px;
@@ -770,7 +770,6 @@
     .nav__login .ico { width: 1.2em; height: 1.2em; }
     .nav__login:hover, .nav__login:focus-visible { color: var(--c-blue); }
     .nav__top .nav__login + .lang { margin-left: 0; }
-    .nav__kunde { display: none; }
     /* I menypanelet: under sidelisten (på brede skjermer nederst i kolonnen) */
     .nav__lang { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: auto; padding-top: 24px; }
     .nav__lang-label { color: var(--c-muted); font-family: var(--f-title); font-size: .875rem; font-weight: 500; letter-spacing: -.01em; }
@@ -1848,16 +1847,15 @@
     }
     @media (max-width: 767px) {
         :root { --nav-h: 56px; }
-        .nav__login { display: none; }
-        .nav__kunde {
-            display: inline-flex; align-items: center; gap: 10px;
-            min-height: 44px; margin-top: 10px;
-            color: var(--c-ink);
-            font-family: var(--f-title); font-size: 1rem; font-weight: 500; letter-spacing: -.01em;
-            transition: color .3s;
+        /* Mobil: «Logg inn» som knapp. NO/EN er inne i menyen («Språk / Language») */
+        .nav__top .lang { display: none; }
+        .nav__login {
+            height: 40px; margin-right: 10px; padding: 0 12px 0 10px; gap: 6px;
+            background: var(--c-bg);
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-ink) 10%, transparent);
+            font-size: .9375rem; font-weight: 500; white-space: nowrap;
         }
-        .nav__kunde .ico { width: 1.25em; height: 1.25em; color: var(--c-blue); }
-        .nav__kunde:hover, .nav__kunde:focus-visible { color: var(--c-blue); }
+        .nav__login .ico { color: var(--c-blue); }
         .nav__top { padding: 8px 16px; }
         .nav__logo .mark { width: 34px; }
         .brandword { font-size: 24px; }
@@ -1908,10 +1906,10 @@
         .intro-tag__text { font-size: .9375rem; }
         .footer__mail { font-size: .875rem; }
     }
-    /* Smale mobiler: logo, språkvelger og meny må få plass på én linje.
+    /* Mobiler: logo, «Logg inn» og meny må få plass på én linje.
        Ordet «Meny» skjules visuelt (skjermlesere leser det fortsatt),
        ikonet står igjen som en 44 px knapp. */
-    @media (max-width: 400px) {
+    @media (max-width: 480px) {
         .js .nav__toggle-words {
             position: absolute; width: 1px; height: 1px; overflow: hidden;
             clip-path: inset(50%); white-space: nowrap;
@@ -1919,6 +1917,10 @@
         .nav__top { gap: 8px; }
         .nav__toggle { justify-content: center; min-width: 44px; }
         .nav__top .lang { margin-right: 0; }
+        .nav__login { margin-right: 0; }
+    }
+    @media (max-width: 340px) {
+        .nav__login { padding: 0 8px; gap: 4px; font-size: .875rem; }
     }
 
 
@@ -1958,7 +1960,7 @@
                     </a>
                     <!-- Uten JavaScript: lenke til navigasjonen i footeren i stedet for menyknappen -->
                     <a class="nav__toggle nav__toggle--nojs" href="#footer-nav"><span class="nav__toggle-icon" aria-hidden="true"><i></i><i></i></span>Meny</a>
-                    <!-- Kundeinnlogging (kunde.html). På mobil er det ikke plass her, så da ligger den i menyen (.nav__kunde). -->
+                    <!-- Kundeinnlogging (kunde.html). På mobil vises den som en knapp i stedet for NO/EN (språket velges da i menyen). -->
                     <a class="nav__login" href="/kunde">
                         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.3-3.4 3.9-5 7-5s5.7 1.6 7 5"/></svg>
                         <span data-i18n="nav.login">Logg inn</span>
@@ -1994,11 +1996,6 @@
                                         <li><a class="nav__page ulink" href="#booking" data-i18n="nav.book">Book en samtale</a></li>
                                         <li><a class="nav__page ulink" href="#kontakt" data-i18n="nav.contact">Kontakt</a></li>
                                     </ul>
-                                    <!-- Kundeinnlogging i menyen, bare på mobil (der «Logg inn» ikke får plass i headeren) -->
-                                    <a class="nav__kunde" href="/kunde">
-                                        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.3-3.4 3.9-5 7-5s5.7 1.6 7 5"/></svg>
-                                        <span data-i18n="nav.clientLogin">Kundeinnlogging</span>
-                                    </a>
                                     <!-- Språkvelger i menyen (samme som i headeren) -->
                                     <div class="nav__lang">
                                         <p class="nav__lang-label" aria-hidden="true">Språk / Language</p>
@@ -2826,7 +2823,6 @@ const I18N = {
         'nav.book': 'Book a call',
         'nav.contact': 'Contact',
         'nav.login': 'Log in',
-        'nav.clientLogin': 'Client login',
         'nav.groupWeb': 'Websites',
         'nav.webBlurb': 'Fast, custom websites that work on every screen.',
         'nav.aiBlurb': 'Automation that takes care of the repetitive tasks.',
