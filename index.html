@@ -254,6 +254,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <!-- Settes før siden tegnes, så menyen og språkvelgeren ikke skifter form når skriptet nederst kjører -->
+    <script>document.documentElement.classList.add('js')</script>
     <!-- ✏️ Sidetittel og beskrivelse (vises i Google og når lenken deles) -->
     <title>Nettsider og webdesign for bedrifter | DOTDEV</title>
     <meta name="description" content="DOTDEV designer og utvikler moderne nettsider for bedrifter. Få en rask, profesjonell og skreddersydd nettside som hjelper bedriften din å vokse.">
@@ -359,6 +361,26 @@
         src: url("fonter/outfit-latin.woff2") format('woff2');
         unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
     }
+    /* Reserveskrifter: Arial justert til samme bredde og høyde som Inter Tight og Outfit
+       (målt i Chrome). Vises til skriftene er lastet, så teksten ikke hopper når de kommer.
+       Bare én vekt (400), så overskriftene ikke får fet Arial, som er 7 % bredere.
+       Bytter dere font, må tallene måles på nytt. */
+    @font-face {
+        font-family: 'Inter Tight fallback';
+        src: local('Arial'), local('ArialMT');
+        size-adjust: 100.1%;
+        ascent-override: 96.9%;
+        descent-override: 24%;
+        line-gap-override: 0%;
+    }
+    @font-face {
+        font-family: 'Outfit fallback';
+        src: local('Arial'), local('ArialMT');
+        size-adjust: 98.9%;
+        ascent-override: 101.1%;
+        descent-override: 26.3%;
+        line-gap-override: 0%;
+    }
 
     /* ═════════════════════════════════════════════════════════════════
        1. TOKENS: alle farger, fonter, størrelser og bevegelser
@@ -380,8 +402,8 @@
         --c-off:    #b3b3b3;   /* utilgjengelige datoer i kalenderen */
 
         /* Fonter */
-        --f-title: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
-        --f-body:  "Outfit", "Helvetica Neue", Arial, sans-serif;
+        --f-title: "Inter Tight", "Inter Tight fallback", "Helvetica Neue", Arial, sans-serif;
+        --f-body:  "Outfit", "Outfit fallback", "Helvetica Neue", Arial, sans-serif;
         --fw-title: 590;
 
         /* Tekststørrelser (flytende) */
@@ -2662,7 +2684,8 @@
         <!-- ✏️ Avslutning -->
         <h2 class="cta__title" id="kontakt-title" data-i18n="cta.title">Skal vi ta en prat?</h2>
         <p class="cta__copy" data-i18n="cta.copy">Fortell kort om bedriften og hva du trenger, så svarer vi innen én&nbsp;arbeidsdag.</p>
-        <a class="sbtn sbtn--white" href="mailto:kontakt@dotdev.no">
+        <!-- ✏️ E-posten åpnes med emne og et kort skjema ferdig utfylt (engelsk: cta.mailHref) -->
+        <a class="sbtn sbtn--white" href="mailto:kontakt@dotdev.no?subject=Nytt%20prosjekt&amp;body=Hei%20DOTDEV!%0D%0A%0D%0ABedrift%3A%0D%0ANettside%20(hvis%20dere%20har%20en)%3A%0D%0AHva%20vil%20dere%20ha%20hjelp%20med%3A%0D%0A%C3%98nsket%20oppstart%3A%0D%0A%0D%0A" data-i18n-attr="href:cta.mailHref">
             <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
             <span class="sbtn__txt" data-i18n="btn.start">Start et prosjekt</span>
             <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
@@ -2993,6 +3016,7 @@ const I18N = {
         'cta.ring': 'Book a call — Book a call — Book a call — Book a call — Book a call — ',
         'cta.title': 'Ready to talk?',
         'cta.copy': 'Tell us briefly about your business and what you need, and we’ll get back to you within one working&nbsp;day.',
+        'cta.mailHref': 'mailto:kontakt@dotdev.no?subject=New%20project&body=Hi%20DOTDEV!%0D%0A%0D%0ACompany%3A%0D%0AWebsite%20(if%20you%20have%20one)%3A%0D%0AWhat%20do%20you%20need%20help%20with%3A%0D%0APreferred%20start%3A%0D%0A%0D%0A',
 
         // Footer
         'footer.tagline': 'Websites and AI automation for businesses that want to stand out.',

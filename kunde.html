@@ -116,7 +116,8 @@
     .felt__boks { position: relative; }
     .felt input {
         width: 100%; height: 56px; padding: 0 16px;
-        border: 1px solid color-mix(in srgb, var(--c-ink) 18%, transparent); border-radius: var(--r-sm);
+        /* 52 % gir kontrast 3,4:1 mot hvitt, nok til at feltet synes (WCAG krever 3:1) */
+        border: 1px solid color-mix(in srgb, var(--c-ink) 52%, transparent); border-radius: var(--r-sm);
         background: var(--c-white); font-size: 1.0625rem;
         transition: border-color .2s, box-shadow .2s;
     }
