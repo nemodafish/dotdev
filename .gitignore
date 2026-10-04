@@ -1,2 +1,31 @@
 # Lages av bygg.py. Netlify bygger den selv ved hver publisering (se netlify.toml).
 dist/
+
+# Hemmeligheter og miljøvariabler: skal aldri lastes opp (repoet er offentlig).
+# Nøklene til kundeportalen ligger bare i Netlify, se «Kundeportalen» i LES-MEG.md.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+secrets.*
+credentials*.json
+.netlify/
+
+# Lokale verktøy- og editorinnstillinger
+.claude/
+.vscode/
+.idea/
+*.code-workspace
+
+# Avhengigheter
+node_modules/
+
+# Systemfiler
+.DS_Store
+Thumbs.db
+desktop.ini

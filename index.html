@@ -237,6 +237,11 @@
        legg den også i sitemap.xml og i HTML_FILES øverst i bygg.py. Andre
        nye filer som skal være synlige på nettet (f.eks. en
        verifiseringsfil fra Google), legges i COPY i bygg.py.
+     • Sikkerhetsreglene (CSP) tillater bare innebygd kode med kjent hash.
+       bygg.py regner ut hashene selv, men onclick="…", style="…" og
+       javascript:-lenker i HTML-en blir stoppet (byggingen feiler med en
+       forklaring). Bruk klasser og addEventListener i <script> i stedet.
+       Se «Sikkerhet» i LES-MEG.md.
 ═══════════════════════════════════════════════════════════════════════════
 -->
 <html lang="no">

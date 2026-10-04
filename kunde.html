@@ -12,6 +12,8 @@
   • Alt som kommer fra statistikken (sidenavn, kilder, mål), settes inn med
     textContent, aldri innerHTML. Hvem som helst kan sende falske besøk med
     rare sidenavn til en Plausible-konto, så tekstene må behandles som utrygge.
+    Trusted Types (meta-taggen i <head>) gjør at innerHTML ikke virker på
+    siden i det hele tatt, så feilen kan ikke snike seg inn senere heller.
   • Ingen localStorage og ingen statistikk på selve portalen. Den eneste
     cookien er innloggingen (HttpOnly), som er nødvendig og ikke krever
     samtykke (ekomloven § 3-15).
@@ -27,6 +29,9 @@
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#0004f6">
     <meta name="referrer" content="no-referrer">
+    <!-- Trusted Types: nettleseren nekter all innsetting av HTML fra tekst (innerHTML o.l.)
+         på denne siden. Bruk textContent og createElement/createElementNS. -->
+    <meta http-equiv="Content-Security-Policy" content="require-trusted-types-for 'script'; trusted-types 'none'">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -850,15 +855,22 @@
             for (var c2 = 0; c2 < fylt; c2++) for (var r2 = 0; r2 < hoyde; r2++) pa.push(rute(i * per + c2, r2));
         });
 
-        // Bare tall i SVG-en, ingen tekst fra statistikken
-        var mal_ = document.createElement('div');
-        mal_.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + B + ' ' + H + '" aria-hidden="true" focusable="false">' +
-            '<path class="av" d="' + av.join('') + '"/>' +
-            '<path class="senere" d="' + senere.join('') + '"/>' +
-            '<rect class="markor" data-markor x="0" y="0" width="0" height="' + (H - hull) + '"/>' +
-            '<path class="pa" d="' + pa.join('') + '"/></svg>';
+        // Bygges med createElementNS (ikke innerHTML), så Trusted Types kan stå på for hele siden
+        var SVG = 'http://www.w3.org/2000/svg';
+        var lag = function (tag, attr) {
+            var el = document.createElementNS(SVG, tag);
+            Object.keys(attr).forEach(function (k) { el.setAttribute(k, attr[k]); });
+            return el;
+        };
+        var svg = lag('svg', { viewBox: '0 0 ' + B + ' ' + H, 'aria-hidden': 'true', focusable: 'false' });
+        svg.append(
+            lag('path', { 'class': 'av', d: av.join('') }),
+            lag('path', { 'class': 'senere', d: senere.join('') }),
+            lag('rect', { 'class': 'markor', 'data-markor': '', x: '0', y: '0', width: '0', height: String(H - hull) }),
+            lag('path', { 'class': 'pa', d: pa.join('') })
+        );
         var gammel = graf.querySelector('svg');
-        if (gammel) gammel.replaceWith(mal_.firstChild); else graf.prepend(mal_.firstChild);
+        if (gammel) gammel.replaceWith(svg); else graf.prepend(svg);
 
         g = { n: n, per: per, fylt: fylt, steg: steg, X: X, hull: hull };
         $('[data-graf-maks]').textContent = punkter.some(function (p) { return p.besokende; }) ? 'Høyeste: ' + heltall(maks) : 'Ingen besøk i perioden';

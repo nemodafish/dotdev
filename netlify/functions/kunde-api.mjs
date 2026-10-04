@@ -65,6 +65,8 @@ function svar(status, data, ekstra = {}) {
             'X-Robots-Tag': 'noindex',
             'Referrer-Policy': 'no-referrer',
             'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+            'Cross-Origin-Resource-Policy': 'same-origin',
+            'Strict-Transport-Security': 'max-age=63072000; includeSubDomains',
             ...ekstra,
         },
     });
@@ -133,16 +135,25 @@ function lagCookie(k, nokkel) {
 
 const slettCookie = () => `${COOKIE}=; Path=${COOKIE_STI}; Max-Age=0; HttpOnly; Secure; SameSite=Strict`;
 
-function lesCookie(req) {
+function lesCookies(req) {
+    const verdier = [];
     for (const del of (req.headers.get('cookie') || '').split(';')) {
         const i = del.indexOf('=');
-        if (i > 0 && del.slice(0, i).trim() === COOKIE) return del.slice(i + 1).trim();
+        if (i > 0 && del.slice(0, i).trim() === COOKIE) verdier.push(del.slice(i + 1).trim());
     }
-    return '';
+    return verdier.slice(0, 5);
 }
 
 function innloggetKunde(req, nokkel) {
-    const [data, sig, ...rest] = lesCookie(req).split('.');
+    for (const verdi of lesCookies(req)) {
+        const k = kundeFraCookie(verdi, nokkel);
+        if (k) return k;
+    }
+    return null;
+}
+
+function kundeFraCookie(verdi, nokkel) {
+    const [data, sig, ...rest] = verdi.split('.');
     if (!data || !sig || rest.length) return null;
     const faktisk = Buffer.from(sig, 'base64url');
     const forventet = signatur(data, nokkel);
@@ -168,7 +179,7 @@ function feiletForsok(ip) {
     const naa = Date.now();
     const f = forsok.get(ip);
     if (!f || f.til <= naa) forsok.set(ip, { antall: 1, til: naa + SPERRE_MS });
-    else f.antall++;
+    else if (++f.antall === MAKS_FORSOK) console.warn('Innlogging sperret et kvarter for én IP etter for mange feil.');
     if (forsok.size > 5000) forsok.clear();
 }
 
@@ -346,6 +357,7 @@ async function loggInn(req, ip, nokkel) {
         feiletForsok(ip);
         return feil(401, 'Feil e-post eller passord.');
     }
+    console.log(`Innlogging ok: ${k.nettsted}`);
     return svar(200, { navn: k.navn, nettsted: k.nettsted, epost: k.epost }, { 'Set-Cookie': lagCookie(k, nokkel) });
 }
 
@@ -367,7 +379,12 @@ async function statistikk(req, k) {
 }
 
 export default async (req, context) => {
-    const sti = new URL(req.url).pathname.replace(/\/+$/, '');
+    const adresse = new URL(req.url);
+    // Portalen svarer bare på eget domene, ikke på Netlifys adresser for gamle eller
+    // forhåndsviste publiseringer (de kan ha gamle nøkler og kundelister).
+    const vert = adresse.hostname.replace(/\.+$/, '');      // «dotdev.no.» med punktum til slutt er samme adresse
+    if (vert === 'netlify.app' || vert.endsWith('.netlify.app')) return feil(404, 'Finnes ikke.');
+    const sti = adresse.pathname.replace(/\/+$/, '');
     const nokkel = process.env.PORTAL_NOKKEL || '';
     if (nokkel.length < 32) {
         console.error('PORTAL_NOKKEL mangler eller er kortere enn 32 tegn (lag den med «node lag-kunde.mjs --nokkel»).');

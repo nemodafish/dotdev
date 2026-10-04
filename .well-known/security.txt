@@ -1,0 +1,5 @@
+# Sikkerhetskontakt for dotdev.no (RFC 9116). Fornyes hvert år: flytt Expires fram.
+Contact: mailto:kontakt@dotdev.no
+Expires: 2027-09-30T22:00:00.000Z
+Preferred-Languages: no, en
+Canonical: https://dotdev.no/.well-known/security.txt

@@ -1,21 +1,35 @@
 # Netlify leser denne filen fra publiseringsmappen og legger headerne på svarene.
 # Sjekk resultatet på https://securityheaders.com etter publisering.
 #
-# Content-Security-Policy sier hvor siden får hente innhold fra. Alt ligger på
-# dotdev.no i dag. Tar dere i bruk noe eksternt, må det legges til her:
+# Content-Security-Policy sier hvor siden får hente innhold fra, og hvilken kode
+# som får kjøre. Innebygde <script>- og <style>-blokker får bare kjøre hvis hashen
+# deres står i regelen. Den fyller bygg.py inn automatisk der det står
+# merkene «HASHER-FOR-…» i regelen under (ikke fjern dem). Derfor:
+#   • Ikke bruk onclick="…", style="…" eller javascript:-lenker i HTML-en. Bygg-
+#     ingen stopper med en feilmelding hvis dere gjør det. Bruk klasser og
+#     addEventListener i <script>-blokken i stedet.
+#   • Alt ligger på dotdev.no i dag. Tar dere i bruk noe eksternt, må det
+#     legges til her:
 #   • Formspree (modus 2 i BOOKING): legg til https://formspree.io i connect-src
 #   • Cal.com/Calendly som lenke (modus 3): trengs ingen endring
 #   • Innebygd kalender, video, analyse o.l.: legg til domenet i riktig direktiv
 #   • Kundeportalen (/api/kunde/…) ligger på dotdev.no, så den trenger ingen endring.
 #     Svarene fra serverfunksjonen får sine egne headere (Netlify bruker ikke denne
 #     filen på dem), se netlify/functions/kunde-api.mjs.
+#
+# Strict-Transport-Security: nettleseren bruker bare HTTPS i to år, også på alle
+# underdomener. Et nytt underdomene må derfor ha gyldig HTTPS fra første dag (se
+# «Sikkerhet» i LES-MEG.md).
 
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
+  Permissions-Policy: accelerometer=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), hid=(), magnetometer=(), microphone=(), midi=(), payment=(), publickey-credentials-get=(), serial=(), usb=(), xr-spatial-tracking=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' HASHER-FOR-SKRIPT; style-src 'self' HASHER-FOR-STIL; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests
+  Cross-Origin-Opener-Policy: same-origin
+  X-Permitted-Cross-Domain-Policies: none
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
 
 # Fonter endrer aldri innhold (nye fonter får nye filnavn): ett år i nettleserens mellomlager
 /fonter/*

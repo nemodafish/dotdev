@@ -33,7 +33,7 @@ if (process.argv.includes('--nokkel')) {
     console.log('\nLegg inn i Netlify (Project configuration → Environment variables → Add a variable):\n');
     console.log('  Key:    PORTAL_NOKKEL');
     console.log('  Value:  ' + randomBytes(32).toString('base64url'));
-    console.log('\nHuk av «Contains secret values», velg scope Functions og fyll bare inn verdien for Production.');
+    console.log('\nHuk av «Contains secret values» og fyll bare inn verdien for Production (scope Functions hvis valget finnes).');
     console.log('Publiser på nytt etterpå (Deploys → Trigger deploy → Deploy project).');
     console.log('Bytter dere nøkkelen senere, blir alle logget ut.\n');
     process.exit(0);
@@ -64,7 +64,7 @@ const verdi = JSON.stringify({
 
 console.log(`
 1) Legg inn i Netlify (Project configuration → Environment variables → Add a variable).
-   Huk av «Contains secret values», velg scope Functions og fyll bare inn verdien for Production.
+   Huk av «Contains secret values» og fyll bare inn verdien for Production (scope Functions hvis valget finnes).
    Finnes variabelen fra før, trykk Edit og bytt verdien. Det erstatter den gamle innloggingen
    for denne e-posten (brukes ved nytt passord). Én e-post gir tilgang til ett nettsted.
 

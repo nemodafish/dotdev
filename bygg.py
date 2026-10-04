@@ -11,8 +11,14 @@ ser og virker helt likt.
 
 Netlify kjører skriptet selv ved hver publisering fra GitHub og publiserer
 bare dist/ (se netlify.toml). Kjør det lokalt bare hvis du vil se resultatet.
+
+Skriptet lager også dist/_headers: sikkerhetsreglene (Content-Security-Policy)
+får en sha256-hash for hvert innebygde <script> og <style>, så nettleseren
+bare kjører koden vi selv har skrevet. Se «Sikkerhet» i LES-MEG.md.
 """
 
+import base64
+import hashlib
 import json
 import re
 import shutil
@@ -26,10 +32,13 @@ DIST = ROOT / "dist"
 
 HTML_FILES = ["index.html", "personvern.html", "404.html", "kunde.html"]
 COPY = [
-    "robots.txt", "sitemap.xml", "_headers", "site.webmanifest",
+    "robots.txt", "sitemap.xml", "site.webmanifest", ".well-known",
     "favicon.ico", "favicon-32.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png",
     "delingsbilde.png", "fonter", "bilder",
 ]
+# _headers kopieres ikke rett over: write_headers() fyller inn hashene først.
+HASH_SCRIPT = "HASHER-FOR-SKRIPT"
+HASH_STYLE = "HASHER-FOR-STIL"
 
 
 # ── JavaScript: fjern kommentarer, innrykk og tomme linjer ─────────────────
@@ -261,6 +270,56 @@ def check_js(scripts):
     print(f"  JavaScript-syntaks OK ({len(scripts)} skript)")
 
 
+# ── Sikkerhetsregler: hasher for innebygd kode ────────────────────────────
+# Nettleseren regner ut sha256 av teksten mellom <script> og </script> (og det
+# samme for <style>) og kjører den bare hvis hashen står i CSP-en. Hashene regnes
+# ut fra filene slik de ligger i dist/, byte for byte, så de alltid stemmer.
+
+INLINE = re.compile(r"<(script|style)\b([^>]*)>(.*?)</\1\s*>", re.S | re.I)
+# Inline-hendelser (onclick= o.l.), style="…" og javascript:-lenker blir stoppet
+# av CSP-en. Byggingen stopper heller her, så det ikke blir en side som ikke virker.
+FORBIDDEN = re.compile(r"<[^>]*\s(?:on[a-z]+|style)\s*=|javascript:", re.I)
+# Skript med src= (egen fil) og JSON-LD (data, kjøres ikke) trenger ingen hash
+EXTERNAL = re.compile(r"(?:^|\s)src\s*=", re.I)
+JSON_LD = re.compile(r"(?:^|\s)type\s*=\s*[\"']?application/ld\+json", re.I)
+
+
+def csp_hash(body):
+    # Nettleseren gjør CRLF og CR om til LF før den regner ut hashen (HTML-standarden),
+    # så det samme gjøres her. Ellers blir hashene feil hvis siden bygges på Windows.
+    body = body.replace("\r\n", "\n").replace("\r", "\n")
+    digest = hashlib.sha256(body.encode("utf-8")).digest()
+    return "'sha256-" + base64.b64encode(digest).decode("ascii") + "'"
+
+
+def inline_hashes(name, html):
+    """Gir (skript-hasher, stil-hasher) for én side og stopper ved inline-attributter."""
+    found = FORBIDDEN.search(INLINE.sub("", html))
+    if found:
+        sys.exit(f"{name}: «{found.group(0)[:60]}» blir stoppet av sikkerhetsreglene (CSP). "
+                 "Flytt koden inn i <script>/<style>-blokken i stedet.")
+    scripts, styles = set(), set()
+    for tag, attrs, body in INLINE.findall(html):
+        if tag.lower() == "style":
+            styles.add(csp_hash(body))
+        elif not EXTERNAL.search(attrs) and not JSON_LD.search(attrs):
+            scripts.add(csp_hash(body))
+    return scripts, styles
+
+
+def write_headers(scripts, styles):
+    if not scripts or not styles:
+        sys.exit("Fant ingen innebygde skript eller stiler å lage hasher for")
+    text = (ROOT / "_headers").read_text(encoding="utf-8")
+    for marker, hashes in ((HASH_SCRIPT, scripts), (HASH_STYLE, styles)):
+        if text.count(marker) != 1:
+            sys.exit(f"_headers må inneholde {marker} nøyaktig én gang (i Content-Security-Policy)")
+        text = text.replace(marker, " ".join(sorted(hashes)))
+    with open(DIST / "_headers", "w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
+    print(f"  Sikkerhetsregler: {len(scripts)} skript og {len(styles)} stiler med hash i _headers")
+
+
 def main():
     if DIST == ROOT or ROOT not in DIST.parents:
         sys.exit("Ugyldig dist-mappe")
@@ -287,6 +346,15 @@ def main():
             print(f"  Advarsel: fant ikke {name}")
 
     check_js(scripts)
+
+    # Hashene regnes ut fra filene slik de ble skrevet (bytes, uten linjeskift-omgjøring)
+    all_scripts, all_styles = set(), set()
+    for name in HTML_FILES:
+        page_scripts, page_styles = inline_hashes(name, (DIST / name).read_bytes().decode("utf-8"))
+        all_scripts |= page_scripts
+        all_styles |= page_styles
+    write_headers(all_scripts, all_styles)
+
     print(f"  HTML: {before / 1024:.0f} KB → {after / 1024:.0f} KB (uten kommentarer og innrykk)")
     print(f"\nFerdig! Publiseringsklar kopi i:\n  {DIST}")
 
