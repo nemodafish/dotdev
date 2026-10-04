@@ -109,11 +109,18 @@ console.log(`
 // Verdien og passordet på utklippstavlen etter tur, så ingenting må kopieres fra terminalen
 if (process.stdin.isTTY && kopier(verdi)) {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    console.log('  ✓ Value er kopiert. Lim den inn i Netlify med Ctrl+V nå (hele linjen er med).');
-    await rl.question('    Trykk Enter når variabelen er lagret, så kopieres passordet … ');
-    if (kopier(passord)) console.log('  ✓ Passordet er kopiert. Lim det inn i SMS-en til kunden med Ctrl+V.');
-    await rl.question('    Trykk Enter når SMS-en er sendt, så tømmes utklippstavlen … ');
-    kopier(' ');
-    rl.close();
-    console.log('  ✓ Utklippstavlen er tømt. Har du utklippshistorikk på (Win+V), slett passordet der også.\n');
+    try {
+        console.log('  ✓ Value er kopiert. Lim den inn i Netlify med Ctrl+V nå (hele linjen er med).');
+        await rl.question('    Trykk Enter når variabelen er lagret, så kopieres passordet … ');
+        if (kopier(passord)) console.log('  ✓ Passordet er kopiert. Lim det inn i SMS-en til kunden med Ctrl+V.');
+        await rl.question('    Trykk Enter når SMS-en er sendt, så tømmes utklippstavlen … ');
+    } catch (e) {
+        // Ctrl+C: avslutt rolig. Verdien og passordet står fortsatt over i terminalen.
+        if (e?.name !== 'AbortError') throw e;
+        console.log('\n  Avbrutt. Verdien og passordet står over.');
+    } finally {
+        rl.close();
+        kopier(' ');
+        console.log('  ✓ Utklippstavlen er tømt. Har du utklippshistorikk på (Win+V), slett passordet der også.\n');
+    }
 }
