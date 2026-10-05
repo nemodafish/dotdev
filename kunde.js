@@ -190,7 +190,7 @@
         'Affiliates': 'Partnerlenker', 'Display': 'Bannerannonser', 'Organic Video': 'Video', 'Paid Video': 'Betalt video',
         'Organic Shopping': 'Shopping', 'Paid Shopping': 'Betalt shopping', 'Cross-network': 'På tvers av nettverk',
         'SMS': 'SMS', 'Audio': 'Lyd', 'Mobile Push Notifications': 'Push-varsler', 'Paid Other': 'Annet betalt',
-        'AI Assistants': 'KI-assistenter'
+        'AI Assistants': 'AI-assistenter'
     };
     var ENHETER = { Desktop: 'PC', Laptop: 'Bærbar PC', Tablet: 'Nettbrett', Mobile: 'Mobil' };
     var MAL = {
@@ -2941,11 +2941,15 @@
     });
 
     // ── Start ───────────────────────────────────────────────────────────
+    // Årstallet i bunnteksten, som på forsiden (2026 står i HTML-en som reserve)
+    document.querySelectorAll('[data-year]').forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
     byggPaneler();
+    // /meg svarer 200 { innlogget: false } når ingen er logget inn (ikke 401, så innloggingssiden
+    // ikke får en rød feil i konsollen ved hvert besøk). 401 godtas fortsatt som «ikke innlogget».
     api('/meg')
         .then(function (svar) {
-            if (svar.status === 200) return visDash(svar.data, false);
-            visLogin(svar.status === 401 ? '' : (svar.data.feil || 'Kundeportalen svarer ikke akkurat nå. Prøv igjen senere.'));
+            if (svar.status === 200 && svar.data.innlogget !== false && svar.data.nettsted) return visDash(svar.data, false);
+            visLogin(svar.status === 200 || svar.status === 401 ? '' : (svar.data.feil || 'Kundeportalen svarer ikke akkurat nå. Prøv igjen senere.'));
         })
         .catch(function () { visLogin('Fikk ikke kontakt. Sjekk nettet og last siden på nytt.'); });
 })();

@@ -6,7 +6,7 @@
 //
 //   POST /api/kunde/logginn   { epost, passord } → setter innloggingscookien
 //   POST /api/kunde/loggut                       → sletter den
-//   GET  /api/kunde/meg                          → hvem som er logget inn
+//   GET  /api/kunde/meg                          → hvem som er logget inn ({ innlogget: false } uten gyldig cookie)
 //   GET  /api/kunde/oppsett                      → tidssone, mål og egenskaper for nettstedet
 //   GET  /api/kunde/data?<periode>&deler=…       → flere deler på én gang: topp, nå, graf:…, liste:…
 //   GET  /api/kunde/detaljer?rapport=…&<periode> → én liste med 100 rader per side, søk og sortering
@@ -94,10 +94,13 @@ const SIKKERHET = {
 };
 
 function svar(status, data, ekstra = {}) {
-    return new Response(JSON.stringify(data), {
-        status,
-        headers: { 'Content-Type': 'application/json; charset=utf-8', ...SIKKERHET, ...ekstra },
-    });
+    const headers = new Headers({ 'Content-Type': 'application/json; charset=utf-8', ...SIKKERHET });
+    // En liste gir flere like headere (innloggingen setter to cookies)
+    for (const [navn, verdi] of Object.entries(ekstra)) {
+        if (Array.isArray(verdi)) verdi.forEach((v) => headers.append(navn, v));
+        else headers.set(navn, verdi);
+    }
+    return new Response(JSON.stringify(data), { status, headers });
 }
 
 const feil = (status, melding, ekstra) => svar(status, { feil: melding }, ekstra);
@@ -183,6 +186,14 @@ function lagCookie(k, nokkel) {
 }
 
 const slettCookie = () => `${COOKIE}=; Path=${COOKIE_STI}; Max-Age=0; HttpOnly; Secure; SameSite=Strict`;
+
+// Et flagg («1») uten opplysninger om kunden, som forsiden kan lese. Da vet den at det er verdt å spørre
+// /meg om hvem som er innlogget, og kan vise «Min side» i stedet for «Logg inn». Vanlige besøkende har
+// ikke flagget, så forsiden spør aldri portalen for dem. Det gir ingen tilgang: alt sjekkes mot COOKIE.
+const FLAGG = '__Secure-dd_innlogget';
+const lagFlagg = () => `${FLAGG}=1; Path=/; Max-Age=${OKT_DAGER * 86400}; Secure; SameSite=Lax`;
+const slettFlagg = () => `${FLAGG}=; Path=/; Max-Age=0; Secure; SameSite=Lax`;
+const harFlagg = (req) => (req.headers.get('cookie') || '').split(';').some((del) => del.trim().startsWith(FLAGG + '='));
 
 function lesCookies(req) {
     const verdier = [];
@@ -295,7 +306,7 @@ async function loggInn(req, ip, nokkel) {
         return feil(401, 'Feil e-post eller passord.');
     }
     console.log(`Innlogging ok: ${k.nettsted}`);
-    return svar(200, { navn: k.navn, nettsted: k.nettsted, epost: k.epost }, { 'Set-Cookie': lagCookie(k, nokkel) });
+    return svar(200, { navn: k.navn, nettsted: k.nettsted, epost: k.epost }, { 'Set-Cookie': [lagCookie(k, nokkel), lagFlagg()] });
 }
 
 // mal og egenskaper er null når Plausible ikke svarte (siden viser da «Fikk ikke hentet målene»)
@@ -419,13 +430,19 @@ export default async (req, context) => {
         return metode === 'POST' ? loggInn(req, ip, nokkel) : feil(405, 'Bruk POST.', { Allow: 'POST' });
     }
     if (sti === '/api/kunde/loggut') {
-        return metode === 'POST' ? svar(200, { ok: true }, { 'Set-Cookie': slettCookie() }) : feil(405, 'Bruk POST.', { Allow: 'POST' });
+        return metode === 'POST' ? svar(200, { ok: true }, { 'Set-Cookie': [slettCookie(), slettFlagg()] }) : feil(405, 'Bruk POST.', { Allow: 'POST' });
     }
     if (sti === '/api/kunde/meg' || Object.hasOwn(STATISTIKK, sti)) {
         if (metode !== 'GET') return feil(405, 'Bruk GET.', { Allow: 'GET' });
         const k = innloggetKunde(req, nokkel);
+        // /meg spør bare om noen er innlogget, og «nei» er et vanlig svar (200), ikke en feil. Da får
+        // innloggingssiden ingen rød 401 i konsollen ved hvert besøk. Statistikken svarer fortsatt 401.
+        if (sti === '/api/kunde/meg') {
+            if (k) return svar(200, { innlogget: true, navn: k.navn, nettsted: k.nettsted, epost: k.epost });
+            // Utløpt eller ugyldig innlogging: fjern flagget, så forsiden slutter å spørre
+            return svar(200, { innlogget: false }, harFlagg(req) ? { 'Set-Cookie': slettFlagg() } : {});
+        }
         if (!k) return feil(401, 'Ikke innlogget.');
-        if (sti === '/api/kunde/meg') return svar(200, { navn: k.navn, nettsted: k.nettsted, epost: k.epost });
         return statistikk(STATISTIKK[sti], adresse, k);
     }
     return feil(404, 'Finnes ikke.');

@@ -13,10 +13,8 @@
   bare mappen dist/, så guiden og kommentarene slipper ikke ut (punkt 11).
 
   1. SØK OG ERSTATT (Ctrl+H / Cmd+Alt+F)
-     • Navn ............ «DOTDEV»  (title, meta-tagger, JSON-LD, meny, footer
-                         og BOOKING.studio i skriptet)
-     • E-post .......... «kontakt@dotdev.no»  (mailto-lenker, tekst, JSON-LD
-                         og BOOKING.email i skriptet)
+     • Navn ............ «DOTDEV»  (title, meta-tagger, JSON-LD, meny og footer)
+     • E-post .......... «kontakt@dotdev.no»  (mailto-lenker, tekst og JSON-LD)
      • Overskrift ...... «Design. Utvikling. Vekst.» står i <h1> i hero, og den
                          engelske i I18N.en ('hero.title'). Den og
                          undertittelen står også på delingsbilde.png, så lag
@@ -28,7 +26,7 @@
                          (16/32/48 px), favicon-32.png, icon-192.png og
                          icon-512.png. Bytter dere logo, bytt alle sammen.
      • Undertittel ..... «Webdesign og AI-automatisering» (hero-merket);
-                         engelsk «Web Design &amp; AI Automation» står i
+                         engelsk «Web design &amp; AI automation» står i
                          I18N.en ('hero.tag'; engelsk sidetittel i 'meta.title'). Ordet
                          «Studio» i hero-merket står i en egen
                          <span class="intro-tag__chip">.
@@ -72,7 +70,7 @@
      • Footer ......... to lenkekolonner (.footer__links). Telefon, LinkedIn
                         og Instagram står klare (skjult mellom «KONTAKT START»
                         og «KONTAKT SLUTT») i Kontakt-kolonnen. Nederst står firmaopplysningene
-                        (.footer__company: org.nr. og adresse, lovpålagt) og
+                        (.footer__company: org.nr., lovpålagt) og
                         lenken til personvern.html.
      • Samtaletyper ... (booking) står IKKE i HTML-en, men i BOOKING.types
                         øverst i <script>. Se punkt 8.
@@ -82,9 +80,8 @@
      eller slett alt mellom to SEKSJON-bannere. JavaScript tåler at en seksjon
      mangler. Fjern da også lenkene til den i menyen og footeren.
      Skjuler eller sletter du Booking, sender JavaScript automatisk knappene
-     «Book en samtale» og «Snakk med oss» (href="#booking") til #kontakt,
-     og skjuler
-     «Book en samtale» i menyen og footeren. Uten JavaScript må du endre
+     «Book en samtale» (href="#booking") til #kontakt, og skjuler
+     «Book en samtale» i footeren. Uten JavaScript må du endre
      disse lenkene selv.
 
   5. BYTTE ET PIKSELCOVER MED ET EKTE BILDE (prosjektkort)
@@ -100,70 +97,37 @@
      --cta-rot i :root styrer hvor buen står i ro (brukes også som start
      for den langsomme rotasjonen).
      Engelsk: 'cta.ring' i I18N.en (punkt 10), med like mange
-     gjentakelser som den norske frasen. Den engelske buen («Book a call»)
-     har sin egen hvilestilling, --cta-rot-en i :root, så «a» havner bak
-     firkanten. Bytter du den engelske frasen, juster --cta-rot-en.
+     gjentakelser som den norske frasen. Den engelske buen («Get started»)
+     har sin egen hvilestilling, --cta-rot-en i :root, så mellomrommet
+     havner bak firkanten. Bytter du den engelske frasen, juster --cta-rot-en.
 
   7. PIKSELKUNST OG BEVEGELSE
      Hver <canvas class="px" data-pixel="…"> tegnes av JS-modulen PIXEL.
      data-seed (et tall) gir et nytt mønster, data-variant velger motiv.
      Uten JavaScript vises enklere CSS-mønstre i stedet.
-     Overskrifter med data-scramble får bokstav-effekten (fjern attributtet
-     for vanlig tekst). All bevegelse slås av når besøkende har valgt
-     «redusert bevegelse».
+     All bevegelse slås av når besøkende har valgt «redusert bevegelse».
 
   8. BOOKING «Book en samtale» (SEKSJON: Booking)
-     Alle innstillinger står i objektet BOOKING helt øverst i <script>
-     nederst i filen: e-post, samtaletyper (navn, minutter, video/telefon,
-     kort tekst), ukedager, åpningstid, intervall, lunsj, hvor mange uker
-     frem man kan booke, minste varsel i timer og fridager (ÅÅÅÅ-MM-DD).
-     Hver samtaletype har også titleEn og textEn (engelsk, se punkt 10).
-     publicHolidays: true stenger norske helligdager automatisk (påske,
-     Kristi himmelfart, pinse, 1. og 17. mai, jul og nyttår) for alle år.
-     Alle tider er norsk tid (Europe/Oslo).
+     Bookingen skjer i Google Kalender: knappen «Velg tidspunkt» på
+     kalenderkortet åpner bookingsiden «Introsamtale med DOTDEV»
+     (kontakt@dotdev.no) i en ny fane. Der vises bare ledige tider, og den
+     som booker, får bekreftelse på e-post med en gang. Samtalen er på video.
+     Innstillingene står i objektet BOOKING helt øverst i <script>
+     nederst i filen:
+     • externalUrl: adressen til bookingsiden. Står den tom, vises kortet
+       «Book en samtale på e-post» i stedet (det samme kortet som besøkende
+       uten JavaScript ser), og punktet om bekreftelse viser e-postteksten.
+     • types: samtaletypene på kortet (navn, minutter og engelsk navn).
+       Hold dem like med bookingsiden i Google Kalender.
      Hvor tekstene står (alt er merket ✏️):
-     • I HTML-en: overskrifter, feltnavn, feltfeil (data-msg-…),
-       knappetekster og bekreftelsen.
-     • I skriptet, modul 11: MSG.no og MSG.en (steg-feil, sendefeil,
-       «ingen tider», kunngjøringer, etikettene «Video»/«Telefon» og
-       tekstene i e-posten som åpnes og i kalenderfilen).
-     • Engelsk for tekstene i HTML-en står i I18N.en (punkt 10).
-     • Kalenderfilen lover at dere ringer (telefon) eller sender
-       videolenke på e-post. Endre teksten i buildIcs hvis det ikke stemmer.
-     • De tre punktene ved siden av kalenderen: minuttene («15–45») regnes
-       ut fra BOOKING.types, og punktet om bekreftelse byttes automatisk
-       i modus 3. «På video eller telefon» må du tilpasse selv.
-     • Personvern: skjemaet samler navn, e-post og telefon, og lenker til
-       personvern.html. Bytter dere til modus 2 (Formspree) eller modus 3
-       (Cal.com/Calendly), MÅ personvern.html oppdateres: se avsnittene
-       merket ✏️ MODUS 2 / MODUS 3 der.
-
-     Tre moduser, styrt av to felt i BOOKING:
-     • E-post (standard): formEndpoint og externalUrl er tomme. Når
-       besøkende trykker «Send forespørsel», åpnes e-postprogrammet deres
-       med forespørselen ferdig utfylt til BOOKING.email. De må selv trykke
-       «Send» i e-posten. Ingen server trengs. Besøkende som bare bruker
-       webmail (uten e-postprogram), får ikke åpnet e-posten; de ser en
-       lenke og adressen i bekreftelsen. En skjematjeneste er mer
-       pålitelig. Lange meldinger kortes ned i e-posten (ca. 500 tegn),
-       fordi noen e-postprogrammer ikke åpner veldig lange lenker.
-     • Skjematjeneste: lim inn adressen til et skjema i formEndpoint,
-       f.eks. fra Formspree (https://formspree.io/f/dinkode). Forespørselen
-       sendes da direkte fra siden, og dere får den som e-post. Går noe
-       galt, får besøkende en feilmelding med en e-postlenke som reserve.
-     • Ekstern kalender: lim inn en booking-lenke i externalUrl, f.eks.
-       https://cal.com/dotdev eller en Calendly-lenke. Da byttes hele
-       skjemaet ut med et kort med knappen «Velg tidspunkt», som åpner
-       kalenderen i en ny fane. Vil dere ha ekte kalendersynk (bare ledige
-       tider vises, og bookingen havner rett i Google- eller
-       Outlook-kalenderen), anbefaler vi gratisplanen til Cal.com.
-       externalUrl vinner over formEndpoint hvis begge er fylt ut.
-
-     Ærlig merknad: den innebygde kalenderen vet IKKE hva som faktisk er
-     ledig hos dere. Den viser tider etter reglene i BOOKING, og en
-     booking er bare en forespørsel til dere har bekreftet tiden på
-     e-post (innen én arbeidsdag, slik siden lover). Legg inn ferie og
-     fridager i holidays, og svar raskt.
+     • I HTML-en: overskrift, ingress, de tre punktene, kalenderkortet og
+       e-postkortet. Engelsk står i I18N.en (punkt 10).
+     • De tre punktene ved siden av kortet: minuttene regnes ut fra
+       BOOKING.types, og punktet om bekreftelse byttes automatisk (data-ext)
+       når kalenderen er i bruk.
+     • Klikk på «Velg tidspunkt» telles i Plausible (se punkt 9).
+     • Personvern: avsnitt 3 i personvern.html beskriver bookingen i Google
+       Kalender. Bytter dere bookingtjeneste, MÅ personvern.html oppdateres.
 
   9. JUS OG PERSONVERN (sjekkliste før publisering, ikke juridisk rådgivning)
      • personvern.html ligger ved siden av denne filen. Fyll inn alle
@@ -185,8 +149,9 @@
        o.l., må dere ha et samtykkebanner FØR noe lastes (ekomloven
        § 3-15 og GDPR), og personvern.html må oppdateres.
        Unntaket er kundeportalen (kunde.html, «Logg inn» i headeren, også
-       på mobil, og «Kundeinnlogging» i footeren), som setter én
-       nødvendig innloggingscookie for kunder som logger inn. Se «Kundeportalen» i LES-MEG.md.
+       på mobil, og «Kundeinnlogging» i footeren), som setter en
+       nødvendig innloggingscookie og et flagg («1», så forsiden kan vise
+       «Min side») for kunder som logger inn. Se «Kundeportalen» i LES-MEG.md.
      • Prosjekter: få skriftlig ok (e-post holder) fra kunden før dere
        viser arbeidet og skjermbildet (gjelder også DJ Tiny og bildene i
        skjermbildet).
@@ -204,11 +169,13 @@
        bare i adressen: index.html?lang=en er engelsk, uten ?lang (eller
        ?lang=no) er norsk. Knappen bytter adressen uten å laste siden på
        nytt. Ingenting lagres på enheten (ingen cookies, localStorage
-       e.l.), slik personvern.html lover. Lenker til personvern.html får
-       ?lang=en med seg automatisk når engelsk er valgt.
-     • Knappen står i den hvite headeren til venstre for «Meny», og i
-       menypanelet under sidelisten. Den vises bare med JavaScript. På
-       smale mobiler skjules ordet «Meny» (ikonet står), så alt får plass.
+       e.l.), slik personvern.html lover. Lenker med data-lang-carry
+       (f.eks. href="/personvern" i footeren) får ?lang=en med seg
+       automatisk når engelsk er valgt.
+     • Knappen står i den hvite headeren til venstre for «Meny». Under
+       768 px er den skjult der og står i stedet i menypanelet under
+       sidelisten. Den vises bare med JavaScript. På smale mobiler
+       skjules ordet «Meny» (ikonet står), så alt får plass.
      • Engelske tekster står i objektet I18N øverst i <script> (rett under
        BOOKING), i I18N.en. Nøkkelen (f.eks. 'hero.lead') er den samme som
        i data-i18n="hero.lead" på elementet i HTML-en. Endre den engelske
@@ -223,10 +190,9 @@
      • Tekst uten oversettelse (ingen data-i18n, eller nøkkelen mangler i
        I18N.en) blir stående på norsk også på engelsk. Sjekk derfor siden
        med ?lang=en etter at du har lagt til tekst.
-     • Booking: engelske navn og tekster for samtaletypene står i
-       BOOKING.types (titleEn og textEn). Meldinger, e-posten og
-       kalenderfilen står i MSG.no og MSG.en i modul 11. Dager og måneder
-       i kalenderen kommer fra nettleseren (nb-NO / en-GB).
+     • Booking: engelske navn på samtaletypene står i BOOKING.types
+       (titleEn). På engelsk får lenken til bookingsiden hl=en, så
+       Google Kalender også vises på engelsk.
      • Buen har nøkkelen cta.ring: hold samme antall gjentakelser som på
        norsk (se punkt 6).
 
@@ -278,6 +244,7 @@
     <meta property="og:image:alt" content="DOTDEV – Design. Utvikling. Vekst. Webdesign og AI-automatisering.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://dotdev.no/delingsbilde.png?v=2">
+    <meta name="twitter:image:alt" content="DOTDEV – Design. Utvikling. Vekst. Webdesign og AI-automatisering.">
     <!-- ✏️ Aksentfarge i nettleserlinjen og favicon (kan ikke lese tokens: bytt #0004f6 / %230004f6 selv).
          Ikonfilene (favicon.ico, favicon-32.png, apple-touch-icon.png, icon-192/512.png) er bilder: lag nye hvis logo eller farge endres. -->
     <meta name="theme-color" content="#0004f6">
@@ -290,7 +257,8 @@
     <link rel="preload" href="fonter/inter-tight-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonter/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Strukturerte data for Google (firmaopplysninger). ✏️ Får dere telefon eller sosiale
-         medier: legg til "telephone": "+47 …" og "sameAs": ["https://www.linkedin.com/company/…"]. -->
+         medier: legg til "telephone": "+47 …" og "sameAs": ["https://www.linkedin.com/company/…"].
+         iso6523Code er org.nr. med 0192 foran (0192 = Enhetsregisteret). -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -315,6 +283,7 @@
         "description": "Skreddersydde nettsider og AI-automatisering for bedrifter.",
         "email": "kontakt@dotdev.no",
         "identifier": { "@type": "PropertyValue", "propertyID": "Organisasjonsnummer", "value": "936133231" },
+        "iso6523Code": "0192:936133231",
         "areaServed": { "@type": "Country", "name": "Norge" },
         "knowsAbout": ["Webdesign", "Webutvikling", "AI-automatisering", "UI/UX-design", "Visuell identitet"]
     }
@@ -438,7 +407,7 @@
         --cta-pad:  clamp(2.5rem, 4.5vw, 5rem);
         --cta-icon: clamp(70px, 7vw, 120px);
         --cta-rot:  -8.7deg;   /* hvilestilling for buen: «i» havner bak firkanten */
-        --cta-rot-en: -15deg;  /* samme på engelsk: «a» i «Book a call» bak firkanten */
+        --cta-rot-en: -2.5deg; /* samme på engelsk: mellomrommet i «Get started» bak firkanten */
 
         /* Header */
         --nav-top: clamp(16px, 3.1vw, 54px);
@@ -480,6 +449,10 @@
         letter-spacing: var(--track-title);
         line-height: 1.12;
     }
+    /* Ingen enslige ord på siste linje: overskrifter og korte linjer får like lange
+       linjer, avsnitt unngår ett ord alene nederst. Hero-h1 er med vilje ikke med. */
+    h2, h3, .case__tagline, .plan__list li > span, .booking__facts li > span, .faq__item summary > span:first-child { text-wrap: balance; }
+    p { text-wrap: pretty; }
     a { color: inherit; text-decoration: none; }
     ul, ol { list-style: none; }
     button { font: inherit; color: inherit; letter-spacing: inherit; background: none; border: 0; cursor: pointer; }
@@ -794,9 +767,10 @@
     .nav__login .ico { width: 1.2em; height: 1.2em; }
     .nav__login:hover, .nav__login:focus-visible { color: var(--c-blue); }
     .nav__top .nav__login + .lang { margin-left: 0; }
-    /* I menypanelet: under sidelisten (på brede skjermer nederst i kolonnen) */
+    /* I menypanelet: under sidelisten. Bare under 768 px, der NO/EN ikke står i headeren */
     .nav__lang { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: auto; padding-top: 24px; }
     .nav__lang-label { color: var(--c-muted); font-family: var(--f-title); font-size: .875rem; font-weight: 500; letter-spacing: -.01em; }
+    @media (min-width: 768px) { .nav__lang { display: none; } }
 
     /* Menypanelet */
     .nav__panel {
@@ -813,7 +787,8 @@
     }
     .nav__panel-clip { min-height: 0; overflow: hidden; }
     .nav__panel-inner { padding: 16px 24px 24px; }
-    .nav__row { display: grid; grid-template-columns: 223fr 1073fr; gap: 25px; }
+    /* Sidelisten er så bred som den lengste lenken, tjenestene får resten */
+    .nav__row { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 25px; }
     .nav__row > * {
         opacity: 0;
         transform: translateY(2em);
@@ -840,13 +815,13 @@
         font-weight: 500;
         letter-spacing: -.02em;
         line-height: 1;
+        white-space: nowrap;
         color: var(--c-ink);
         transition: color .5s, transform .4s var(--ease-out);
     }
     .nav__page:hover, .nav__page:focus-visible { color: var(--c-blue); }
     .nav__page.ulink::after { bottom: calc(50% - .72em); }
     .nav__col--services { display: flex; flex-direction: column; align-items: stretch; }
-    .nav__acc-head { display: none; }
     .nav__services { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 15px; }
     .nav__group-label {
         margin-bottom: 14px;
@@ -881,19 +856,8 @@
     }
     .nav__svc:hover .nav__svc-title, .nav__svc:focus-visible .nav__svc-title { color: var(--c-blue); }
     .nav__svc-blurb { display: block; margin-top: 4px; font-size: .875rem; line-height: 1.3; color: var(--c-muted); }
-    .nav__book {
-        position: relative;
-        isolation: isolate;
-        display: flex; justify-content: space-between; align-items: center; gap: 20px;
-        margin-top: 28px;
-        padding: 18px 23px;
-        border-radius: var(--r);
-        overflow: hidden;
-        background: var(--c-night);
-        color: var(--c-white);
-    }
-    .nav__book-canvas { position: absolute; inset: 0; z-index: -1; }
-    .nav__book-title { font-family: var(--f-title); font-size: var(--fs-h5); font-weight: var(--fw-title); letter-spacing: -.04em; line-height: 1.05; }
+    /* «Book en samtale» står én gang når menyen er åpen: knappen ved siden av
+       headeren (.nav__cta, fra 992 px) eller under menypanelet (.nav__mobile-cta) */
     .nav__cta { flex: none; pointer-events: auto; }
     .nav__mobile-cta { display: none; }
 
@@ -1025,9 +989,8 @@
     /* ═════════════════════════════════════════════════════════════════
        9. PROSJEKTER (case-kort)
        ═════════════════════════════════════════════════════════════════ */
-    .work__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--sp-3); margin-bottom: var(--sp-4); }
+    .work__head { margin-bottom: var(--sp-4); }
     .work__title { font-size: var(--fs-h2); line-height: 1; }
-    .work__more { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-para); }
     .work__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
     .case {
         display: flex; flex-direction: column;
@@ -1067,10 +1030,11 @@
     }
     .case__cat { margin-bottom: 12px; color: var(--c-lime); font-size: .6875rem; font-weight: 700; letter-spacing: .26em; text-transform: uppercase; }
     .case__tagline { max-width: min(60%, 12em); font-family: var(--f-title); font-size: clamp(1.4rem, 2.35vw, 2.1rem); font-weight: 450; letter-spacing: -.03em; line-height: 1.08; text-shadow: 0 2px 24px color-mix(in srgb, var(--c-night) 55%, transparent); }
+    /* Stikkord, beskrivelse og navnet i den blå linjen starter 30 px fra kortkanten (22 px på mobil) */
     .case__chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 10px 0; }
-    .case__chip { padding: .9em 1.1em; border-radius: var(--r-sm); background: var(--c-bg); font-size: var(--fs-sm); line-height: 1.3; }
+    .case__chip { padding: .9em 20px; border-radius: var(--r-sm); background: var(--c-bg); font-size: var(--fs-sm); line-height: 1.3; }
     .case__chip strong { display: block; font-family: var(--f-title); font-size: var(--fs-h5); font-weight: 500; letter-spacing: -.03em; line-height: 1.2; }
-    .case__desc { padding: var(--sp-2) var(--sp-3) 10px; color: var(--c-muted); font-size: var(--fs-sm); line-height: 1.5; }
+    .case__desc { max-width: 64ch; padding: var(--sp-2) 30px 10px; color: var(--c-muted); font-size: var(--fs-sm); line-height: 1.5; }
     .case__bar {
         display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2);
         margin: auto 10px 10px;
@@ -1145,7 +1109,8 @@
         pointer-events: none;
     }
     .about__floor.is-drawn { -webkit-mask-image: none; mask-image: none; }
-    .about__inner { position: relative; z-index: 2; padding-block: var(--sp-6); }
+    /* Toppluften regnes fra under pikseltrappen, så «Om oss» ikke står klistret til den */
+    .about__inner { position: relative; z-index: 2; padding-block: calc(var(--about-band) + 16px + var(--sp-4)) var(--sp-6); }
     .about__title { margin-bottom: var(--sp-5); font-size: var(--fs-h2); line-height: 1.08; }
     /* Teamet: bilde, navn, rolle, kort tekst og LinkedIn (se ✏️ TEAM i HTML-en) */
     .team { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); margin-bottom: var(--sp-3); }
@@ -1302,8 +1267,6 @@
 
     /* ═════════════════════════════════════════════════════════════════
        13. BOOKING («Book en samtale»)
-       Kortet .bk er en «container», så innholdet tilpasser seg kortets
-       egen bredde (@container bk) og ikke bare skjermen.
        ═════════════════════════════════════════════════════════════════ */
     .booking__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
     .booking__title { max-width: 11em; font-size: var(--fs-h2); line-height: 1.08; }
@@ -1325,302 +1288,26 @@
         .booking__intro { position: sticky; top: calc(var(--nav-top) + var(--nav-h) + var(--sp-4)); }
     }
 
-    /* Felles for kortene: bookingen, ekstern kalender og reserven uten JS */
-    .bk, .bk-ext, .bk-nojs {
+    /* Felles for kortene: kalenderkortet og e-postkortet. E-postkortet vises
+       uten JavaScript, og når BOOKING.externalUrl mangler (klassen is-mail
+       settes da av JS på .booking__widget). */
+    .bk-ext, .bk-nojs {
         border-radius: var(--r);
         background: var(--c-white);
         box-shadow: 0 1px 4px color-mix(in srgb, var(--c-black) 6%, transparent);
     }
-    .bk { container: bk / inline-size; padding: clamp(12px, 2.2vw, 32px); }
-    /* Fokus på et felt/steg skal aldri havne under den faste headeren */
-    .bk :is(input, textarea, button, h3) { scroll-margin-top: calc(var(--nav-top) + var(--nav-h) + var(--sp-3)); scroll-margin-bottom: var(--sp-3); }
-    html:not(.js) .bk, html:not(.js) .bk-ext, .js .bk-nojs { display: none; }
+    html:not(.js) .bk-ext, .js .bk-nojs { display: none; }
+    .js .is-mail .bk-nojs { display: flex; }
 
-    /* Uten JavaScript: kort melding og e-postknapp */
+    /* E-postkortet: kort melding og e-postknapp */
     .bk-nojs { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); padding: clamp(20px, 3vw, 40px); }
     .bk-nojs__title { font-family: var(--f-title); font-size: var(--fs-h5); font-weight: var(--fw-title); letter-spacing: -.035em; line-height: 1.15; }
     .bk-nojs__text { max-width: 46ch; color: var(--c-muted); line-height: 1.45; }
     .bk-nojs .sbtn { margin-top: var(--sp-1); }
 
-    /* Toppen: stegindikator og tidssone */
-    .bk__top {
-        display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2);
-        padding-bottom: var(--sp-2);
-        margin-bottom: var(--sp-3);
-        border-bottom: 1px solid color-mix(in srgb, var(--c-black) 8%, transparent);
-    }
-    .bk__steps { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .bk__steps li { display: flex; align-items: center; gap: 8px; }
-    .bk__steps li + li::before {
-        content: "";
-        width: clamp(8px, 2.4vw, 32px); height: 1px;
-        background: color-mix(in srgb, var(--c-black) 20%, transparent);
-    }
-    /* Pille per steg: omriss = kommer, blå = nå, svart = ferdig */
-    .bk-step {
-        display: inline-flex; align-items: center; gap: .5em;
-        min-height: 44px;
-        padding: 6px 1em 6px 6px;
-        border: 1px solid color-mix(in srgb, var(--c-ink) 22%, transparent);
-        border-radius: var(--r-pill);
-        color: var(--c-muted);
-        font-size: .9375rem;
-        font-weight: 500;
-        line-height: 1;
-        white-space: nowrap;
-        transition: background-color .3s, border-color .3s, color .3s;
-    }
-    .bk-step__num {
-        display: grid; place-items: center;
-        width: 30px; height: 30px;
-        border-radius: 50%;
-        background: var(--c-bg);
-        color: var(--c-black);
-        font-variant-numeric: tabular-nums;
-    }
-    .bk-step__ok { display: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-    .bk-step.is-current { background: var(--c-blue); border-color: var(--c-blue); color: var(--c-white); }
-    .bk-step.is-current .bk-step__num { background: var(--c-white); color: var(--c-blue); }
-    .bk-step.is-done { background: var(--c-black); border-color: var(--c-black); color: var(--c-white); }
-    .bk-step.is-done .bk-step__num { background: var(--c-blue); color: var(--c-white); }
-    .bk-step.is-done .bk-step__n { display: none; }
-    .bk-step.is-done .bk-step__ok { display: block; }
-    .bk-step:disabled { cursor: default; }
-    @media (hover: hover) and (pointer: fine) {
-        .bk-step.is-done:not(:disabled):hover { background: var(--c-blue); border-color: var(--c-blue); }
-    }
-    .bk__tz { display: none; align-items: center; gap: .5em; color: var(--c-muted); font-size: .9375rem; white-space: nowrap; }
-
-    /* Stegene */
-    .bk-pane:not([hidden]) { animation: bk-in .55s var(--ease-out) both; }
-    @keyframes bk-in { from { opacity: 0; transform: translateY(12px); } }
-    .bk-pane__title { font-size: var(--fs-h5); letter-spacing: -.035em; line-height: 1.15; }
-    .bk-pane__title:focus { outline: none; }
-    .bk-pane__sub { margin-top: 6px; margin-bottom: var(--sp-3); color: var(--c-muted); line-height: 1.4; }
-
-    /* Steg 1: samtaletyper (radioknapper som kort) */
-    .bk-types { display: flex; flex-direction: column; gap: 10px; }
-    .bk-type { position: relative; display: block; cursor: pointer; }
-    .bk-type__input, .bk-slot input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-    .bk-type__card {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        grid-template-areas: "ico body dot";
-        align-items: center;
-        gap: 12px 16px;
-        padding: 14px;
-        border: 1px solid transparent;
-        border-radius: var(--r);
-        background: var(--c-bg);
-        transition: background-color .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease), transform .5s var(--ease-out);
-    }
-    .bk-type__card .ichip { grid-area: ico; width: 44px; height: 44px; transition: background-color .35s, color .35s; }
-    .bk-type__body { grid-area: body; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-    .bk-type__title { font-family: var(--f-title); font-size: 1.1875rem; font-weight: 500; letter-spacing: -.03em; line-height: 1.15; }
-    .bk-type__text { color: var(--c-muted); font-size: .9375rem; line-height: 1.35; transition: color .35s; }
-    .bk-type__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-    .chip--sm { padding: .3em .85em; font-size: .8125rem; }
-    .bk-type__dot {
-        grid-area: dot;
-        position: relative;
-        width: 24px; height: 24px;
-        border: 1.5px solid color-mix(in srgb, var(--c-ink) 55%, transparent);
-        border-radius: 50%;
-        transition: border-color .35s, background-color .35s;
-    }
-    .bk-type__dot::after {
-        content: "";
-        position: absolute; inset: 5px;
-        border-radius: 50%;
-        background: var(--c-blue);
-        transform: scale(0);
-        transition: transform .35s var(--ease-out);
-    }
-    @media (hover: hover) and (pointer: fine) {
-        .bk-type:hover .bk-type__card { border-color: var(--c-blue); }
-    }
-    .bk-type__input:checked + .bk-type__card { background: var(--c-blue); color: var(--c-white); }
-    .bk-type__input:checked + .bk-type__card .ichip { background: var(--c-white); color: var(--c-blue); }
-    .bk-type__input:checked + .bk-type__card .bk-type__text { color: color-mix(in srgb, var(--c-white) 88%, var(--c-blue)); }
-    .bk-type__input:checked + .bk-type__card .bk-type__dot { border-color: var(--c-white); background: var(--c-white); }
-    .bk-type__input:checked + .bk-type__card .bk-type__dot::after { transform: scale(1); }
-    .bk-type__input:focus-visible + .bk-type__card, .bk-slot input:focus-visible + .bk-slot__pill { outline: 2px solid var(--c-blue); outline-offset: 3px; }
-
-    /* Steg 2: kalender og klokkeslett */
-    .bk-when { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
-    .bk-cal__head { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); margin-bottom: 10px; }
-    .bk-cal__month { font-family: var(--f-title); font-size: 1.1875rem; font-weight: 500; letter-spacing: -.03em; }
-    .bk-cal__month::first-letter { text-transform: uppercase; }
-    .bk-cal__nav { display: flex; gap: 6px; }
-    .bk-cal__btn {
-        display: grid; place-items: center;
-        width: 44px; height: 44px;
-        border-radius: var(--r-sm);
-        background: var(--c-bg);
-        transition: background-color .3s, color .3s;
-    }
-    .bk-cal__btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-    @media (hover: hover) and (pointer: fine) {
-        .bk-cal__btn:not(:disabled):hover { background: var(--c-blue); color: var(--c-white); }
-    }
-    .bk-cal__btn:disabled { color: var(--c-off); cursor: not-allowed; }
-    .bk-cal__grid { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    .bk-cal__grid th { padding-bottom: 6px; color: var(--c-muted); font-size: .8125rem; font-weight: 500; text-align: center; text-transform: lowercase; }
-    .bk-cal__grid td { padding: 1px; text-align: center; }
-    .bk-day {
-        position: relative;
-        display: grid; place-items: center;
-        width: 100%;
-        min-height: 44px;
-        aspect-ratio: 1;
-        max-height: 54px;
-        border-radius: var(--r-sm);
-        background: var(--c-bg);
-        font-size: 1rem;
-        font-weight: 500;
-        font-variant-numeric: tabular-nums;
-        transition: background-color .25s, color .25s, box-shadow .25s;
-    }
-    .bk-day:focus-visible { outline-offset: 1px; position: relative; z-index: 1; }
-    @media (hover: hover) and (pointer: fine) {
-        .bk-day:not([aria-disabled="true"]):hover { box-shadow: inset 0 0 0 1.5px var(--c-blue); color: var(--c-blue); }
-    }
-    .bk-day[aria-disabled="true"] { background: transparent; color: var(--c-off); font-weight: 400; cursor: not-allowed; }
-    .bk-day[aria-pressed="true"], .bk-day[aria-pressed="true"]:hover { background: var(--c-blue); color: var(--c-white); box-shadow: none; }
-    /* I dag: liten prikk under tallet */
-    .bk-day.is-today::after {
-        content: "";
-        position: absolute; left: 50%; bottom: 18%;
-        width: 4px; height: 4px; margin-left: -2px;
-        border-radius: 50%;
-        background: currentColor;
-    }
-    .bk-cal__legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; color: var(--c-muted); font-size: .8125rem; }
-    .bk-cal__legend span { display: inline-flex; align-items: center; gap: 6px; }
-    .bk-cal__legend i { width: 12px; height: 12px; border-radius: var(--r-xs); background: var(--c-bg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-ink) 30%, transparent); }
-    .bk-cal__legend i.is-picked { background: var(--c-blue); box-shadow: none; }
-
-    .bk-slots { min-width: 0; border: 0; }
-    .bk-slots__legend { padding: 0; font-family: var(--f-title); font-size: 1.1875rem; font-weight: 500; letter-spacing: -.03em; line-height: 44px; }
-    .bk-slots__date { margin-bottom: 12px; color: var(--c-muted); font-size: .9375rem; }
-    .bk-slots__date::first-letter { text-transform: uppercase; }
-    .bk-slots__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
-    .bk-slot { position: relative; display: block; cursor: pointer; }
-    .bk-slot__pill {
-        display: flex; align-items: center; justify-content: center;
-        min-height: 44px;
-        border: 1px solid color-mix(in srgb, var(--c-ink) 22%, transparent);
-        border-radius: var(--r-pill);
-        font-variant-numeric: tabular-nums;
-        font-weight: 500;
-        transition: background-color .25s, border-color .25s, color .25s;
-    }
-    @media (hover: hover) and (pointer: fine) {
-        .bk-slot:hover .bk-slot__pill { border-color: var(--c-blue); color: var(--c-blue); }
-    }
-    .bk-slot input:checked + .bk-slot__pill { background: var(--c-blue); border-color: var(--c-blue); color: var(--c-white); }
-    /* Før en dato er valgt: prikkete plassholder (CSS-dither) */
-    .bk-slots__empty {
-        display: grid; place-items: center;
-        min-height: 184px;
-        padding: var(--sp-3);
-        border-radius: var(--r);
-        background:
-            radial-gradient(color-mix(in srgb, var(--c-blue) 26%, transparent) 1.3px, transparent 1.8px) 0 0 / 9px 9px,
-            var(--c-bg);
-        text-align: center;
-    }
-    .bk-slots__empty span { max-width: 26ch; padding: .6em 1em; border-radius: var(--r-sm); background: var(--c-white); color: var(--c-muted); font-size: .9375rem; line-height: 1.35; }
-    .bk-slots__tz { display: flex; align-items: center; gap: .5em; margin-top: 14px; color: var(--c-muted); font-size: .875rem; }
-    .bk__tz svg, .bk-slots__tz svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-
-    /* Steg 3: felt og oppsummering */
-    .bk-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px 16px; }
-    .bk-field label { display: block; margin-bottom: 6px; font-size: .9375rem; font-weight: 500; }
-    .bk-req { color: var(--c-blue); }
-    .bk-field input, .bk-field textarea {
-        display: block;
-        width: 100%;
-        min-height: 52px;
-        padding: 13px 16px;
-        border: 1px solid color-mix(in srgb, var(--c-ink) 28%, transparent);   /* ca. 3:1 mot kortet */
-        border-radius: var(--r-sm);
-        background: var(--c-bg);
-        color: var(--c-black);
-        font: inherit;
-        font-size: 1rem;
-        line-height: 1.4;
-        transition: border-color .25s, background-color .25s, box-shadow .25s;
-    }
-    .bk-field textarea { min-height: 116px; resize: vertical; }
-    .bk-field input::placeholder, .bk-field textarea::placeholder { color: var(--c-muted); opacity: 1; }
-    .bk-field input:hover, .bk-field textarea:hover { border-color: color-mix(in srgb, var(--c-ink) 50%, transparent); }
-    .bk-field input:focus, .bk-field textarea:focus { outline: none; border-color: var(--c-blue); background: var(--c-white); box-shadow: 0 0 0 1px var(--c-blue); }
-    .bk-field [aria-invalid="true"] { border-color: var(--c-error); background: var(--c-white); }
-    .bk-field [aria-invalid="true"]:focus { border-color: var(--c-error); box-shadow: 0 0 0 1px var(--c-error); }
-    .bk-field__err { display: flex; align-items: flex-start; gap: .45em; margin-top: 6px; color: var(--c-error); font-size: .875rem; line-height: 1.35; }
-    .bk-field__err::before { content: "!"; display: grid; place-items: center; flex: none; width: 1.3em; height: 1.3em; border-radius: 50%; background: var(--c-error); color: var(--c-white); font-size: .75rem; font-weight: 700; }
-    .bk-hp { display: none; }
-
-    .bk-sum { margin-top: var(--sp-3); padding: 2px 16px; border-radius: var(--r); background: var(--c-bg); }
-    .bk-sum__row {
-        display: grid; grid-template-columns: 4.8em minmax(0, 1fr); align-items: center; gap: 12px;
-        min-height: 52px;
-        padding-block: 4px;
-        border-bottom: 1px solid color-mix(in srgb, var(--c-black) 8%, transparent);
-    }
-    .bk-sum__row:last-child { border-bottom: 0; }
-    .bk-sum dt { color: var(--c-muted); font-size: .9375rem; }
-    .bk-sum dd { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-width: 0; font-weight: 500; line-height: 1.3; overflow-wrap: break-word; }
-    .bk-sum dd > span { min-width: 0; }
-    .bk-sum__edit { flex: none; display: inline-flex; align-items: center; min-height: 44px; color: var(--c-blue); font-weight: 500; }
-    .bk-note { margin-top: 14px; color: var(--c-muted); font-size: .875rem; line-height: 1.4; }
-
-    /* Feilmelding (role="alert") og knapperaden nederst */
-    .bk__alert:empty { display: none; }
-    .bk__alert {
-        display: flex; align-items: flex-start; gap: .6em;
-        margin-top: var(--sp-3);
-        padding: 12px 14px;
-        border-radius: var(--r-sm);
-        background: color-mix(in srgb, var(--c-error) 7%, var(--c-white));
-        color: var(--c-error);
-        font-size: .9375rem;
-        line-height: 1.4;
-    }
-    .bk__alert a { color: inherit; font-weight: 600; }
-    .bk__foot {
-        display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px var(--sp-2);
-        margin-top: var(--sp-3);
-        padding-top: var(--sp-3);
-        border-top: 1px solid color-mix(in srgb, var(--c-black) 8%, transparent);
-    }
-    .bk__picked { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
-    .bk__picked .chip { font-size: .875rem; padding: .4em .95em; }
-    .bk__nav { display: flex; align-items: center; gap: var(--sp-3); margin-left: auto; }
-    .bk__back { display: inline-flex; align-items: center; gap: .35em; min-height: 44px; font-weight: 500; }
-    /* Brede skjermer (kort ved siden av teksten, kalender i to kolonner):
-       skjemaet har minstehøyde som steg 3, og knapperaden står nederst,
-       så kortet og knappene ikke hopper mellom stegene. Blir steg 3 høyere
-       (mer tekst, feilmeldinger), vokser kortet bare som vanlig. */
-    @media (min-width: 1100px) {
-        @container bk (min-width: 620px) {
-            .bk__form { display: flex; flex-direction: column; min-height: 790px; }
-            .bk__form > .bk-pane:not([hidden]) { flex: 1 0 auto; display: flex; flex-direction: column; }
-            /* Steg 1: samtaletypene deler høyden, så kortet ikke ser tomt ut */
-            .bk-types { flex: 1 0 auto; display: grid; grid-auto-rows: 1fr; }
-            .bk-type { display: grid; }
-        }
-    }
-    .bk__nav .sbtn__txt { min-width: 7.2em; }
-    .sbtn.is-busy { cursor: progress; }
-    .sbtn.is-busy .sbtn__txt { opacity: .85; }
-    .sbtn.is-busy .sbtn__ico--tail svg { animation: bk-busy .9s steps(4) infinite; }
-    @keyframes bk-busy { to { transform: rotate(360deg); } }
-
-    /* Bekreftelse */
-    .bk-done:not([hidden]) { animation: bk-in .6s var(--ease-out) both; }
-    .bk-done__head, .bk-ext__head {
+    /* Kalenderkortet (bookingsiden i Google Kalender) */
+    .bk-ext { padding: clamp(12px, 2.2vw, 32px); }
+    .bk-ext__head {
         position: relative;
         isolation: isolate;
         display: flex; align-items: center; gap: var(--sp-2);
@@ -1632,18 +1319,9 @@
             var(--c-night);
         color: var(--c-white);
     }
-    .bk-done__canvas, .bk-ext__canvas { position: absolute; inset: 0; z-index: -1; background: var(--c-night); }
+    .bk-ext__canvas { position: absolute; inset: 0; z-index: -1; background: var(--c-night); }
     .ichip--white { background: var(--c-white); color: var(--c-blue); }
-    .bk-done__title, .bk-ext__title { font-size: var(--fs-h5); letter-spacing: -.035em; line-height: 1.12; text-wrap: balance; }
-    .bk-done__title:focus { outline: none; }
-    .bk-done__note { max-width: 56ch; margin-top: var(--sp-3); font-size: var(--fs-sm); line-height: 1.45; }
-    .bk-done__retry { margin-top: 6px; color: var(--c-muted); font-size: .9375rem; }
-    .bk-done__retry a { display: inline-flex; align-items: center; min-height: 44px; color: var(--c-black); }
-    .bk-done__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px var(--sp-3); margin-top: var(--sp-3); }
-    .bk-done__fine { margin-top: var(--sp-3); padding-top: var(--sp-2); border-top: 1px solid color-mix(in srgb, var(--c-black) 8%, transparent); color: var(--c-muted); font-size: .875rem; line-height: 1.4; }
-
-    /* Ekstern kalender (Cal.com / Calendly) */
-    .bk-ext { padding: clamp(12px, 2.2vw, 32px); }
+    .bk-ext__title { font-size: var(--fs-h5); letter-spacing: -.035em; line-height: 1.12; text-wrap: balance; }
     .bk-ext__eyebrow { margin-bottom: 4px; font-size: .75rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; opacity: .8; }
     .bk-ext__types { display: flex; flex-direction: column; margin-top: var(--sp-3); }
     .bk-ext__types li {
@@ -1653,44 +1331,9 @@
     }
     .bk-ext__types strong { font-family: var(--f-title); font-size: 1.1875rem; font-weight: 500; letter-spacing: -.03em; }
     .bk-ext__types li > span { display: flex; gap: 6px; }
+    .chip--sm { padding: .3em .85em; font-size: .8125rem; }
     .bk-ext__text { max-width: 56ch; margin-top: var(--sp-3); color: var(--c-muted); line-height: 1.45; }
     .bk-ext__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px var(--sp-3); margin-top: var(--sp-3); }
-    .bk-ext__cta p { color: var(--c-muted); font-size: .9375rem; }
-    .bk-ext__cta p a { display: inline-flex; align-items: center; min-height: 44px; color: var(--c-black); }
-
-    /* Tilpasning etter kortets bredde */
-    @container bk (min-width: 560px) {
-        .bk__tz { display: inline-flex; }
-        .bk-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .bk-field--full { grid-column: 1 / -1; }
-        .bk-type__card { gap: 12px 20px; padding: 16px 20px 16px 16px; }
-        .bk-sum__row { grid-template-columns: 7em minmax(0, 1fr); }
-    }
-    @container bk (min-width: 620px) {
-        .bk-when { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: clamp(20px, 3.4cqi, 40px); }
-        .bk-slots__empty { min-height: 300px; }
-    }
-    @container bk (max-width: 440px) {
-        .bk__steps { gap: 6px; }
-        .bk__steps li { gap: 6px; }
-        .bk-step { padding-right: 6px; }
-        .bk-step.is-current { padding-right: .9em; }
-        /* Bare det aktive steget viser navnet; de andre viser tallet */
-        .bk-step:not(.is-current) .bk-step__txt {
-            position: absolute; width: 1px; height: 1px; overflow: hidden;
-            clip-path: inset(50%); white-space: nowrap;
-        }
-        .bk__nav { width: 100%; justify-content: space-between; }
-        .bk__nav .sbtn { flex: 1; width: auto; }
-        .bk__back { flex: none; }
-        /* Oppsummering: etikett over verdien, «Endre» til høyre */
-        .bk-sum__row { grid-template-columns: minmax(0, 1fr); gap: 2px; padding-block: 10px; }
-        .bk-sum dt { font-size: .8125rem; }
-    }
-    /* Smale kort: ikon og radioknapp på egen rad, teksten i full bredde under */
-    @container bk (max-width: 380px) {
-        .bk-type__card { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ico . dot" "body body body"; }
-    }
 
     /* ═════════════════════════════════════════════════════════════════
        14. KONTAKT (avslutning med buetekst)
@@ -1774,26 +1417,10 @@
     .footer__meta a { display: inline-flex; align-items: center; min-height: 44px; }
 
     /* ═════════════════════════════════════════════════════════════════
-       16. «SCRAMBLE»-OVERSKRIFTER (bokstaver faller på plass)
-       Kun aktiv med JS. JS setter --p (0–1) på overskriften etter hvor
-       langt den er scrollet inn; hver bokstav har egen forsinkelse (--d)
-       og startforskyvning (--dy). Skjermlesere leser den skjulte hele teksten.
-       ═════════════════════════════════════════════════════════════════ */
-    .scr__w { display: inline-block; white-space: nowrap; }
-    .scr__c {
-        --t: clamp(0, (var(--p, 1) - var(--d, 0)) / .45, 1);
-        display: inline-block;
-        opacity: var(--t);
-        transform: translateY(calc(var(--dy, .6em) * (1 - var(--t))));
-        transition: transform .3s var(--ease-out), opacity .3s linear;
-    }
-
-    /* ═════════════════════════════════════════════════════════════════
        17. RESPONSIVT
        ═════════════════════════════════════════════════════════════════ */
     @media (max-width: 1200px) {
         .services__grid, .process__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .plan__title { min-height: 0; }
     }
     @media (max-width: 1200px) {
         .footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1804,6 +1431,11 @@
         .hero__heading { max-width: 9em; }     /* tre linjer, så teksten holder avstand til planeten */
         .hero__lead { max-width: 52%; }
     }
+    /* Nettbrett liggende og små laptoper: tjenestene i to kolonner uten beskrivelse */
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .nav__svc-blurb { display: none; }
+        .nav__services { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 24px; }
+    }
     @media (max-width: 991px) {
         .nav__wrap { padding-top: 16px; }
         .nav__main, .nav__bar { max-width: 100%; }
@@ -1811,27 +1443,8 @@
         .nav__panel-inner { padding: 16px 16px 20px; }
         .nav__panel-clip { max-height: calc(100dvh - 190px); overflow-y: auto; overscroll-behavior: contain; }
         .nav__row { display: flex; flex-direction: column; align-items: stretch; gap: 20px; }
-        .nav__eyebrow, .nav__book, .nav__svc-blurb { display: none; }
-        .nav__acc-head {
-            display: flex; justify-content: space-between; align-items: center;
-            width: 100%;
-            padding: 12px 12px 12px 14px;
-            border-radius: var(--r);
-            background: var(--c-bg);
-            font-family: var(--f-title); font-size: var(--fs-h5); font-weight: 500; letter-spacing: -.02em;
-            color: var(--c-ink);
-        }
-        .nav__acc-chip { position: relative; display: block; flex: none; width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--c-blue); }
-        .nav__acc-chip i { position: absolute; top: 50%; left: 50%; width: 14px; height: 2px; margin: -1px 0 0 -7px; background: var(--c-white); transition: transform var(--dur) var(--ease); }
-        .nav__acc-chip i:nth-child(2) { transform: rotate(90deg); }
-        .nav__col--services.is-acc-open .nav__acc-chip i:nth-child(2) { transform: rotate(90deg) scaleX(0); }
-        .nav__acc { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows var(--dur) var(--ease), visibility 0s linear var(--dur); }
-        .nav__col--services.is-acc-open .nav__acc { grid-template-rows: 1fr; visibility: visible; transition: grid-template-rows var(--dur) var(--ease), visibility 0s; }
-        .nav__acc-clip { min-height: 0; overflow: hidden; }
-        .nav__services { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; }
-        .nav__group-label { margin-bottom: 2px; font-size: .6875rem; }
-        .nav__svc { display: flex; align-items: center; min-height: 44px; padding-block: 8px; }
-        .nav__svc-title { font-family: var(--f-body); font-size: 1rem; font-weight: 400; letter-spacing: -.01em; }
+        /* Bare sidelisten: «Tjenester» står der allerede */
+        .nav__eyebrow, .nav__col--services { display: none; }
         .nav__mobile-cta {
             display: block;
             width: 100%;
@@ -1885,11 +1498,14 @@
         .brandword { font-size: 24px; }
         .nav.is-open .nav__top::after { left: 0; right: 0; }
         .services__grid, .process__grid { grid-template-columns: 1fr; }
-        .work__head { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .plan__title { min-height: 0; }
         .case__tagline { font-size: 1.25rem; }
         .case__cat { margin-bottom: 8px; font-size: .625rem; }
-        .plan.is-collapsible { cursor: pointer; }
-        .plan.is-collapsible .plan__title { margin-bottom: var(--sp-4); }
+        /* Lukket kort: like mye luft over «01» og under tittelen. Luften over listen
+           ligger inne i det som lukkes, så åpne kort har samme luft som før over listen. */
+        .plan.is-collapsible { cursor: pointer; padding-bottom: var(--sp-4); }
+        .plan.is-collapsible .plan__title { margin-bottom: 0; }
+        .plan.is-collapsible .plan__list { padding-top: var(--sp-4); }
         .plan.is-collapsible .plan__body { grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows var(--dur) var(--ease), visibility 0s linear var(--dur); }
         .plan.is-collapsible.is-open .plan__body { grid-template-rows: 1fr; visibility: visible; transition: grid-template-rows var(--dur) var(--ease), visibility 0s; }
         .plan.is-collapsible .plan__body-inner { overflow: hidden; }
@@ -1901,6 +1517,8 @@
     @media (max-width: 600px) {
         .case__bar { flex-direction: column; align-items: stretch; padding: 12px; }
         .case__bar .sbtn { display: flex; width: 100%; }
+        .case__chip { flex: 1 1 100%; padding-inline: 12px; }
+        .case__desc { padding-inline: 22px; }
         .person { grid-template-columns: minmax(0, 1fr); }
         .faq__item summary { padding-left: var(--sp-2); }
         .faq__answer { padding-inline: var(--sp-2); }
@@ -1947,6 +1565,25 @@
         .nav__login { padding: 0 8px; gap: 4px; font-size: .875rem; }
     }
 
+    /* ═════════════════════════════════════════════════════════════════
+       17b. UTSKRIFT OG «LAGRE SOM PDF» (endrer ingenting på skjermen)
+       Uten header, pikselkunst og bue. Om oss-punktene står under
+       hverandre, og de mørke flatene beholder fargen, så hvit tekst
+       fortsatt kan leses. Svarene i Spørsmål og svar åpnes av JS
+       (beforeprint) og lukkes igjen etterpå.
+       ═════════════════════════════════════════════════════════════════ */
+    @media print {
+        .skip, header.nav, .nav__backdrop, canvas.px, .hero__visual, .cta__ring, .about__bg, .about__visual, .about__floor, .about__progress { display: none !important; }
+        .about.is-sticky .about__track, .about.is-sticky .about__panel { position: static !important; height: auto !important; }
+        .about.is-sticky .about__items, .about.is-sticky .about__item, .about.is-sticky .about__copy { position: static !important; width: auto !important; }
+        .about.is-sticky .about__copy > * { opacity: 1 !important; transform: none !important; }
+        .on-dark, .about, .about__panel, .cta, .footer, .sbtn, .ichip, .case__media { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        /* Smal side (under 768 px) gjør tjenestekortene til trekkspill: skriv dem ut åpne */
+        .plan.is-collapsible .plan__body { grid-template-rows: 1fr !important; visibility: visible !important; }
+        .plan__toggle { display: none !important; }
+        .plan, .case, .faq__item, .about__copy, .step { break-inside: avoid; }
+        h2, .work__head { break-after: avoid; }
+    }
 
     /* ═════════════════════════════════════════════════════════════════
        18. REDUSERT BEVEGELSE
@@ -1957,7 +1594,6 @@
             transition-delay: 0s !important;
             animation: none !important;
         }
-        .scr__c { opacity: 1 !important; transform: none !important; }
     }
     </style>
     <!-- Besøksstatistikk uten cookies (Plausible). Lastes og sendes via eget domene (/dd/ i netlify.toml), så CSP kan stå som 'self'. -->
@@ -1984,10 +1620,12 @@
                     </a>
                     <!-- Uten JavaScript: lenke til navigasjonen i footeren i stedet for menyknappen -->
                     <a class="nav__toggle nav__toggle--nojs" href="#footer-nav"><span class="nav__toggle-icon" aria-hidden="true"><i></i><i></i></span>Meny</a>
-                    <!-- Kundeinnlogging (kunde.html). På mobil vises den som en knapp i stedet for NO/EN (språket velges da i menyen). -->
-                    <a class="nav__login" href="/kunde">
+                    <!-- Kundeinnlogging (kunde.html). På mobil vises den som en knapp i stedet for NO/EN (språket velges da i menyen).
+                         Er kunden allerede innlogget, står det «Min side» (se 1b i skriptet). -->
+                    <a class="nav__login" href="/kunde" data-min-side>
                         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.3-3.4 3.9-5 7-5s5.7 1.6 7 5"/></svg>
-                        <span data-i18n="nav.login">Logg inn</span>
+                        <span data-i18n="nav.login" data-utlogget>Logg inn</span>
+                        <span data-i18n="nav.mypage" data-innlogget hidden>Min side</span>
                     </a>
                     <!-- Språkvelger NO | EN (vises bare med JavaScript, se punkt 10 i guiden) -->
                     <div class="lang" role="group" aria-label="Språk / Language">
@@ -2017,10 +1655,10 @@
                                         <li><a class="nav__page ulink" href="#prosjekter" data-i18n="nav.work">Prosjekter</a></li>
                                         <li><a class="nav__page ulink" href="#prosess" data-i18n="nav.process">Prosess</a></li>
                                         <li><a class="nav__page ulink" href="#sporsmal" data-i18n="nav.faq">Spørsmål og svar</a></li>
-                                        <li><a class="nav__page ulink" href="#booking" data-i18n="nav.book">Book en samtale</a></li>
                                         <li><a class="nav__page ulink" href="#kontakt" data-i18n="nav.contact">Kontakt</a></li>
                                     </ul>
-                                    <!-- Språkvelger i menyen (samme som i headeren) -->
+                                    <!-- «Book en samtale» er knappen ved siden av headeren (fra 992 px) eller under menyen -->
+                                    <!-- Språkvelger i menyen (samme som i headeren, vises bare under 768 px) -->
                                     <div class="nav__lang">
                                         <p class="nav__lang-label" aria-hidden="true">Språk / Language</p>
                                         <div class="lang" role="group" aria-label="Språk / Language">
@@ -2030,47 +1668,31 @@
                                     </div>
                                 </div>
 
-                                <div class="nav__col nav__col--services" data-acc>
+                                <!-- Tjenestene vises fra 992 px (under det står «Tjenester» bare i sidelisten) -->
+                                <div class="nav__col nav__col--services">
                                     <p class="nav__eyebrow nav__eyebrow--services" data-i18n="nav.services">Tjenester</p>
-                                    <button class="nav__acc-head" type="button" aria-expanded="false" aria-controls="meny-tjenester" data-acc-toggle>
-                                        <span data-i18n="nav.services">Tjenester</span>
-                                        <span class="nav__acc-chip" aria-hidden="true"><i></i><i></i></span>
-                                    </button>
-                                    <div class="nav__acc" id="meny-tjenester">
-                                        <div class="nav__acc-clip">
-                                            <!-- ✏️ Tjenester i menyen: tre grupper (blå etikett + tittel og én linje).
-                                                 Ny tjeneste: kopier en <li> inn i en gruppe. Ny gruppe: kopier en hel .nav__group. -->
-                                            <div class="nav__services">
-                                                <div class="nav__group">
-                                                    <p class="nav__group-label" data-i18n="nav.groupWeb">Nettsider</p>
-                                                    <ul>
-                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.web">Webdesign og utvikling</span><span class="nav__svc-blurb" data-i18n="nav.webBlurb">Raske, skreddersydde nettsider som fungerer på alle skjermer.</span></a></li>
-                                                    </ul>
-                                                </div>
-                                                <div class="nav__group">
-                                                    <p class="nav__group-label">AI</p>
-                                                    <ul>
-                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.ai">AI-automatisering</span><span class="nav__svc-blurb" data-i18n="nav.aiBlurb">Automatisering som tar seg av de repeterende oppgavene.</span></a></li>
-                                                    </ul>
-                                                </div>
-                                                <div class="nav__group">
-                                                    <p class="nav__group-label">Design</p>
-                                                    <ul>
-                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.ux">UI/UX-design</span><span class="nav__svc-blurb" data-i18n="nav.uxBlurb">Grensesnitt som er enkle å forstå og bruke.</span></a></li>
-                                                        <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.brand">Visuell identitet</span><span class="nav__svc-blurb" data-i18n="nav.brandBlurb">Logo, farger og typografi som henger sammen.</span></a></li>
-                                                    </ul>
-                                                </div>
-                                            </div>
+                                    <!-- ✏️ Tjenester i menyen: tre grupper (blå etikett + tittel og én linje).
+                                         Ny tjeneste: kopier en <li> inn i en gruppe. Ny gruppe: kopier en hel .nav__group. -->
+                                    <div class="nav__services">
+                                        <div class="nav__group">
+                                            <p class="nav__group-label" data-i18n="nav.groupWeb">Nettsider</p>
+                                            <ul>
+                                                <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.web">Webdesign og utvikling</span><span class="nav__svc-blurb" data-i18n="nav.webBlurb">Raske nettsider som fungerer på alle skjermer.</span></a></li>
+                                            </ul>
                                         </div>
-                                    </div>
-                                    <div class="nav__book on-dark">
-                                        <canvas class="nav__book-canvas px" data-pixel="field" data-variant="menu" data-seed="31" aria-hidden="true"></canvas>
-                                        <p class="nav__book-title" data-i18n="cta.title">Skal vi ta en prat?</p>
-                                        <a class="sbtn" href="#booking">
-                                            <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                                            <span class="sbtn__txt" data-i18n="nav.book">Book en samtale</span>
-                                            <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                                        </a>
+                                        <div class="nav__group">
+                                            <p class="nav__group-label">AI</p>
+                                            <ul>
+                                                <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.ai">AI-automatisering</span><span class="nav__svc-blurb" data-i18n="nav.aiBlurb">Automatisering som tar seg av de repeterende oppgavene.</span></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="nav__group">
+                                            <p class="nav__group-label">Design</p>
+                                            <ul>
+                                                <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.ux">UI/UX-design</span><span class="nav__svc-blurb" data-i18n="nav.uxBlurb">Grensesnitt som er enkle å forstå og bruke.</span></a></li>
+                                                <li><a class="nav__svc" href="#tjenester"><span class="nav__svc-title" data-i18n="svc.brand">Visuell identitet</span><span class="nav__svc-blurb" data-i18n="nav.brandBlurb">Logo, farger og typografi som henger sammen.</span></a></li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2117,7 +1739,7 @@
                  Engelsk versjon står i I18N.en under 'hero.title'. -->
             <h1 class="hero__heading" id="hero-title" data-i18n="hero.title">Design. Utvikling. <span class="accent">Vekst.</span></h1>
             <!-- ✏️ Ingress -->
-            <p class="hero__lead" data-i18n="hero.lead">Vi designer og utvikler skreddersydde nettsider som styrker merkevaren din og hjelper bedriften å vokse.</p>
+            <p class="hero__lead" data-i18n="hero.lead">Vi designer og utvikler skreddersydde nettsider for bedrifter og automatiserer repeterende oppgaver med AI.</p>
             <!-- ✏️ Knappen og lenken under ingressen -->
             <div class="hero__actions">
                 <a class="sbtn" href="#booking">
@@ -2138,7 +1760,7 @@
             <p class="kicker" data-i18n="nav.services">Tjenester</p>
             <!-- ✏️ Overskrift og ingress: den blå delen står i <span class="accent"> -->
             <h2 class="services__title" id="tjenester-title" data-i18n="svc.title">Nettsider som gjør<br><span class="accent">varig inntrykk</span></h2>
-            <p class="services__intro" data-i18n="svc.intro">Skreddersydde løsninger som kombinerer godt design med teknologi som fungerer, fra første skisse til lansering. Velg én tjeneste, eller la oss ta helheten.</p>
+            <p class="services__intro" data-i18n="svc.intro">Fra første skisse til lansering. Velg én tjeneste, eller la oss ta helheten.</p>
         </div>
 
         <div class="services__grid">
@@ -2153,7 +1775,7 @@
                     <div class="plan__body-inner">
                         <!-- ✏️ Punktliste -->
                         <ul class="plan__list">
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M6.5 6.5h.01M9 6.5h.01"/></svg><span data-i18n="svc.web1">Skreddersydd design og utvikling</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M6.5 6.5h.01M9 6.5h.01"/></svg><span data-i18n="svc.web1">Designet for bedriften din</span></li>
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/></svg><span data-i18n="svc.web2">Tilpasset mobil, nettbrett og PC</span></li>
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg><span data-i18n="svc.web3">Bygget for å bli funnet i Google</span></li>
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12z"/></svg><span data-i18n="svc.web4">Rask lastetid</span></li>
@@ -2179,7 +1801,7 @@
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/></svg><span data-i18n="svc.ai1">Henvendelser som besvares og sorteres automatisk</span></li>
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9.5L4 20z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></svg><span data-i18n="svc.ai2">Chatbot som svarer kundene dine</span></li>
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8.5 6h7M7.2 8.2l3.6 7.6M16.8 8.2l-3.6 7.6"/></svg><span data-i18n="svc.ai3">Verktøy som snakker sammen</span></li>
-                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8.5L18 6.5V21H6z"/><path d="M9 11h6M9 14.5h6M9 18h3.5"/></svg><span data-i18n="svc.ai4">Rapporter som lager seg selv</span></li>
+                            <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8.5L18 6.5V21H6z"/><path d="M9 11h6M9 14.5h6M9 18h3.5"/></svg><span data-i18n="svc.ai4">Rapporter som lages automatisk</span></li>
                         </ul>
                         <p class="plan__note" data-i18n="svc.aiNote"><strong>Passer for</strong> bedrifter som bruker mye tid på manuelle og repeterende oppgaver.</p>
                     </div>
@@ -2201,7 +1823,7 @@
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/></svg><span data-i18n="svc.ux3">Grensesnitt som er enkle å bruke</span></li>
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="1.8"/><path d="M5 8.5l7 1.5 7-1.5M12 10v4.5l-3 6M12 14.5l3 6"/></svg><span data-i18n="svc.ux4">Universell utforming (WCAG)</span></li>
                         </ul>
-                        <p class="plan__note" data-i18n="svc.uxNote"><strong>Passer for</strong> nye digitale produkter, og nettsider som får besøk, men ikke henvendelser.</p>
+                        <p class="plan__note" data-i18n="svc.uxNote"><strong>Passer for</strong> nye digitale produkter og for nettsider som får besøk, men ikke henvendelser.</p>
                     </div>
                 </div>
             </article>
@@ -2221,7 +1843,7 @@
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="svc.brand3">Profilmanual som holder uttrykket likt</span></li>
                             <li><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span data-i18n="svc.brand4">Lett å bygge videre på</span></li>
                         </ul>
-                        <p class="plan__note" data-i18n="svc.brandNote"><strong>Passer for</strong> nye bedrifter, og bedrifter som trenger et tydeligere uttrykk.</p>
+                        <p class="plan__note" data-i18n="svc.brandNote"><strong>Passer for</strong> nye bedrifter og for dem som trenger et tydeligere uttrykk.</p>
                     </div>
                 </div>
             </article>
@@ -2286,7 +1908,7 @@
                             <span class="about__num">01</span>
                             <!-- ✏️ Tittel og tekst -->
                             <h3 data-i18n="about.1">Hvem vi er</h3>
-                            <p data-i18n="about.1t">Et lite studio for nettsider og AI-automatisering. Du har de samme to personene med deg fra første skisse til lansering.</p>
+                            <p data-i18n="about.1t">Et lite studio for nettsider og AI-automatisering. Du har de samme to personene med deg hele veien.</p>
                         </div>
                         <!-- Illustrasjon: data-variant = duo | browser | mark -->
                         <canvas class="about__visual px" data-pixel="scene" data-variant="duo" data-seed="5" aria-hidden="true"></canvas>
@@ -2321,7 +1943,6 @@
     <div class="container">
         <div class="work__head">
             <h2 class="work__title" id="prosjekter-title" data-i18n="nav.work">Prosjekter</h2>
-            <a class="work__more ulink" href="#booking" data-i18n="work.talk">Snakk med oss →</a>
         </div>
         <div class="work__grid">
             <!-- ── Prosjektkort: DJ Tiny (ekte prosjekt med skjermbilde: case--photo) ── -->
@@ -2336,7 +1957,7 @@
                     <li class="case__chip"><strong data-i18n="work.ent">Underholdning</strong><span data-i18n="work.industry">Bransje</span></li>
                 </ul>
                 <!-- ✏️ Beskrivelse -->
-                <p class="case__desc" data-i18n="work.djDesc">Nettside for DJ Tiny, DJ på Østlandet for bryllup, firmafest og klubb. Mørkt neonuttrykk, tjenester, kommende bookinger, musikkbingo og bookingforespørsel rett fra siden.</p>
+                <p class="case__desc" data-i18n="work.djDesc">Nettside for DJ Tiny, DJ på Østlandet for bryllup, firmafest og klubb. Mørkt neonuttrykk, tjenester, kommende spillejobber, musikkbingo og bookingforespørsel rett fra siden.</p>
                 <div class="case__bar">
                     <h3 class="case__name">DJ Tiny</h3>
                     <a class="sbtn sbtn--white" href="https://djtiny.no" target="_blank" rel="noopener" aria-label="Se nettsiden djtiny.no (åpnes i ny fane)" data-i18n-attr="aria-label:work.visitLabel">
@@ -2362,7 +1983,7 @@
                     <li class="case__chip"><strong data-i18n="svc.web">Webdesign og utvikling</strong><span data-i18n="work.service">Tjeneste</span></li>
                     <li class="case__chip"><strong data-i18n="svc.ai">AI-automatisering</strong><span data-i18n="work.service">Tjeneste</span></li>
                 </ul>
-                <p class="case__desc" data-i18n="work.openDesc">Vi tar imot nye prosjekter nå. Book en uforpliktende samtale, så finner vi ut hva vi kan bygge for deg.</p>
+                <p class="case__desc" data-i18n="work.openDesc">Vi tar imot nye prosjekter nå. Book en samtale, så finner vi ut hva vi kan bygge for deg.</p>
                 <div class="case__bar">
                     <h3 class="case__name" data-i18n="work.yours">Ditt prosjekt</h3>
                     <a class="sbtn sbtn--white" href="#booking">
@@ -2379,9 +2000,9 @@
 <!-- ════ SEKSJON: Prosess ════ -->
 <section class="section process" id="prosess" aria-labelledby="prosess-title">
     <div class="container process__inner">
-        <!-- ✏️ Etikett, overskrift (data-scramble gir bokstav-effekten) og stegene under -->
+        <!-- ✏️ Etikett, overskrift og stegene under -->
         <p class="kicker" data-i18n="proc.kicker">Vår prosess</p>
-        <h2 class="process__title" id="prosess-title" data-scramble data-i18n="proc.title">Enkelt.<br>Effektivt.</h2>
+        <h2 class="process__title" id="prosess-title" data-i18n="proc.title">Enkelt.<br>Effektivt.</h2>
         <ol class="process__grid">
             <!-- ── Steg 1 (kopier hele <li> for et nytt steg) ── -->
             <li class="step">
@@ -2400,7 +2021,7 @@
             <li class="step">
                 <span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4.5l-3 15"/></svg></span>
                 <h3 class="step__title" data-i18n="proc.3">Utvikling</h3>
-                <p class="step__text" data-i18n="proc.3t">Vi bygger siden med ren kode, så den lastes raskt, fungerer like godt på mobil, kan brukes av alle og er lett å finne i Google.</p>
+                <p class="step__text" data-i18n="proc.3t">Vi bygger siden med ren kode, så den lastes raskt, fungerer like godt på mobil, kan brukes av alle og er bygget for å bli funnet i Google.</p>
             </li>
             <!-- ── Steg 4 ── -->
             <li class="step">
@@ -2431,7 +2052,7 @@
             </details>
             <details class="faq__item">
                 <summary><span data-i18n="faq.q3">Hva er AI-automatisering, og passer det for oss?</span><span class="faq__icon" aria-hidden="true"></span></summary>
-                <div class="faq__answer"><p data-i18n="faq.a3">Det betyr at repeterende oppgaver gjøres automatisk, for eksempel å svare på og sortere henvendelser eller å lage rapporter. I en kort samtale finner vi ut om noe hos dere lønner seg å automatisere.</p></div>
+                <div class="faq__answer"><p data-i18n="faq.a3">Det betyr at repeterende oppgaver gjøres automatisk, for eksempel å svare på og sortere henvendelser eller å lage rapporter. I en kort samtale finner vi ut om noe i bedriften din lønner seg å automatisere.</p></div>
             </details>
             <details class="faq__item">
                 <summary><span data-i18n="faq.q4">Må jeg vite nøyaktig hva jeg vil ha?</span><span class="faq__icon" aria-hidden="true"></span></summary>
@@ -2446,29 +2067,29 @@
 </section>
 
 <!-- ════ SEKSJON: Booking ════ -->
-<!-- Innstillinger (e-post, samtaletyper, tider, fridager og modus) står i
-     objektet BOOKING øverst i <script> nederst i filen. Se punkt 8 i guiden.
-     Samtaletypene lages av JavaScript fra BOOKING.types. -->
+<!-- Innstillingene (lenken til bookingsiden i Google Kalender og samtaletypen) står i
+     objektet BOOKING øverst i <script> nederst i filen. Se punkt 8 i guiden. -->
 <section class="section booking" id="booking" aria-labelledby="booking-title">
     <div class="container booking__inner">
         <div class="booking__intro">
             <p class="kicker">Booking</p>
             <!-- ✏️ Overskrift og ingress -->
             <h2 class="booking__title" id="booking-title" data-i18n="bk.title">Book en uforpliktende samtale</h2>
-            <p class="booking__lead" data-i18n="bk.lead">Lurer du på hva vi kan gjøre for deg? Velg et tidspunkt som passer, så snakker vi sammen om prosjektet ditt.</p>
-            <!-- ✏️ Tre korte punkter. «15–45» regnes ut av JS fra BOOKING.types.
-                 Punktet om bekreftelse byttes med teksten i data-ext når en ekstern
-                 kalender (externalUrl) er i bruk. Tilpass «video eller telefon» selv. -->
+            <p class="booking__lead" data-i18n="bk.lead">Lurer du på hva vi kan gjøre for deg? Velg et tidspunkt, så snakker vi sammen om prosjektet ditt.</p>
+            <!-- ✏️ Tre korte punkter. Minuttene regnes ut av JS fra BOOKING.types.
+                 Punktet om bekreftelse byttes med teksten i data-ext når kalenderen
+                 (BOOKING.externalUrl) er i bruk; ellers gjelder e-postteksten. -->
             <ul class="booking__facts">
-                <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg></span><span><span class="nowrap" data-bk-minutes>15–45</span>&nbsp;<span data-i18n="bk.factMin">minutter, helt uforpliktende</span></span></li>
-                <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="M15.5 10.5l6-3.5v10l-6-3.5z"/></svg></span><span data-i18n="bk.factWhere">På video eller telefon – du velger</span></li>
+                <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg></span><span><span class="nowrap" data-bk-minutes>30</span>&nbsp;<span data-i18n="bk.factMin">minutter</span></span></li>
+                <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="M15.5 10.5l6-3.5v10l-6-3.5z"/></svg></span><span data-i18n="bk.factWhere">På video</span></li>
                 <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg></span><span data-bk-fact data-ext="Du får bekreftelse på e-post med en gang" data-i18n="bk.factConfirm" data-i18n-attr="data-ext:bk.factConfirmExt">Vi bekrefter tiden på e-post innen én&nbsp;arbeidsdag</span></li>
             </ul>
             <p class="booking__alt"><span data-i18n="bk.alt">Foretrekker du e-post?</span> <a class="ulink ulink--on" href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a></p>
         </div>
 
         <div class="booking__widget" data-booking>
-            <!-- Uten JavaScript: kort melding med e-postknapp i stedet for kalenderen -->
+            <!-- E-postkortet: vises uten JavaScript, og i stedet for kalenderkortet
+                 hvis BOOKING.externalUrl er tom -->
             <div class="bk-nojs">
                 <span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span>
                 <!-- ✏️ -->
@@ -2481,167 +2102,8 @@
                 </a>
             </div>
 
-            <!-- Selve bookingen (vises bare med JavaScript) -->
-            <div class="bk" data-bk>
-                <div class="bk__top">
-                    <ol class="bk__steps" aria-label="Steg i bookingen" data-i18n-attr="aria-label:bk.steps">
-                        <li><button class="bk-step" type="button" data-bk-step="1"><span class="bk-step__num"><span class="bk-step__n">1</span><svg class="bk-step__ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="bk-step__txt" data-i18n="bk.sType">Type</span><span class="sr-only" data-bk-step-sr></span></button></li>
-                        <li><button class="bk-step" type="button" data-bk-step="2"><span class="bk-step__num"><span class="bk-step__n">2</span><svg class="bk-step__ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="bk-step__txt" data-i18n="bk.sTime">Tid</span><span class="sr-only" data-bk-step-sr></span></button></li>
-                        <li><button class="bk-step" type="button" data-bk-step="3"><span class="bk-step__num"><span class="bk-step__n">3</span><svg class="bk-step__ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="bk-step__txt" data-i18n="bk.sDetails">Om deg</span><span class="sr-only" data-bk-step-sr></span></button></li>
-                    </ol>
-                    <p class="bk__tz"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></svg><span data-i18n="bk.tzShort">Norsk tid</span></p>
-                </div>
-
-                <form class="bk__form" action="#" novalidate data-bk-form>
-                    <!-- ── Steg 1: type samtale ── -->
-                    <div class="bk-pane" role="group" aria-labelledby="bk-t1" data-bk-pane="1">
-                        <!-- ✏️ -->
-                        <h3 class="bk-pane__title" id="bk-t1" tabindex="-1" data-i18n="bk.t1">Hva gjelder det?</h3>
-                        <p class="bk-pane__sub" data-i18n="bk.t1s">Velg typen samtale som passer best.</p>
-                        <!-- Kortene lages av JavaScript fra BOOKING.types -->
-                        <div class="bk-types" role="radiogroup" aria-labelledby="bk-t1" data-bk-types></div>
-                    </div>
-
-                    <!-- ── Steg 2: dato og klokkeslett ── -->
-                    <div class="bk-pane" role="group" aria-labelledby="bk-t2" data-bk-pane="2" hidden>
-                        <!-- ✏️ -->
-                        <h3 class="bk-pane__title" id="bk-t2" tabindex="-1" data-i18n="bk.t2">Velg tid</h3>
-                        <p class="bk-pane__sub" data-i18n="bk.t2s">Velg en dato og et klokkeslett som passer deg. Vi bekrefter tiden på e-post.</p>
-                        <div class="bk-when">
-                            <div class="bk-cal">
-                                <div class="bk-cal__head">
-                                    <p class="bk-cal__month" id="bk-month" aria-live="polite" data-bk-month></p>
-                                    <div class="bk-cal__nav">
-                                        <button class="bk-cal__btn" type="button" aria-label="Forrige måned" data-i18n-attr="aria-label:bk.prev" data-bk-prev><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"/></svg></button>
-                                        <button class="bk-cal__btn" type="button" aria-label="Neste måned" data-i18n-attr="aria-label:bk.next" data-bk-next><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg></button>
-                                    </div>
-                                </div>
-                                <table class="bk-cal__grid" role="grid" aria-labelledby="bk-month" aria-describedby="bk-cal-help">
-                                    <thead><tr data-bk-weekdays></tr></thead>
-                                    <tbody data-bk-days></tbody>
-                                </table>
-                                <p class="sr-only" id="bk-cal-help" data-i18n="bk.calHelp">Piltastene flytter mellom datoer. Page Up og Page Down bytter måned. Enter eller mellomrom velger datoen.</p>
-                                <p class="bk-cal__legend" aria-hidden="true"><span><i></i><span data-i18n="bk.legendOpen">Kan velges</span></span><span><i class="is-picked"></i><span data-i18n="bk.legendPicked">Valgt</span></span></p>
-                            </div>
-                            <fieldset class="bk-slots">
-                                <legend class="bk-slots__legend" data-i18n="bk.slots">Mulige tider</legend>
-                                <p class="bk-slots__date" data-bk-slots-date hidden></p>
-                                <p class="bk-slots__empty" data-bk-slots-empty><span data-i18n="bk.pickDate">Velg en dato i kalenderen for å se tidene.</span></p>
-                                <div class="bk-slots__grid" data-bk-slots></div>
-                                <p class="bk-slots__tz"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></svg><span data-i18n="bk.tzLong">Alle tider er norsk tid (Europe/Oslo).</span></p>
-                            </fieldset>
-                        </div>
-                    </div>
-
-                    <!-- ── Steg 3: kontaktinfo og oppsummering ── -->
-                    <div class="bk-pane" role="group" aria-labelledby="bk-t3" data-bk-pane="3" hidden>
-                        <!-- ✏️ Overskrift, feltnavn og feilmeldinger (data-msg-…) -->
-                        <h3 class="bk-pane__title" id="bk-t3" tabindex="-1" data-i18n="bk.t3">Hvem snakker vi med?</h3>
-                        <p class="bk-pane__sub" data-i18n="bk.t3s">Fortell litt om deg, så forbereder vi oss til samtalen.</p>
-                        <div class="bk-fields">
-                            <div class="bk-field">
-                                <label for="bk-name"><span data-i18n="bk.name">Navn</span> <span class="bk-req" aria-hidden="true">*</span></label>
-                                <input id="bk-name" name="navn" type="text" autocomplete="name" maxlength="100" required aria-describedby="bk-name-err"
-                                       data-msg-missing="Skriv inn navnet ditt, så vet vi hvem vi skal snakke med."
-                                       data-i18n-attr="data-msg-missing:bk.nameMissing">
-                                <p class="bk-field__err" id="bk-name-err" hidden></p>
-                            </div>
-                            <div class="bk-field">
-                                <label for="bk-email"><span data-i18n="bk.email">E-post</span> <span class="bk-req" aria-hidden="true">*</span></label>
-                                <input id="bk-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="120" required aria-describedby="bk-email-err"
-                                       data-msg-missing="Skriv inn e-postadressen din, så kan vi bekrefte tiden."
-                                       data-msg-type="Sjekk e-postadressen. Den skal se ut som navn@firma.no."
-                                       data-i18n-attr="data-msg-missing:bk.emailMissing, data-msg-type:bk.emailType">
-                                <p class="bk-field__err" id="bk-email-err" hidden></p>
-                            </div>
-                            <div class="bk-field">
-                                <label for="bk-company" data-i18n="bk.company">Bedrift</label>
-                                <input id="bk-company" name="bedrift" type="text" autocomplete="organization" maxlength="100" aria-describedby="bk-company-err">
-                                <p class="bk-field__err" id="bk-company-err" hidden></p>
-                            </div>
-                            <div class="bk-field">
-                                <label for="bk-phone"><span data-i18n="bk.phone">Telefon</span> <span class="bk-req" aria-hidden="true" data-bk-phone-req hidden>*</span></label>
-                                <input id="bk-phone" name="telefon" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" pattern="[0-9 +\-]{5,20}" aria-describedby="bk-phone-err"
-                                       data-msg-missing="Skriv inn telefonnummeret ditt, så vi kan ringe deg."
-                                       data-msg-pattern="Telefonnummeret kan bare inneholde tall, mellomrom, + og bindestrek."
-                                       data-i18n-attr="data-msg-missing:bk.phoneMissing, data-msg-pattern:bk.phonePattern">
-                                <p class="bk-field__err" id="bk-phone-err" hidden></p>
-                            </div>
-                            <div class="bk-field bk-field--full">
-                                <label for="bk-message" data-i18n="bk.message">Hva vil du snakke om?</label>
-                                <textarea id="bk-message" name="melding" rows="4" maxlength="1500" placeholder="F.eks. ny nettside, redesign eller AI-automatisering" data-i18n-attr="placeholder:bk.messagePh" aria-describedby="bk-message-err"></textarea>
-                                <p class="bk-field__err" id="bk-message-err" hidden></p>
-                            </div>
-                        </div>
-                        <dl class="bk-sum">
-                            <div class="bk-sum__row"><dt data-i18n="bk.sumType">Type</dt><dd><span data-sum="type"></span><button class="bk-sum__edit ulink" type="button" data-bk-goto="1" data-i18n="bk.editType">Endre<span class="sr-only"> type samtale</span></button></dd></div>
-                            <div class="bk-sum__row"><dt data-i18n="bk.sumDate">Dato</dt><dd><span data-sum="date"></span><button class="bk-sum__edit ulink" type="button" data-bk-goto="2" data-i18n="bk.editDate">Endre<span class="sr-only"> dato</span></button></dd></div>
-                            <div class="bk-sum__row"><dt data-i18n="bk.sumTime">Tid</dt><dd><span data-sum="time"></span><button class="bk-sum__edit ulink" type="button" data-bk-goto="2" data-i18n="bk.editTime">Endre<span class="sr-only"> klokkeslett</span></button></dd></div>
-                        </dl>
-                        <p class="bk-note" data-i18n="bk.note">Felt merket <span class="bk-req">*</span> må fylles ut. Vi bruker opplysningene bare til å svare deg. Les mer i <a class="ulink ulink--on" href="personvern.html">personvernerklæringen</a>.</p>
-                        <!-- Felle for spamroboter (skjult for mennesker, ikke fjern) -->
-                        <div class="bk-hp" aria-hidden="true"><label><span data-i18n="bk.trap">Ikke fyll ut dette feltet</span> <input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></div>
-                    </div>
-
-                    <div class="bk__alert" role="alert" data-bk-alert></div>
-
-                    <div class="bk__foot">
-                        <div class="bk__picked" data-bk-picked></div>
-                        <div class="bk__nav">
-                            <button class="bk__back ulink" type="button" data-bk-back hidden data-i18n="bk.back"><span aria-hidden="true">←</span> Tilbake</button>
-                            <button class="sbtn sbtn--black" type="submit" data-bk-submit>
-                                <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                                <!-- ✏️ Knappetekst for hvert steg: data-next, data-send og data-busy -->
-                                <span class="sbtn__txt" data-bk-submit-txt data-next="Neste" data-send="Send forespørsel" data-busy="Sender …"
-                                      data-i18n-attr="data-next:bk.nextBtn, data-send:bk.sendBtn, data-busy:bk.busyBtn">Neste</span>
-                                <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-
-                <!-- ── Bekreftelse (vises etter innsending) ── -->
-                <div class="bk-done" data-bk-done hidden>
-                    <div class="bk-done__head on-dark">
-                        <canvas class="bk-done__canvas px" data-pixel="field" data-variant="menu" data-seed="63" aria-hidden="true"></canvas>
-                        <span class="ichip ichip--white" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
-                        <!-- ✏️ Overskrift: data-title-sent når skjematjenesten har sendt,
-                             data-title-mailto når e-postprogrammet åpnes (ingenting er sendt ennå) -->
-                        <h3 class="bk-done__title" tabindex="-1" data-bk-done-title
-                            data-title-sent="Takk! Forespørselen din er sendt."
-                            data-title-mailto="Nesten ferdig! Send e-posten for å fullføre."
-                            data-i18n-attr="data-title-sent:bk.doneSent, data-title-mailto:bk.doneMailto">Takk! Forespørselen din er sendt.</h3>
-                    </div>
-                    <!-- ✏️ Vises når e-postprogrammet åpnes (formEndpoint er tom) -->
-                    <p class="bk-done__note" data-bk-note="mailto" data-i18n="bk.noteMailto">E-postprogrammet ditt åpnes med forespørselen ferdig utfylt. Trykk «Send» i <span class="nowrap">e-posten</span>, så er den på vei til oss.</p>
-                    <p class="bk-done__retry" data-bk-note="mailto"><span data-i18n="bk.retryQ">Åpnet ikke e-postprogrammet seg?</span> <a class="ulink ulink--on" href="mailto:kontakt@dotdev.no" data-bk-mail-again data-i18n="bk.retry">Prøv igjen</a> <span data-i18n="bk.retryOr">eller skriv til</span> kontakt@dotdev.no.</p>
-                    <!-- ✏️ Vises når forespørselen er sendt via formEndpoint -->
-                    <p class="bk-done__note" data-bk-note="sent" hidden data-i18n="bk.noteSent">Vi har mottatt forespørselen din og ser frem til å snakke med deg.</p>
-                    <dl class="bk-sum">
-                        <div class="bk-sum__row"><dt data-i18n="bk.sumType">Type</dt><dd><span data-sum="type"></span></dd></div>
-                        <div class="bk-sum__row"><dt data-i18n="bk.sumDate">Dato</dt><dd><span data-sum="date"></span></dd></div>
-                        <div class="bk-sum__row"><dt data-i18n="bk.sumTime">Tid</dt><dd><span data-sum="time"></span></dd></div>
-                        <div class="bk-sum__row"><dt data-i18n="bk.name">Navn</dt><dd><span data-sum="name"></span></dd></div>
-                        <div class="bk-sum__row"><dt data-i18n="bk.email">E-post</dt><dd><span data-sum="email"></span></dd></div>
-                    </dl>
-                    <div class="bk-done__actions">
-                        <button class="sbtn sbtn--black" type="button" data-bk-ics>
-                            <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                            <span class="sbtn__txt" data-i18n="bk.ics">Legg til i kalender</span>
-                            <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
-                        </button>
-                        <button class="bk__back ulink ulink--on" type="button" data-bk-again data-i18n="bk.again">Book en ny samtale <span aria-hidden="true">→</span></button>
-                    </div>
-                    <!-- ✏️ -->
-                    <p class="bk-done__fine" data-i18n="bk.fine">Tiden er foreløpig til vi har bekreftet den på e-post. Det gjør vi innen én&nbsp;arbeidsdag.</p>
-                </div>
-
-                <!-- Skjermleserkunngjøringer (steg og valg) -->
-                <p class="sr-only" aria-live="polite" data-bk-status></p>
-            </div>
-
-            <!-- Ekstern kalender (Google Kalender, Cal.com, Calendly): vises i stedet for skjemaet
-                 når BOOKING.externalUrl er fylt ut. Lenken settes av JavaScript. -->
+            <!-- Kalenderkortet: «Velg tidspunkt» åpner bookingsiden i Google Kalender
+                 (BOOKING.externalUrl) i en ny fane. Lenken settes av JavaScript. -->
             <div class="bk-ext" data-bk-ext hidden>
                 <div class="bk-ext__head on-dark">
                     <canvas class="bk-ext__canvas px" data-pixel="field" data-variant="menu" data-seed="52" aria-hidden="true"></canvas>
@@ -2653,14 +2115,14 @@
                     </div>
                 </div>
                 <ul class="bk-ext__types" data-bk-ext-types></ul>
-                <p class="bk-ext__text" data-i18n="bk.extText">Kalenderen vår åpnes i en ny fane. Der ser du bare tider som faktisk er ledige, og du får bekreftelse på e-post med en gang.</p>
+                <p class="bk-ext__text" data-i18n="bk.extText">Kalenderen vår åpnes i en ny fane og viser bare ledige tider.</p>
+                <!-- E-postalternativet står i teksten til venstre («Foretrekker du e-post?») -->
                 <div class="bk-ext__cta">
                     <a class="sbtn sbtn--black plausible-event-name=Book+samtale" href="#booking" target="_blank" rel="noopener" data-bk-ext-link>
                         <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
                         <span class="sbtn__txt" data-i18n="bk.extBtn">Velg tidspunkt<span class="sr-only"> (åpnes i ny fane)</span></span>
                         <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
                     </a>
-                    <p><span data-i18n="mail.or">eller skriv til</span> <a class="ulink ulink--on" href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a></p>
                 </div>
             </div>
         </div>
@@ -2685,7 +2147,7 @@
         <h2 class="cta__title" id="kontakt-title" data-i18n="cta.title">Skal vi ta en prat?</h2>
         <p class="cta__copy" data-i18n="cta.copy">Fortell kort om bedriften og hva du trenger, så svarer vi innen én&nbsp;arbeidsdag.</p>
         <!-- ✏️ E-posten åpnes med emne og et kort skjema ferdig utfylt (engelsk: cta.mailHref) -->
-        <a class="sbtn sbtn--white" href="mailto:kontakt@dotdev.no?subject=Nytt%20prosjekt&amp;body=Hei%20DOTDEV!%0D%0A%0D%0ABedrift%3A%0D%0ANettside%20(hvis%20dere%20har%20en)%3A%0D%0AHva%20vil%20dere%20ha%20hjelp%20med%3A%0D%0A%C3%98nsket%20oppstart%3A%0D%0A%0D%0A" data-i18n-attr="href:cta.mailHref">
+        <a class="sbtn sbtn--white" href="mailto:kontakt@dotdev.no?subject=Nytt%20prosjekt&amp;body=Hei%20DOTDEV!%0D%0A%0D%0ABedrift%3A%0D%0ANettside%20i%20dag%20(hvis%20noen)%3A%0D%0AHva%20gjelder%20det%3A%0D%0A%C3%98nsket%20oppstart%3A%0D%0A%0D%0A" data-i18n-attr="href:cta.mailHref">
             <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
             <span class="sbtn__txt" data-i18n="btn.start">Start et prosjekt</span>
             <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
@@ -2737,13 +2199,13 @@
     <div class="container footer__base">
         <!-- Året oppdateres automatisk med JS (2026 er reserve) -->
         <p>© <span data-year>2026</span> DOTDEV. <span data-i18n="footer.rights">Alle rettigheter forbeholdt.</span></p>
-        <!-- ✏️ LOVPÅLAGT (ehandelsloven § 8): org.nr. Foretaksnavnet (Nerland Consulting)
-             står i bunnteksten og teksten på personvernsiden. Blir foretaket
-             MVA-registrert, skriv «Org.nr. 936 133 231 MVA». -->
+        <!-- ✏️ LOVPÅLAGT (ehandelsloven § 8): org.nr. Footeren viser bare org.nr., likt på
+             alle sidene. Foretaksnavnet (Nerland Consulting) står i teksten på
+             personvernsiden. Blir foretaket MVA-registrert, skriv «Org.nr. 936 133 231 MVA». -->
         <p class="footer__company" data-i18n="footer.company">Org.nr. 936 133 231</p>
         <ul class="footer__meta">
-            <li><a class="ulink" href="personvern.html" data-i18n="footer.privacy">Personvern</a></li>
-            <li><a class="ulink" href="/kunde" data-i18n="footer.portal">Kundeinnlogging</a></li>
+            <li><a class="ulink" href="/personvern" data-lang-carry data-i18n="footer.privacy">Personvern</a></li>
+            <li><a class="ulink" href="/kunde" data-min-side><span data-i18n="footer.portal" data-utlogget>Kundeinnlogging</span><span data-i18n="footer.mypage" data-innlogget hidden>Min side</span></a></li>
             <li><a class="ulink" href="#hjem" data-i18n="footer.top">Til toppen ↑</a></li>
         </ul>
     </div>
@@ -2759,56 +2221,23 @@
 /* ═══════════════════════════════════════════════════════════════════
    ✏️ BOOKING: innstillinger for «Book en samtale» (SEKSJON: Booking)
    ───────────────────────────────────────────────────────────────────
-   Tre moduser (mer i punkt 8 i guiden øverst i filen):
-   1. E-post (standard): formEndpoint og externalUrl er tomme ('').
-      «Send forespørsel» åpner e-postprogrammet til besøkende med alt
-      ferdig utfylt til adressen i email. De må selv trykke «Send».
-   2. Skjematjeneste: formEndpoint = adressen til et skjema, f.eks.
-      'https://formspree.io/f/dinkode' (Formspree har gratisplan).
-      Forespørselen sendes da rett fra siden, og dere får den på e-post.
-   3. Ekstern kalender: externalUrl = en booking-lenke, f.eks.
-      'https://cal.com/dotdev' eller en Calendly-lenke. Skjemaet
-      byttes ut med knappen «Velg tidspunkt», som åpner lenken i ny fane.
-      Vil dere ha ekte kalendersynk, anbefaler vi gratisplanen til
-      Cal.com: den viser bare tider som faktisk er ledige i Google- eller
-      Outlook-kalenderen deres, og legger bookingen rett inn der.
-   Ærlig merknad: modus 1 og 2 sjekker IKKE hva som faktisk er ledig.
-   Kalenderen viser tider etter reglene under, og dere bekrefter tiden
-   på e-post (innen én arbeidsdag, slik siden lover).
+   Knappen «Velg tidspunkt» på kalenderkortet åpner bookingsiden i Google
+   Kalender i en ny fane (mer i punkt 8 i guiden øverst i filen). Står
+   externalUrl tom (''), vises kortet «Book en samtale på e-post» i stedet.
    ═══════════════════════════════════════════════════════════════════ */
 const BOOKING = {
-    studio: 'DOTDEV',            // navnet som brukes i e-posten og kalenderfilen
-    email: 'kontakt@dotdev.no',       // hit går forespørslene i modus 1
-    formEndpoint: '',                 // modus 2, f.eks. 'https://formspree.io/f/dinkode'
-    // modus 3: bookingsiden «Introsamtale med DOTDEV» i Google Kalender (kontakt@dotdev.no).
+    // Bookingsiden «Introsamtale med DOTDEV» i Google Kalender (kontakt@dotdev.no).
     // Bruk den lange adressen med ?hl=no (kortlenken calendar.app.google mister språket).
+    // På engelsk (?lang=en) byttes hl=no til hl=en automatisk.
     externalUrl: 'https://calendar.google.com/calendar/appointments/schedules/AcZssZ3D9coY1AykZQDfDVF3EKbgtgS4DjhijDuONKMRV1ynmMh1uin8-eJXwwtpp4HUXAClbdlJyZIz?hl=no',
 
-    // Samtaletyper. title = navn, minutes = varighet, where = 'video' eller
-    // 'telefon' (telefon gjør telefonfeltet påkrevd), text = én kort linje.
-    // titleEn og textEn er det samme på engelsk (vises med ?lang=en). Mangler
-    // de, brukes den norske teksten også på engelsk.
-    // Kopier en blokk for en ny type, eller slett en blokk for å fjerne den.
+    // Samtaletypene på kortet. title = navn, minutes = varighet, titleEn = navnet
+    // på engelsk (vises med ?lang=en; mangler det, brukes det norske).
+    // Samme samtale som bookingsiden i Google Kalender (externalUrl). Lager dere flere
+    // samtaletyper der, legg dem til her også, så kortet på nettsiden stemmer.
     types: [
-        // Samme samtale som bookingsiden i Google Kalender (externalUrl). Lager dere flere
-        // samtaletyper der, legg dem til her også, så kortet på nettsiden stemmer.
-        { id: 'intro',  title: 'Introsamtale',        minutes: 30, where: 'video',   text: 'Bli kjent med oss, fortell om ideen din og hør hvordan vi kan hjelpe.',
-          titleEn: 'Intro call',     textEn: 'Get to know us, tell us about your idea and hear how we can help.' }
-    ],
-
-    days: [1, 2, 3, 4, 5],       // ukedager: 1 = mandag … 5 = fredag, 6 = lørdag, 7 = søndag
-    start: '09:00',              // første mulige starttid (norsk tid)
-    end: '16:00',                // samtalen må være ferdig senest da
-    interval: 30,                // minutter mellom hver mulige starttid
-    lunch: ['11:30', '12:00'],   // lunsjpause (fra, til). Ingen pause: []
-    weeksAhead: 4,               // hvor mange uker frem man kan booke
-    minNoticeHours: 48,          // minste varsel i timer før en samtale. 48 gir dere
-                                 // tid til å bekrefte (svartid én arbeidsdag)
-                                 // god tid før samtalen.
-    publicHolidays: true,        // true = norske helligdager stenges automatisk hvert år
-    // Egne fridager og ferie (ÅÅÅÅ-MM-DD), i tillegg til helligdagene.
-    // Utvid listen hvert år (sommerferie, romjul, planleggingsdager osv.).
-    holidays: ['2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31', '2027-01-01']
+        { title: 'Introsamtale', minutes: 30, titleEn: 'Intro call' }
+    ]
 };
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -2822,9 +2251,8 @@ const BOOKING = {
    • Attributter (data-i18n-attr: aria-label, alt, placeholder, data-…)
      og meta.* er ren tekst: skriv & som vanlig.
    • Mangler en nøkkel her, vises den norske teksten også på engelsk.
-   • Meldinger fra bookingen (feil, kunngjøringer, e-post og
-     kalenderfil) står i MSG i modul 11, og engelske navn på
-     samtaletypene står i BOOKING.types (titleEn og textEn).
+   • Engelske navn på samtaletypene i bookingen står i BOOKING.types
+     (titleEn), og etiketten «Video» i MSG i modul 11.
    ═══════════════════════════════════════════════════════════════════ */
 const I18N = {
     en: {
@@ -2848,8 +2276,9 @@ const I18N = {
         'nav.book': 'Book a call',
         'nav.contact': 'Contact',
         'nav.login': 'Log in',
+        'nav.mypage': 'My page',
         'nav.groupWeb': 'Websites',
-        'nav.webBlurb': 'Fast, custom websites that work on every screen.',
+        'nav.webBlurb': 'Fast websites that work on every screen.',
         'nav.aiBlurb': 'Automation that takes care of the repetitive tasks.',
         'nav.uxBlurb': 'Interfaces that are easy to understand and use.',
         'nav.brandBlurb': 'A logo, colours and typography that fit together.',
@@ -2860,31 +2289,30 @@ const I18N = {
         'mail.or': 'or email',
 
         // Hero (den engelske overskriften er slagordet)
-        'hero.tag': 'Web Design &amp; AI Automation',
+        'hero.tag': 'Web design &amp; AI automation',
         'hero.title': 'Design. Development. <span class="accent">Growth.</span>',
-        'hero.lead': 'We design and develop custom websites that strengthen your brand and help your business grow.',
+        'hero.lead': 'We design and build custom websites for businesses and automate repetitive tasks with AI.',
         'hero.about': 'Get to know us',
 
         // Prosjekter
-        'work.talk': 'Talk to us →',
         'work.djAlt': 'The djtiny.no homepage: the DJ Tiny logo in neon above a packed dance floor',
         'work.service': 'Service',
         'work.ent': 'Entertainment',
         'work.industry': 'Industry',
-        'work.djDesc': 'Website for DJ Tiny, a DJ in Eastern Norway for weddings, corporate parties and clubs. A dark neon look, services, upcoming bookings, music bingo and booking requests straight from the site.',
+        'work.djDesc': 'Website for DJ Tiny, a DJ in Eastern Norway for weddings, corporate parties and clubs. A dark neon look, services, upcoming gigs, music bingo and booking requests straight from the site.',
         'work.visitLabel': 'Visit djtiny.no (opens in a new tab)',
         'work.visit': 'Visit the site',
         'work.openCat': '02 – Open slot',
         'work.openTag': 'Your project could be next',
-        'work.openDesc': 'We’re taking on new projects now. Book a no-obligation call and we’ll work out what we can build for you.',
+        'work.openDesc': 'We’re taking on new projects now. Book a call and we’ll work out what we can build for you.',
         'work.yours': 'Your project',
 
         // Tjenester
         'svc.title': 'Websites that make<br><span class="accent">a lasting impression</span>',
-        'svc.intro': 'Tailored solutions that pair good design with technology that works, from first sketch to launch. Pick one service, or let us handle the whole thing.',
+        'svc.intro': 'From first sketch to launch. Pick one service, or let us handle the whole thing.',
         'svc.web': 'Web design &amp; development',
         'svc.webMore': 'Show details: Web design &amp; development',
-        'svc.web1': 'Custom design and development',
+        'svc.web1': 'Designed for your business',
         'svc.web2': 'Works on mobile, tablet and desktop',
         'svc.web3': 'Built to be found on Google',
         'svc.web4': 'Fast load times',
@@ -2894,7 +2322,7 @@ const I18N = {
         'svc.ai1': 'Enquiries answered and sorted automatically',
         'svc.ai2': 'A chatbot that answers your customers',
         'svc.ai3': 'Tools that talk to each other',
-        'svc.ai4': 'Reports that write themselves',
+        'svc.ai4': 'Reports generated automatically',
         'svc.aiNote': '<strong>Right for</strong> businesses that spend a lot of time on manual, repetitive tasks.',
         'svc.ux': 'UI/UX design',
         'svc.uxMore': 'Show details: UI/UX design',
@@ -2902,121 +2330,69 @@ const I18N = {
         'svc.ux2': 'Wireframes and clickable prototypes',
         'svc.ux3': 'Interfaces that are easy to use',
         'svc.ux4': 'Accessibility (WCAG)',
-        'svc.uxNote': '<strong>Right for</strong> new digital products, and websites that get visits but not enquiries.',
+        'svc.uxNote': '<strong>Right for</strong> new digital products and for websites that get visits but no enquiries.',
         'svc.brand': 'Brand identity',
         'svc.brandMore': 'Show details: Brand identity',
         'svc.brand1': 'Logo and visual identity',
         'svc.brand2': 'Colours and typography',
         'svc.brand3': 'Brand guidelines that keep things consistent',
         'svc.brand4': 'Easy to build on',
-        'svc.brandNote': '<strong>Right for</strong> new businesses, and businesses that need a clearer look.',
+        'svc.brandNote': '<strong>Right for</strong> new businesses and for those that need a clearer look.',
 
         // Prosess
         'proc.kicker': 'Our process',
         'proc.title': 'Simple.<br>Effective.',
         'proc.1': 'Discovery',
         'proc.1t': 'First, we get to know you and your business. What should the website achieve, and who should it reach?',
-        'proc.2': 'Design &amp; Strategy',
+        'proc.2': 'Design &amp; strategy',
         'proc.2t': 'We design the site around your business, so the look, content and structure all pull in the same direction.',
         'proc.3': 'Development',
-        'proc.3t': 'We build the site with clean code, so it loads quickly, works just as well on mobile, is accessible to everyone and is easy to find on Google.',
-        'proc.4': 'Launch &amp; Support',
+        'proc.3t': 'We build the site with clean code, so it loads quickly, works just as well on mobile, is accessible to everyone and is built to be found on Google.',
+        'proc.4': 'Launch',
         'proc.4t': 'We publish the site and check that everything works. Afterwards, we help you whenever something needs changing.',
 
         // Om oss
         'about.title': 'Two childhood friends.<br>One studio.',
         'about.1': 'Who we are',
-        'about.1t': 'A small studio for websites and AI automation. The same two people are with you from first sketch to launch.',
+        'about.1t': 'A small studio for websites and AI automation. The same two people are with you all the way.',
         'about.2': 'What we believe',
         'about.2t': 'A website shouldn’t just look good. It should be fast and clear, and make it easy for your customers to get in touch.',
         'about.3': 'How we work',
         'about.3t': 'We design everything from the ground up and take time over the details, so your site doesn’t look like everyone else’s.',
 
         // Spørsmål og svar
-        'faq.title': 'Questions we often get',
+        'faq.title': 'Frequently asked questions',
         'faq.q1': 'How much does a website cost?',
-        'faq.a1': 'It depends on what you need. After a no-obligation call, you get a concrete quote, so you know the cost before we start.',
+        'faq.a1': 'It depends on what you need. After a no-obligation call, you’ll get a detailed quote, so you know the cost before we start.',
         'faq.q2': 'Can you improve the website I already have?',
-        'faq.a2': 'Yes. Book an intro call, and we’ll look at your website together and give you concrete suggestions for improvements.',
+        'faq.a2': 'Yes. Book an intro call, and we’ll look at your website together and give you specific suggestions for improvement.',
         'faq.q3': 'What is AI automation, and is it right for us?',
         'faq.a3': 'It means repetitive tasks are done automatically, such as replying to and sorting enquiries or creating reports. In a short call, we’ll find out whether anything in your business is worth automating.',
         'faq.q4': 'Do I need to know exactly what I want?',
         'faq.a4': 'No. We’ll work it out together and help you prioritise what adds the most value.',
         'faq.q5': 'What happens after launch?',
-        'faq.a5': 'We stay with you with tweaks, updates and ongoing improvements, so your website keeps working for you.',
+        'faq.a5': 'We’ll keep supporting you with tweaks, updates and ongoing&nbsp;improvements.',
 
-        // Booking (tekstene i HTML-en; meldingene står i MSG i modul 11)
-        'bk.title': 'Book a no-obligation call',
-        'bk.lead': 'Wondering what we can do for you? Pick a time that suits you, and we’ll talk about your project.',
-        'bk.factMin': 'minutes, no obligation',
-        'bk.factWhere': 'On video or by phone – your choice',
+        // Booking
+        'bk.title': 'Book a <span class="nowrap">no-obligation</span> call',
+        'bk.lead': 'Wondering what we can do for you? Pick a time, and we’ll talk about your project.',
+        'bk.factMin': 'minutes',
+        'bk.factWhere': 'By video call',
         'bk.factConfirm': 'We’ll confirm the time by email within one working&nbsp;day',
         'bk.factConfirmExt': 'You’ll get an email confirmation straight away',
         'bk.alt': 'Prefer email?',
         'bk.nojsTitle': 'Book a call by email',
         'bk.nojsText': 'Send us an email with a few times that suit you, and we’ll find a time together. We reply within one working&nbsp;day.',
-        'bk.steps': 'Booking steps',
-        'bk.sType': 'Type',
-        'bk.sTime': 'Time',
-        'bk.sDetails': 'Details',
-        'bk.tzShort': 'Norwegian time',
-        'bk.t1': 'What’s it about?',
-        'bk.t1s': 'Choose the type of call that suits you best.',
-        'bk.t2': 'Choose a time',
-        'bk.t2s': 'Pick a date and a time that suit you. We’ll confirm the time by email.',
-        'bk.prev': 'Previous month',
-        'bk.next': 'Next month',
-        'bk.calHelp': 'Arrow keys move between dates. Page Up and Page Down change the month. Enter or Space selects the date.',
-        'bk.legendOpen': 'Available',
-        'bk.legendPicked': 'Selected',
-        'bk.slots': 'Available times',
-        'bk.pickDate': 'Choose a date in the calendar to see the times.',
-        'bk.tzLong': 'All times are Norwegian time (Europe/Oslo).',
-        'bk.t3': 'Your details',
-        'bk.t3s': 'Tell us a little about yourself so we can prepare for the call.',
-        'bk.name': 'Name',
-        'bk.nameMissing': 'Please enter your name so we know who we’re talking to.',
-        'bk.email': 'Email',
-        'bk.emailMissing': 'Please enter your email address so we can confirm the time.',
-        'bk.emailType': 'Please check the email address. It should look like name@company.com.',
-        'bk.company': 'Company',
-        'bk.phone': 'Phone',
-        'bk.phoneMissing': 'Please enter your phone number so we can call you.',
-        'bk.phonePattern': 'The phone number can only contain digits, spaces, + and hyphens.',
-        'bk.message': 'What would you like to talk about?',
-        'bk.messagePh': 'E.g. a new website, a redesign or AI automation',
-        'bk.sumType': 'Type',
-        'bk.sumDate': 'Date',
-        'bk.sumTime': 'Time',
-        'bk.editType': 'Change<span class="sr-only"> call type</span>',
-        'bk.editDate': 'Change<span class="sr-only"> date</span>',
-        'bk.editTime': 'Change<span class="sr-only"> time</span>',
-        'bk.note': 'Fields marked <span class="bk-req">*</span> are required. We only use your details to reply to you. Read more in our <a class="ulink ulink--on" href="personvern.html">privacy policy</a>.',
-        'bk.trap': 'Do not fill in this field',
-        'bk.back': '<span aria-hidden="true">←</span> Back',
-        'bk.nextBtn': 'Next',
-        'bk.sendBtn': 'Send request',
-        'bk.busyBtn': 'Sending …',
-        'bk.doneSent': 'Thank you! Your request has been sent.',
-        'bk.doneMailto': 'Almost done! Send the email to finish.',
-        'bk.noteMailto': 'Your email app opens with the request filled in. Press “Send” in the email, and it’s on its way to us.',
-        'bk.retryQ': 'Didn’t your email app open?',
-        'bk.retry': 'Try again',
-        'bk.retryOr': 'or write to',
-        'bk.noteSent': 'We’ve received your request and look forward to talking with you.',
-        'bk.ics': 'Add to calendar',
-        'bk.again': 'Book another call <span aria-hidden="true">→</span>',
-        'bk.fine': 'The time is provisional until we’ve confirmed it by email. We’ll do that within one working&nbsp;day.',
         'bk.extEyebrow': 'Calendar',
         'bk.extTitle': 'Choose a time that suits you',
-        'bk.extText': 'Our calendar opens in a new tab. It only shows times that are actually free, and you’ll get an email confirmation straight away.',
+        'bk.extText': 'Our calendar opens in a new tab and shows only available times.',
         'bk.extBtn': 'Choose a time<span class="sr-only"> (opens in a new tab)</span>',
 
         // Kontakt (buen: frasen fem ganger, som på norsk)
-        'cta.ring': 'Book a call — Book a call — Book a call — Book a call — Book a call — ',
+        'cta.ring': 'Get started — Get started — Get started — Get started — Get started — ',
         'cta.title': 'Ready to talk?',
         'cta.copy': 'Tell us briefly about your business and what you need, and we’ll get back to you within one working&nbsp;day.',
-        'cta.mailHref': 'mailto:kontakt@dotdev.no?subject=New%20project&body=Hi%20DOTDEV!%0D%0A%0D%0ACompany%3A%0D%0AWebsite%20(if%20you%20have%20one)%3A%0D%0AWhat%20do%20you%20need%20help%20with%3A%0D%0APreferred%20start%3A%0D%0A%0D%0A',
+        'cta.mailHref': 'mailto:kontakt@dotdev.no?subject=New%20project&body=Hi%20DOTDEV!%0D%0A%0D%0ACompany%3A%0D%0ACurrent%20website%20(if%20any)%3A%0D%0AWhat%20is%20it%20about%3A%0D%0APreferred%20start%3A%0D%0A%0D%0A',
 
         // Footer
         'footer.tagline': 'Websites and AI automation for businesses that want to stand out.',
@@ -3025,6 +2401,7 @@ const I18N = {
         'footer.company': 'Org. no. 936 133 231',
         'footer.privacy': 'Privacy',
         'footer.portal': 'Client login',
+        'footer.mypage': 'My page',
         'footer.top': 'Back to top ↑'
     }
 };
@@ -3089,16 +2466,39 @@ const I18N = {
                 if (val == null) el.removeAttribute(a); else el.setAttribute(a, val);
             });
         };
-        // Lenker til andre sider her (f.eks. personvern.html) får ?lang=en med seg
+        // Lenker med data-lang-carry (f.eks. href="/personvern") får ?lang=en med seg.
+        // Merket står på lenken, så det virker også når Netlify har skrevet om
+        // «personvern.html» til «/personvern».
         const carry = a => {
+            if (!a.hasAttribute('data-lang-carry')) return;
             const h = a.getAttribute('href') || '';
-            const m = /^([^?#:]+\.html)(\?[^#]*)?(#.*)?$/i.exec(h);
+            const m = /^([^?#]+)(\?[^#]*)?(#.*)?$/.exec(h);
             if (!m) return;
             const q = (m[2] || '').slice(1).split('&').filter(p => p && !/^lang=/i.test(p));
             if (cur !== 'no') q.push('lang=' + cur);
             a.setAttribute('href', m[1] + (q.length ? '?' + q.join('&') : '') + (m[3] || ''));
         };
+        // Ankeret ved språkbytte: det innerste elementet som krysser en linje 40 %
+        // ned på skjermen, så teksten man leser blir stående i ro selv om tekstene
+        // over blir kortere eller lengre. Regnes ut fra boksene (ikke elementFromPoint),
+        // så det virker også når menyen er åpen og <main> er inert.
+        const anchorAt = () => {
+            const y = window.innerHeight * .4;
+            const hit = el => { const r = el.getBoundingClientRect(); return r.height > 0 && r.top <= y && r.bottom > y; };
+            const sec = $$('main > section, body > footer').find(hit);
+            let el = sec;
+            while (el) {
+                if (getComputedStyle(el).position === 'sticky') return sec;     // Om oss, Booking: hele seksjonen
+                if (el.hasAttribute('data-i18n') || el.hasAttribute('data-bk-ext-types')) break;   // innholdet byttes ut
+                const next = Array.from(el.children).find(c => c.getAttribute('aria-hidden') !== 'true' && hit(c));
+                if (!next) break;
+                el = next;
+            }
+            return el || null;
+        };
         const set = (lang, initial) => {
+            const anchor = initial ? null : anchorAt();
+            const y0 = anchor ? anchor.getBoundingClientRect().top : 0;
             cur = lang === 'en' && dict.en ? 'en' : 'no';
             root.lang = cur;
             document.title = tr('meta.title') || base.title;
@@ -3113,6 +2513,12 @@ const I18N = {
                 window.history.replaceState(window.history.state, '', u.pathname + u.search + u.hash);
             } catch (e) { /* f.eks. file:// i enkelte nettlesere */ }
             subs.forEach(fn => fn(cur));
+            // Rett opp med en gang ('instant'): html har scroll-behavior: smooth,
+            // og en glidende rulling her ville vært unødvendig uro
+            const dy = anchor && anchor.isConnected ? Math.round(anchor.getBoundingClientRect().top - y0) : 0;
+            if (dy) {
+                try { window.scrollBy({ top: dy, behavior: 'instant' }); } catch (e) { window.scrollBy(0, dy); }
+            }
         };
         // Husk all norsk tekst før andre moduler endrer noe
         $$('[data-i18n], [data-i18n-attr]').forEach(remember);
@@ -3125,6 +2531,23 @@ const I18N = {
 
     /* ── 1. Årstall i footeren ─────────────────────────────────── */
     $$('[data-year]').forEach(el => { el.textContent = String(new Date().getFullYear()); });
+
+    /* ── 1b. «Min side» for kunder som er innlogget i kundeportalen ─ */
+    // Innloggingscookien er HttpOnly og sendes bare til /api/kunde, så forsiden ser bare flagget
+    // __Secure-dd_innlogget (bare «1»). Uten flagget spør vi ikke portalen i det hele tatt.
+    if (/(?:^|;\s*)__Secure-dd_innlogget=1(?:;|$)/.test(document.cookie)) {
+        fetch('/api/kunde/meg', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+            .then(res => (res.ok ? res.json() : null))
+            .then(d => {
+                if (!d || d.innlogget !== true) return;
+                $$('[data-min-side]').forEach(a => {
+                    $$('[data-utlogget]', a).forEach(s => { s.hidden = true; });
+                    $$('[data-innlogget]', a).forEach(s => { s.hidden = false; });
+                    if (typeof d.navn === 'string' && d.navn) a.title = d.navn;
+                });
+            })
+            .catch(() => {});                        // ingen svar: «Logg inn» blir stående
+    }
 
     /* ── 2. Meny (åpne/lukke, Esc, fokusfelle, scroll-lås) ──────── */
     const nav = $('[data-nav]');
@@ -3182,16 +2605,6 @@ const I18N = {
             else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
         });
 
-        // Mobil: «Tjenester» som trekkspill i menyen
-        const acc = $('[data-acc]', nav);
-        const accBtn = acc && $('[data-acc-toggle]', acc);
-        if (acc && accBtn) {
-            accBtn.addEventListener('click', () => {
-                const open = !acc.classList.contains('is-acc-open');
-                acc.classList.toggle('is-acc-open', open);
-                accBtn.setAttribute('aria-expanded', String(open));
-            });
-        }
         // Lukk menyen hvis vinduet blir bredt/smalt mens den er åpen (unngå rar tilstand)
         onMQ(window.matchMedia('(max-width: 991px)'), () => { if (isOpen) setOpen(false, false); });
     }
@@ -3231,84 +2644,6 @@ const I18N = {
         });
         onMQ(mq, apply);
         apply();
-    }
-
-    /* ── 4. Scramble-overskrifter ──────────────────────────────── */
-    // Deler overskriften i bokstaver (skjult for skjermlesere) og legger
-    // den hele teksten i en visuelt skjult <span>, så den alltid leses riktig.
-    const scrambles = $$('[data-scramble]');
-    if (scrambles.length && !reduced() && 'IntersectionObserver' in window) {
-        const wrapChars = node => {
-            Array.from(node.childNodes).forEach(child => {
-                if (child.nodeType === Node.TEXT_NODE) {
-                    const frag = document.createDocumentFragment();
-                    child.textContent.split(/(\s+)/).forEach(part => {
-                        if (!part) return;
-                        if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
-                        const word = document.createElement('span');
-                        word.className = 'scr__w';
-                        Array.from(part).forEach(ch => {
-                            const c = document.createElement('span');
-                            c.className = 'scr__c';
-                            c.textContent = ch;
-                            // tilfeldig startposisjon og forsinkelse per bokstav
-                            const dir = Math.random() < .5 ? -1 : 1;
-                            c.style.setProperty('--dy', (dir * (.25 + Math.random() * .9)).toFixed(2) + 'em');
-                            c.style.setProperty('--d', (Math.random() * .55).toFixed(2));
-                            word.appendChild(c);
-                        });
-                        frag.appendChild(word);
-                    });
-                    child.replaceWith(frag);
-                } else if (child.nodeType === Node.ELEMENT_NODE && child.tagName !== 'BR') {
-                    wrapChars(child);
-                }
-            });
-        };
-        // Fremdrift 0 → 1 mens overskriften går fra 90 % til 50 % av skjermhøyden.
-        // Kun overskrifter som er på skjermen oppdateres (IntersectionObserver).
-        const live = new Set();
-        let ticking = false;
-        const progress = top => clamp((window.innerHeight * .9 - top) / (window.innerHeight * .4), 0, 1);
-        const update = () => {
-            ticking = false;
-            live.forEach(h => h.style.setProperty('--p', progress(h.getBoundingClientRect().top).toFixed(3)));
-        };
-        const request = () => { if (!ticking && live.size) { ticking = true; requestAnimationFrame(update); } };
-        const io = new IntersectionObserver(entries => {
-            entries.forEach(e => {
-                if (e.isIntersecting) live.add(e.target);
-                else {
-                    live.delete(e.target);
-                    // utenfor skjermen: helt ferdig (over) eller helt spredt (under)
-                    e.target.style.setProperty('--p', e.boundingClientRect.top < 0 ? '1' : '0');
-                }
-            });
-            request();
-        });
-        window.addEventListener('scroll', request, { passive: true });
-        window.addEventListener('resize', request);
-        const split = h => {
-            // innerText gjør <br> om til mellomrom, så ordene ikke limes sammen
-            const text = (h.innerText || h.textContent).replace(/\s+/g, ' ').trim();
-            const sr = document.createElement('span');
-            sr.className = 'sr-only';
-            sr.textContent = text;
-            const vis = document.createElement('span');
-            vis.className = 'scr';
-            vis.setAttribute('aria-hidden', 'true');
-            while (h.firstChild) vis.appendChild(h.firstChild);
-            wrapChars(vis);
-            h.append(sr, vis);
-        };
-        scrambles.forEach(h => {
-            split(h);
-            h.style.setProperty('--p', String(progress(h.getBoundingClientRect().top)));
-            io.observe(h);
-        });
-        // Nytt språk: LANG har lagt inn den nye teksten, så del den opp på nytt
-        // (--p beholdes, så en ferdig overskrift forblir ferdig)
-        LANG.on(() => scrambles.forEach(h => { if (h.hasAttribute('data-i18n')) split(h); }));
     }
 
     /* ── 5. PIXEL: prosedyrisk pikselkunst på <canvas> ─────────── */
@@ -3746,14 +3081,22 @@ const I18N = {
         mode();
     }
 
+    /* ── 9. Utskrift: svarene i Spørsmål og svar kommer med ──────── */
+    // Lukkede <details> skrives ikke ut. Alle åpnes før utskrift og
+    // settes tilbake slik de var etterpå.
+    const faqs = $$('.faq__item');
+    if (faqs.length) {
+        let faqOpen = [];
+        window.addEventListener('beforeprint', () => { faqOpen = faqs.map(d => d.open); faqs.forEach(d => { d.open = true; }); });
+        window.addEventListener('afterprint', () => faqs.forEach((d, i) => { d.open = !!faqOpen[i]; }));
+    }
+
     /* ── 11. Booking «Book en samtale» ─────────────────────────────── */
-    // Innstillingene står i BOOKING øverst i skriptet. Modus velges i init():
-    // externalUrl → kort med lenke, formEndpoint → fetch POST, ellers mailto.
-    // Datoer er rene kalenderdatoer (UTC-midnatt i Date-objektet), og
-    // klokkeslett er alltid norsk tid (Europe/Oslo), uansett hvor besøkende
-    // befinner seg. Mangler seksjonen, gjør modulen ingenting.
-    // Test/konsoll: DotdevBooking.init() leser BOOKING på nytt, DotdevBooking.ics()
-    // gir kalenderfilen for siste forespørsel som tekst.
+    // Innstillingene står i BOOKING øverst i skriptet. Kalenderkortet får
+    // lenken til bookingsiden (externalUrl) og samtaletypene (types). Mangler
+    // lenken, vises e-postkortet (det samme som uten JavaScript) i stedet.
+    // Mangler seksjonen, gjør modulen ingenting.
+    // Test/konsoll: DotdevBooking.init() leser BOOKING på nytt.
     (() => {
         const box = $('[data-booking]');
         const section = box && box.closest('section');
@@ -3767,871 +3110,80 @@ const I18N = {
             });
             return;
         }
-        const TZ = 'Europe/Oslo';
-        const DAY = 864e5;
         const q = sel => $(sel, box);
-        const el = {
-            widget: q('[data-bk]'), ext: q('[data-bk-ext]'), extLink: q('[data-bk-ext-link]'), extTypes: q('[data-bk-ext-types]'),
-            form: q('[data-bk-form]'), panes: $$('[data-bk-pane]', box), stepBtns: $$('[data-bk-step]', box), types: q('[data-bk-types]'),
-            month: q('[data-bk-month]'), prev: q('[data-bk-prev]'), next: q('[data-bk-next]'), weekdays: q('[data-bk-weekdays]'), days: q('[data-bk-days]'),
-            slots: q('[data-bk-slots]'), slotsDate: q('[data-bk-slots-date]'), slotsEmpty: q('[data-bk-slots-empty]'),
-            picked: q('[data-bk-picked]'), back: q('[data-bk-back]'), submit: q('[data-bk-submit]'), submitTxt: q('[data-bk-submit-txt]'),
-            alert: q('[data-bk-alert]'), status: q('[data-bk-status]'), phoneReq: q('[data-bk-phone-req]'),
-            done: q('[data-bk-done]'), doneTitle: q('[data-bk-done-title]'), mailAgain: q('[data-bk-mail-again]'), ics: q('[data-bk-ics]'), again: q('[data-bk-again]')
-        };
+        const el = { ext: q('[data-bk-ext]'), extLink: q('[data-bk-ext-link]'), extTypes: q('[data-bk-ext-types]') };
 
-        // ✏️ Meldinger som vises og leses opp (resten av teksten står i HTML-en),
-        // og tekstene i e-posten (mail…) og kalenderfilen (ics…).
-        // no = norsk, en = engelsk (?lang=en). Endrer du en melding, endre begge.
-        // Kalenderen vet ikke hva som faktisk er ledig, så ordlyden er nøytral.
-        const MSG = {
-            no: {
-                pickType: 'Velg hva samtalen gjelder først.',
-                pickDate: 'Velg en dato i kalenderen.',
-                pickTime: 'Velg et klokkeslett.',
-                fixOne: 'Nesten ferdig! Sjekk feltet som er markert.',
-                fixMany: n => `Nesten ferdig! Sjekk de ${n} feltene som er markert.`,
-                expired: 'Tiden du valgte kan ikke lenger bookes. Velg en ny tid.',
-                required: 'Dette feltet må fylles ut.',
-                invalid: 'Sjekk at dette er riktig skrevet.',
-                tooLong: 'Teksten er litt for lang.',
-                notFree: 'Denne datoen kan ikke velges.',
-                dayOff: ', kan ikke velges',
-                today: ', i dag',
-                picked: (day, n) => `${day} er valgt. ${n === 1 ? 'Én mulig tid' : n + ' mulige tider'}.`,
-                step: (n, title) => `Steg ${n} av 3${title ? ': ' + title : ''}`,
-                stepDone: ' (fullført)',
-                noneThatDay: 'Ingen tider denne dagen. Prøv en annen dato.',
-                noneAtAll: 'Ingen tider å velge de neste ukene. Skriv til oss på e-post i stedet.',
-                sendError: 'Beklager, forespørselen ble ikke sendt. Prøv igjen om litt, eller',
-                sendErrorLink: 'send den på e-post',
-                shortened: '… (meldingen er forkortet)',
-                icsDone: 'Kalenderfilen er lastet ned.',
-                icsError: 'Kalenderfilen kunne ikke lages i denne nettleseren.',
-                video: 'Video', phone: 'Telefon', call: 'Samtale',
-                until: ' til ',                        // «09:00 til 09:30» for skjermlesere
-                tz: '(norsk tid)',
-                // E-posten (modus 1) og feltene i skjematjenesten (modus 2)
-                mailSubject: (type, date, time) => `Booking: ${type}, ${date} kl. ${time}`,
-                mailHello: 'Hei!',
-                mailIntro: 'Jeg vil gjerne booke en samtale:',
-                mailType: 'Type', mailDate: 'Dato', mailTime: 'Tid', mailName: 'Navn',
-                mailEmail: 'E-post', mailCompany: 'Bedrift', mailPhone: 'Telefon',
-                mailTopic: 'Hva jeg vil snakke om:',
-                mailFooter: studio => `Sendt fra bookingen på nettsiden til ${studio}.`,
-                // Kalenderfilen (.ics)
-                icsTitle: (type, studio) => `${type} med ${studio}`,
-                icsRequest: (type, studio) => `Forespørsel om ${type.toLowerCase()} med ${studio}.`,
-                icsTentative: studio => `Tiden er foreløpig til ${studio} har bekreftet den på e-post (innen én arbeidsdag).`,
-                icsTopic: 'Tema:',
-                icsQuestions: 'Spørsmål?',
-                icsPhone: 'Telefon (vi ringer deg)',
-                icsVideo: 'Video (lenke kommer på e-post)'
-            },
-            en: {
-                pickType: 'First, choose what the call is about.',
-                pickDate: 'Choose a date in the calendar.',
-                pickTime: 'Choose a time.',
-                fixOne: 'Almost done! Please check the highlighted field.',
-                fixMany: n => `Almost done! Please check the ${n} highlighted fields.`,
-                expired: 'The time you chose can no longer be booked. Please choose a new time.',
-                required: 'This field is required.',
-                invalid: 'Please check that this is entered correctly.',
-                tooLong: 'The text is a little too long.',
-                notFree: 'This date is not available.',
-                dayOff: ', not available',
-                today: ', today',
-                picked: (day, n) => `${day} selected. ${n === 1 ? 'One available time' : n + ' available times'}.`,
-                step: (n, title) => `Step ${n} of 3${title ? ': ' + title : ''}`,
-                stepDone: ' (completed)',
-                noneThatDay: 'No times available on this day. Please try another date.',
-                noneAtAll: 'No times available in the coming weeks. Please email us instead.',
-                sendError: 'Sorry, your request was not sent. Please try again shortly, or',
-                sendErrorLink: 'send it by email',
-                shortened: '… (message shortened)',
-                icsDone: 'The calendar file has been downloaded.',
-                icsError: 'The calendar file could not be created in this browser.',
-                video: 'Video', phone: 'Phone', call: 'Call',
-                until: ' to ',
-                tz: '(Norwegian time)',
-                mailSubject: (type, date, time) => `Booking: ${type}, ${date} at ${time}`,
-                mailHello: 'Hi,',
-                mailIntro: 'I would like to book a call:',
-                mailType: 'Type', mailDate: 'Date', mailTime: 'Time', mailName: 'Name',
-                mailEmail: 'Email', mailCompany: 'Company', mailPhone: 'Phone',
-                mailTopic: 'What I would like to talk about:',
-                mailFooter: studio => `Sent from the booking form on the ${studio} website.`,
-                icsTitle: (type, studio) => `${type} with ${studio}`,
-                icsRequest: (type, studio) => `Booking request: ${type} with ${studio}.`,
-                icsTentative: studio => `The time is provisional until ${studio} has confirmed it by email (within one working day).`,
-                icsTopic: 'Topic:',
-                icsQuestions: 'Questions?',
-                icsPhone: 'Phone (we will call you)',
-                icsVideo: 'Video (link sent by email)'
-            }
-        };
-        // Meldingene på gjeldende språk (mangler en engelsk melding, brukes den norske)
-        const M = () => (LANG.en() ? Object.assign({}, MSG.no, MSG.en) : MSG.no);
+        // ✏️ Tekster som lages av skriptet: etiketten på kortet og reservenavnet
+        // når en samtaletype mangler title. no = norsk, en = engelsk (?lang=en).
+        const MSG = { no: { video: 'Video', call: 'Samtale' }, en: { video: 'Video', call: 'Call' } };
+        const M = () => (LANG.en() ? MSG.en : MSG.no);
 
         /* Innstillinger (leses på nytt hver gang, så init() fanger endringer) */
-        const DEFAULTS = { studio: 'DOTDEV', email: '', formEndpoint: '', externalUrl: '', types: [], days: [1, 2, 3, 4, 5], start: '09:00', end: '16:00', interval: 30, lunch: [], weeksAhead: 4, minNoticeHours: 24, publicHolidays: true, holidays: [] };
-        // Mangler e-post i BOOKING, brukes adressen fra e-postknappen i seksjonen
-        const mailLink = $('a[href^="mailto:"]', box);
-        const fallbackEmail = mailLink ? decodeURIComponent(mailLink.getAttribute('href').slice(7).split('?')[0]) : '';
-        const cfg = () => {
-            const c = Object.assign({}, DEFAULTS, (typeof BOOKING === 'object' && BOOKING) || {});
-            if (!String(c.email || '').trim()) c.email = fallbackEmail;
-            if (!String(c.studio || '').trim()) c.studio = DEFAULTS.studio;
-            return c;
-        };
+        const cfg = () => Object.assign({ externalUrl: '', types: [] }, (typeof BOOKING === 'object' && BOOKING) || {});
         const normTypes = list => {
-            const out = (Array.isArray(list) ? list : []).filter(t => t && typeof t === 'object').map((t, i) => ({
-                id: String(t.id || 'type-' + (i + 1)),
+            const out = (Array.isArray(list) ? list : []).filter(t => t && typeof t === 'object').map(t => ({
                 title: t.title ? String(t.title) : '',
                 titleEn: t.titleEn ? String(t.titleEn) : '',
-                minutes: clamp(parseInt(t.minutes, 10) || 30, 5, 480),
-                phone: /^tel|^phone/i.test(String(t.where || '')),
-                text: t.text ? String(t.text) : '',
-                textEn: t.textEn ? String(t.textEn) : ''
+                minutes: clamp(parseInt(t.minutes, 10) || 30, 5, 480)
             }));
-            return out.length ? out : [{ id: 'samtale', title: '', titleEn: '', minutes: 30, phone: false, text: '', textEn: '' }];
+            return out.length ? out : [{ title: '', titleEn: '', minutes: 30 }];
         };
-        // Navn og tekst for en samtaletype på gjeldende språk (engelsk faller tilbake til norsk)
+        // Navnet på en samtaletype på gjeldende språk (engelsk faller tilbake til norsk)
         const nameOf = t => (LANG.en() && t.titleEn) || t.title || M().call;
-        const descOf = t => (LANG.en() && t.textEn) || t.text;
-        const whereLabel = t => (t && t.phone ? M().phone : M().video);
-
-        /* Datoer og klokkeslett */
-        const pad = n => String(n).padStart(2, '0');
-        const keyOf = d => `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
-        const fromKey = k => { const p = String(k).split('-').map(Number); return new Date(Date.UTC(p[0] || 2000, (p[1] || 1) - 1, p[2] || 1)); };
-        const addDays = (d, n) => new Date(d.getTime() + n * DAY);
-        const monthOf = d => d.getUTCFullYear() * 12 + d.getUTCMonth();
-        const monthStart = m => new Date(Date.UTC(Math.floor(m / 12), m % 12, 1));
-        const addMonths = (d, n) => {
-            const m = monthOf(d) + n, y = Math.floor(m / 12), mo = m - y * 12;
-            return new Date(Date.UTC(y, mo, Math.min(d.getUTCDate(), new Date(Date.UTC(y, mo + 1, 0)).getUTCDate())));
-        };
-        const weekday = d => (d.getUTCDay() + 6) % 7;                 // 0 = mandag … 6 = søndag
-        const toMin = s => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || '').trim()); return m ? +m[1] * 60 + +m[2] : null; };
-        const hhmm = min => pad(Math.floor(min / 60)) + ':' + pad(min % 60);
-        const cap = s => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-
-        // Hvor mange minutter norsk tid ligger foran UTC ved et tidspunkt
-        let tzFmt = null;
-        try { tzFmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { tzFmt = null; }
-        const offsetAt = ts => {
-            try {
-                const p = {};
-                tzFmt.formatToParts(new Date(ts)).forEach(x => { p[x.type] = x.value; });
-                return Math.round((Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second) - ts) / 6e4);
-            } catch (e) { return -new Date(ts).getTimezoneOffset(); }
-        };
-        // Norsk kalenderdato + minutter etter midnatt → tidspunkt i ms (UTC), sommertid inkludert
-        const osloTs = (day, min) => {
-            const guess = day.getTime() + min * 6e4;
-            return guess - offsetAt(guess - offsetAt(guess) * 6e4) * 6e4;
-        };
-        const todayOslo = () => {
-            const now = Date.now(), t = new Date(now + offsetAt(now) * 6e4);
-            return new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate()));
+        // Lenken til bookingsiden, eller '' hvis den mangler eller ikke er en nettadresse.
+        // På engelsk byttes hl=no til hl=en, så Google-siden også vises på engelsk.
+        const linkOf = () => {
+            let ext = String(cfg().externalUrl || '').trim();
+            if (LANG.en()) ext = ext.replace(/([?&]hl=)no(?=&|$)/, '$1en');
+            if (ext && !/^https?:\/\//i.test(ext) && /^[\w-]+(\.[\w-]+)+(\/|$)/.test(ext)) ext = 'https://' + ext;
+            return /^https?:\/\/\S+$/i.test(ext) ? ext : '';
         };
 
-        // Norske helligdager for et år: faste datoer + de som følger påsken
-        // (skjærtorsdag, langfredag, påskedag, 2. påskedag, Kristi himmelfart,
-        // pinsedag og 2. pinsedag). Påskedag regnes ut med Meeus' algoritme.
-        const easter = y => {
-            const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4;
-            const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
-            const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4;
-            const l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
-            const n = h + l - 7 * m + 114;
-            return new Date(Date.UTC(y, Math.floor(n / 31) - 1, (n % 31) + 1));
-        };
-        const publicHolidays = y => [`${y}-01-01`, `${y}-05-01`, `${y}-05-17`, `${y}-12-25`, `${y}-12-26`]
-            .concat([-3, -2, 0, 1, 39, 49, 50].map(n => keyOf(addDays(easter(y), n))));
-
-        // Navn på dager og måneder: Intl 'nb-NO' på norsk, 'en-GB' på engelsk.
-        // Lages på nytt når språket byttes. Reserve uten Intl: ÅÅÅÅ-MM-DD.
-        const formats = () => {
-            const loc = LANG.en() ? 'en-GB' : 'nb-NO';
-            const mk = opts => { try { return new Intl.DateTimeFormat(loc, Object.assign({ timeZone: 'UTC' }, opts)); } catch (e) { return null; } };
-            return {
-                long: mk({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
-                day: mk({ weekday: 'long', day: 'numeric', month: 'long' }),
-                short: mk({ weekday: 'short', day: 'numeric', month: 'short' }),
-                month: mk({ month: 'long', year: 'numeric' }),
-                wd: mk({ weekday: 'short' }),
-                wdLong: mk({ weekday: 'long' })
-            };
-        };
-        let F = formats();
-        const fmt = (f, d) => (f ? f.format(d) : keyOf(d));
-
-        /* Tilstand */
-        const fresh = () => ({ step: 1, type: null, date: null, time: null, view: null, focus: null, sent: false, mode: null, busy: false, tried: false, last: null, advancedAt: 0 });
-        let S = fresh(), types = [], range = null;
-        const cache = new Map();
-        const typeObj = () => types.find(t => t.id === S.type) || null;
-
-        // Ledige starttider en dag: start → slutt i intervaller, minus lunsj og
-        // alt innenfor minste varsel. Varigheten til valgt type teller med.
-        const slotsFor = (day, t) => {
-            const c = cfg(), key = keyOf(day) + '|' + (t ? t.minutes : 0);
-            if (cache.has(key)) return cache.get(key);
-            const step = Math.max(5, parseInt(c.interval, 10) || 30), dur = t ? t.minutes : step;
-            const start = toMin(c.start), end = toMin(c.end);
-            const lunch = Array.isArray(c.lunch) ? c.lunch.map(toMin) : [];
-            const ls = lunch[0], le = lunch[1];
-            const minTs = Date.now() + (Number(c.minNoticeHours) || 0) * 36e5;
-            const out = [];
-            if (start != null && end != null) {
-                for (let m = start; m + dur <= end; m += step) {
-                    if (ls != null && le != null && le > ls && m < le && m + dur > ls) continue;
-                    const ts = osloTs(day, m);
-                    if (ts >= minTs) out.push({ min: m, ts, end: ts + dur * 6e4 });
-                }
-            }
-            cache.set(key, out);
-            return out;
-        };
-        // 'open' | 'out' (utenfor perioden) | 'closed' (ukedag) | 'holiday' | 'full' (for kort varsel)
-        const dayState = d => {
-            const c = cfg();
-            if (!range || d < range.today || d > range.last) return 'out';
-            const wd = d.getUTCDay();
-            if (!(Array.isArray(c.days) ? c.days : []).some(x => (Number(x) % 7) === wd)) return 'closed';
-            if (range.hol.has(keyOf(d))) return 'holiday';
-            return slotsFor(d, typeObj()).length ? 'open' : 'full';
-        };
-        const computeRange = () => {
-            cache.clear();
-            const c = cfg(), today = todayOslo();
-            const last = addDays(today, clamp(Math.round((Number(c.weeksAhead) || 4) * 7), 1, 366));
-            const hol = new Set((Array.isArray(c.holidays) ? c.holidays : []).map(s => String(s).trim()));
-            if (c.publicHolidays !== false) {
-                for (let y = today.getUTCFullYear(); y <= last.getUTCFullYear(); y++) publicHolidays(y).forEach(k => hol.add(k));
-            }
-            range = { today, last, first: null, hol };
-            for (let d = today; d <= last; d = addDays(d, 1)) if (dayState(d) === 'open') { range.first = d; break; }
-            range.min = monthOf(range.first || today);
-            range.max = Math.max(range.min, monthOf(last));
-        };
-        // Fjern valg som ikke lenger gjelder (ny type, tiden er passert osv.)
-        const validateChoice = () => {
-            computeRange();
-            if (S.date && dayState(fromKey(S.date)) !== 'open') { S.date = null; S.time = null; }
-            if (S.date && S.time != null && !slotsFor(fromKey(S.date), typeObj()).some(s => s.min === S.time)) S.time = null;
-        };
-
-        /* Små hjelpere for DOM og kunngjøringer */
         const make = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
-        // Setter tekst og holder ord med bindestrek samlet («e-posten» brytes ikke)
-        const setText = (node, text) => {
-            node.textContent = '';
-            String(text).split(/(\S+-\S+)/).forEach(part => {
-                if (part) node.appendChild(/\S-\S/.test(part) ? make('span', 'nowrap', part) : document.createTextNode(part));
-            });
-        };
-        const say = msg => {
-            if (!el.status) return;
-            el.status.textContent = '';
-            setTimeout(() => { el.status.textContent = msg; }, 80);
-        };
-        // Feilmeldingen huskes som en funksjon (alertDraw), så den kan tegnes
-        // på nytt på riktig språk hvis besøkende bytter språk mens den vises.
-        // msg er en nøkkel i MSG eller en funksjon som gir teksten.
-        let alertDraw = null;
-        const clearAlert = () => { alertDraw = null; if (el.alert) el.alert.textContent = ''; };
-        const showAlert = (msg, link) => {
-            if (!el.alert) return;
-            alertDraw = () => {
-                el.alert.textContent = '';
-                const p = make('p', null, typeof msg === 'function' ? msg() : M()[msg]);
-                const l = link && link();
-                if (l) {
-                    const a = make('a', 'ulink ulink--on', l.text);
-                    a.href = l.href;
-                    p.append(' ', a, '.');
-                }
-                el.alert.appendChild(p);
-            };
-            alertDraw();
-        };
-        const fail = (msg, focusEl) => { showAlert(msg); if (focusEl && typeof focusEl.focus === 'function') focusEl.focus(); };
-        // Scroll kortet til rett under headeren hvis toppen er ute av syne
-        const reveal = () => {
-            const card = el.widget;
-            if (!card) return;
-            const bar = $('.nav__bar');
-            const off = (bar ? bar.getBoundingClientRect().bottom : 0) + 16;
-            const top = card.getBoundingClientRect().top;
-            if (top < off) window.scrollTo({ top: window.pageYOffset + top - off, behavior: reduced() ? 'auto' : 'smooth' });
-        };
-
-        /* Steg 1: samtaletyper som radiokort */
-        const ICONS = {
-            video: '<svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="M15.5 10.5l6-3.5v10l-6-3.5z"/></svg>',
-            phone: '<svg viewBox="0 0 24 24"><path d="M5.5 3.5h3l1.7 4.3-2.2 1.4a11 11 0 006.8 6.8l1.4-2.2 4.3 1.7v3a2 2 0 01-2 2A16 16 0 013.5 5.5a2 2 0 012-2z"/></svg>'
-        };
-        const chipsFor = t => [make('span', 'chip chip--sm', t.minutes + ' min'), make('span', 'chip chip--sm', whereLabel(t))];
-        const renderTypes = () => {
-            if (!el.types) return;
-            el.types.textContent = '';
-            types.forEach(t => {
-                const lab = make('label', 'bk-type');
-                const inp = make('input', 'bk-type__input');
-                inp.type = 'radio'; inp.name = 'bk-type'; inp.value = t.id; inp.checked = S.type === t.id;
-                const card = make('span', 'bk-type__card');
-                const ico = make('span', 'ichip');
-                ico.setAttribute('aria-hidden', 'true');
-                ico.innerHTML = t.phone ? ICONS.phone : ICONS.video;       // faste ikoner, ingen brukertekst
-                const body = make('span', 'bk-type__body');
-                body.appendChild(make('span', 'bk-type__title', nameOf(t)));
-                if (descOf(t)) body.appendChild(make('span', 'bk-type__text', descOf(t)));
-                const meta = make('span', 'bk-type__meta');
-                meta.append(...chipsFor(t));
-                body.appendChild(meta);
-                const dot = make('span', 'bk-type__dot');
-                dot.setAttribute('aria-hidden', 'true');
-                card.append(ico, body, dot);
-                lab.append(inp, card);
-                el.types.appendChild(lab);
-            });
-        };
+        let types = [], isExternal = false;
+        // Samtaletypene på kalenderkortet: navn, minutter og «Video»
         const renderExtTypes = () => {
             if (!el.extTypes) return;
             el.extTypes.textContent = '';
             types.forEach(t => {
                 const li = make('li');
                 const chips = make('span');
-                chips.append(...chipsFor(t));
+                chips.append(make('span', 'chip chip--sm', t.minutes + ' min'), make('span', 'chip chip--sm', M().video));
                 li.append(make('strong', null, nameOf(t)), chips);
                 el.extTypes.appendChild(li);
             });
         };
-
-        /* Steg 2: månedskalender (mandag først) med «roving tabindex» */
-        const WD = { no: ['man', 'tir', 'ons', 'tor', 'fre', 'lør', 'søn'], en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] };
-        const renderWeekdays = () => {
-            if (!el.weekdays || el.weekdays.childElementCount) return;
-            const monday = new Date(Date.UTC(2024, 0, 1)), wd = WD[LANG.en() ? 'en' : 'no'];
-            for (let i = 0; i < 7; i++) {
-                const d = addDays(monday, i), th = make('th');
-                th.scope = 'col';
-                const short = make('span', null, F.wd ? F.wd.format(d).replace(/\.$/, '') : wd[i]);
-                short.setAttribute('aria-hidden', 'true');
-                th.append(short, make('span', 'sr-only', F.wdLong ? F.wdLong.format(d) : wd[i]));
-                el.weekdays.appendChild(th);
-            }
-        };
-        const dayButtons = () => (el.days ? $$('.bk-day', el.days) : []);
-        const setRove = btn => dayButtons().forEach(b => { b.tabIndex = b === btn ? 0 : -1; });
-        const renderCalendar = focusKey => {
-            if (!el.days) return null;
-            validateChoice();
-            if (S.view == null) S.view = S.date ? monthOf(fromKey(S.date)) : range.min;
-            S.view = clamp(S.view, range.min, range.max);
-            const first = monthStart(S.view), y = first.getUTCFullYear(), m = first.getUTCMonth();
-            const count = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(), lead = weekday(first);
-            // Månedsnavnet er en live-region: skriv bare når det faktisk endres,
-            // ellers leses det opp på nytt hver gang kalenderen tegnes
-            const monthText = fmt(F.month, first);
-            if (el.month && el.month.textContent !== monthText) el.month.textContent = monthText;
-            if (el.prev) el.prev.disabled = S.view <= range.min;
-            if (el.next) el.next.disabled = S.view >= range.max;
-            const todayKey = keyOf(range.today);
-            const inView = k => k && monthOf(fromKey(k)) === S.view;
-            let firstOpen = null, tr = null;
-            el.days.textContent = '';
-            for (let i = 0; i < Math.ceil((lead + count) / 7) * 7; i++) {
-                if (i % 7 === 0) { tr = make('tr'); el.days.appendChild(tr); }
-                const td = make('td');
-                tr.appendChild(td);
-                const n = i - lead + 1;
-                if (n < 1 || n > count) continue;
-                const d = new Date(Date.UTC(y, m, n)), k = keyOf(d), open = dayState(d) === 'open';
-                const b = make('button', 'bk-day', String(n));
-                b.type = 'button';
-                b.tabIndex = -1;
-                b.dataset.date = k;
-                b.setAttribute('aria-pressed', String(open && k === S.date));
-                if (!open) b.setAttribute('aria-disabled', 'true');
-                else if (!firstOpen) firstOpen = k;
-                if (k === todayKey) { b.classList.add('is-today'); b.setAttribute('aria-current', 'date'); }
-                b.setAttribute('aria-label', cap(fmt(F.day, d)) + (k === todayKey ? M().today : '') + (open ? '' : M().dayOff));
-                td.appendChild(b);
-            }
-            const want = [focusKey, S.focus, S.date].find(inView) || firstOpen || keyOf(first);
-            const target = el.days.querySelector(`[data-date="${want}"]`) || el.days.querySelector('.bk-day');
-            setRove(target);
-            return target;
-        };
-        // Flytt fokus til en dato (bytter måned ved behov, holdt innenfor perioden)
-        const focusDay = key => {
-            if (!range) return;
-            const lo = monthStart(range.min), hi = addDays(monthStart(range.max + 1), -1);
-            let d = fromKey(key);
-            if (d < lo) d = lo;
-            if (d > hi) d = hi;
-            const k = keyOf(d);
-            S.focus = k;
-            if (monthOf(d) !== S.view) { S.view = monthOf(d); renderCalendar(k); }
-            const b = el.days && el.days.querySelector(`[data-date="${k}"]`);
-            if (b) { setRove(b); b.focus(); }
-        };
-        const shiftMonth = (n, btn) => {
-            if (!range) return;
-            S.view = clamp((S.view == null ? range.min : S.view) + n, range.min, range.max);
-            S.focus = null;
-            const target = renderCalendar();
-            if (btn && btn.disabled && target) target.focus();   // knappen ble deaktivert: fokus til kalenderen
-        };
-
-        const renderSlots = () => {
-            if (!el.slots) return 0;
-            el.slots.textContent = '';
-            const d = S.date ? fromKey(S.date) : null;
-            const list = d ? slotsFor(d, typeObj()) : [];
-            if (S.time != null && !list.some(s => s.min === S.time)) S.time = null;
-            if (el.slotsDate) { el.slotsDate.hidden = !d; el.slotsDate.textContent = d ? fmt(F.day, d) : ''; }
-            if (el.slotsEmpty) {
-                const span = el.slotsEmpty.firstElementChild || el.slotsEmpty;
-                el.slotsEmpty.hidden = !!(d && list.length);
-                const msg = range && !range.first ? M().noneAtAll : d ? M().noneThatDay : null;
-                if (msg) span.textContent = msg;
-                else LANG.fill(span);                 // «Velg en dato …» fra HTML-en, på riktig språk
-            }
-            list.forEach(s => {
-                const lab = make('label', 'bk-slot');
-                const inp = make('input');
-                inp.type = 'radio'; inp.name = 'bk-time'; inp.value = String(s.min); inp.checked = s.min === S.time;
-                const pill = make('span', 'bk-slot__pill', hhmm(s.min));
-                pill.appendChild(make('span', 'sr-only', M().until + hhmm(s.min + (typeObj() ? typeObj().minutes : 0))));
-                lab.append(inp, pill);
-                el.slots.appendChild(lab);
-            });
-            return list.length;
-        };
-
-        /* Steg 3: felt, validering og oppsummering */
-        const fields = el.form ? $$('.bk-field input, .bk-field textarea', el.form) : [];
-        const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-        const fieldVal = name => { const f = el.form && el.form.elements[name]; return f && typeof f.value === 'string' ? f.value.trim() : ''; };
-        // Nettleserens egen validering (validity) med vennlige norske meldinger
-        const checkField = (f, show) => {
-            const val = f.value.trim();
-            let msg = '';
-            if (f.required && !val) msg = f.dataset.msgMissing || M().required;
-            else if (val && f.type === 'email' && (f.validity.typeMismatch || !EMAIL.test(val))) msg = f.dataset.msgType || M().invalid;
-            else if (val && f.validity.patternMismatch) msg = f.dataset.msgPattern || M().invalid;
-            else if (f.validity.tooLong) msg = M().tooLong;
-            try { f.setCustomValidity(msg); } catch (e) { /* eldre nettlesere */ }
-            if (show) {
-                const err = document.getElementById(f.id + '-err');
-                f.setAttribute('aria-invalid', msg ? 'true' : 'false');
-                if (err) { err.textContent = msg; err.hidden = !msg; }
-            }
-            return !msg;
-        };
-        const clearFields = () => fields.forEach(f => {
-            f.removeAttribute('aria-invalid');
-            try { f.setCustomValidity(''); } catch (e) { /* ignorer */ }
-            const err = document.getElementById(f.id + '-err');
-            if (err) { err.textContent = ''; err.hidden = true; }
-        });
-        // Telefonsamtale: telefonnummer blir påkrevd
-        const syncPhone = () => {
-            const f = el.form && el.form.elements.telefon;
-            if (!f || !f.id) return;
-            const t = typeObj();
-            f.required = !!(t && t.phone);
-            if (el.phoneReq) el.phoneReq.hidden = !f.required;
-            if (f.getAttribute('aria-invalid') === 'true') checkField(f, true);
-        };
-        const fillSummary = () => {
-            const t = typeObj(), d = S.date ? fromKey(S.date) : null;
-            const vals = {
-                type: t ? `${nameOf(t)} · ${t.minutes} min · ${whereLabel(t)}` : '—',
-                date: d ? cap(fmt(F.long, d)) : '—',
-                time: d && t && S.time != null ? `${hhmm(S.time)}–${hhmm(S.time + t.minutes)} ${M().tz}` : '—',
-                name: fieldVal('navn') || '—',
-                email: fieldVal('email') || '—'
-            };
-            $$('[data-sum]', box).forEach(n => { n.textContent = vals[n.dataset.sum] || ''; });
-        };
-
-        /* Stegindikator, knapperad og valgte «chips» */
-        const maxStep = () => (!S.type ? 1 : S.date && S.time != null ? 3 : 2);
-        const updateSteps = () => el.stepBtns.forEach(b => {
-            const n = parseInt(b.dataset.bkStep, 10);
-            const cur = !S.sent && n === S.step;
-            const done = S.sent || (n === 1 ? !!S.type : n === 2 ? !!(S.date && S.time != null) : false);
-            b.classList.toggle('is-current', cur);
-            b.classList.toggle('is-done', !cur && done);
-            if (cur) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
-            b.disabled = S.sent || cur || n > maxStep();
-            const sr = $('[data-bk-step-sr]', b);
-            if (sr) sr.textContent = !cur && done ? M().stepDone : '';
-        });
-        const updateFoot = () => {
-            if (el.back) el.back.hidden = S.step === 1;
-            if (el.submitTxt) el.submitTxt.textContent = S.step === 3 ? (el.submitTxt.dataset.send || 'Send forespørsel') : (el.submitTxt.dataset.next || 'Neste');
-        };
-        const updatePicked = () => {
-            if (!el.picked) return;
-            el.picked.textContent = '';
-            const t = typeObj();
-            if (t) el.picked.appendChild(make('span', 'chip chip--black', `${nameOf(t)} · ${t.minutes} min`));
-            if (S.date) el.picked.appendChild(make('span', S.time != null ? 'chip chip--blue' : 'chip', fmt(F.short, fromKey(S.date)) + (S.time != null ? ' · ' + hhmm(S.time) : '')));
-        };
-        const refresh = () => { updatePicked(); updateSteps(); };
-
-        const goTo = (n, opts = {}) => {
-            if (S.sent || !el.panes.length) return;
-            S.step = clamp(n, 1, maxStep());
-            // Tegn innholdet før panelet vises, så live-regioner (måned) ikke leses opp unødig
-            if (S.step === 2) { renderCalendar(); renderSlots(); }
-            if (S.step === 3) fillSummary();
-            el.panes.forEach(p => { p.hidden = parseInt(p.dataset.bkPane, 10) !== S.step; });
-            updateSteps(); updateFoot(); clearAlert();
-            const pane = el.panes.find(p => !p.hidden);
-            const title = pane && $('.bk-pane__title', pane);
-            // Får overskriften fokus, leser skjermleseren den selv: kunngjør bare stegnummeret
-            if (!opts.quiet) say(M().step(S.step, opts.focus || !title ? '' : title.textContent.trim()));
-            if (opts.focus) { reveal(); if (title) title.focus({ preventScroll: true }); }
-        };
-
-        /* Sending: skjematjeneste (fetch) eller ferdig utfylt e-post (mailto) */
-        const collect = () => {
-            const t = typeObj(), d = fromKey(S.date), start = osloTs(d, S.time);
-            return {
-                type: t, date: d, time: S.time, start, end: start + t.minutes * 6e4,
-                name: fieldVal('navn'), email: fieldVal('email'), company: fieldVal('bedrift'),
-                phone: fieldVal('telefon'), message: fieldVal('melding').replace(/\r?\n/g, '\r\n'), trap: fieldVal('_gotcha')
-            };
-        };
-        // Dato og tid som tekst på gjeldende språk (regnes ut hver gang, så
-        // e-posten og kalenderfilen følger språket som er valgt nå)
-        const dateText = D => cap(fmt(F.long, D.date));
-        const timeText = D => `${hhmm(D.time)}–${hhmm(D.time + D.type.minutes)}`;
-        const subjectOf = D => M().mailSubject(nameOf(D.type), fmt(F.short, D.date), hhmm(D.time));
-        // ✏️ Innholdet i e-posten som åpnes (modus 1) og i feilreserven (modus 2).
-        // Meldingen kortes ned til MAIL_MAX tegn: noen e-postprogrammer (bl.a.
-        // Outlook på Windows) åpner ikke mailto-lenker over ca. 2000 tegn.
-        const MAIL_MAX = 500;
-        const mailtoHref = D => {
-            const c = cfg(), T = M();
-            const msg = D.message && D.message.length > MAIL_MAX ? D.message.slice(0, MAIL_MAX).replace(/\s+\S*$/, '') + ' ' + T.shortened : D.message;
-            const lines = [T.mailHello, '', T.mailIntro, '',
-                `${T.mailType}: ${nameOf(D.type)} (${D.type.minutes} min, ${whereLabel(D.type).toLowerCase()})`,
-                `${T.mailDate}: ${dateText(D)}`, `${T.mailTime}: ${timeText(D)} ${T.tz}`, '',
-                `${T.mailName}: ${D.name}`, `${T.mailEmail}: ${D.email}`];
-            if (D.company) lines.push(`${T.mailCompany}: ${D.company}`);
-            if (D.phone) lines.push(`${T.mailPhone}: ${D.phone}`);
-            if (msg) lines.push('', T.mailTopic, msg);
-            lines.push('', T.mailFooter(c.studio));
-            return 'mailto:' + String(c.email || '').trim() + '?subject=' + encodeURIComponent(subjectOf(D)) + '&body=' + encodeURIComponent(lines.join('\r\n'));
-        };
-        const openMail = href => {
-            try {
-                const a = make('a');
-                a.href = href;
-                a.hidden = true;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            } catch (e) { /* lenken «Prøv igjen» i bekreftelsen er reserven */ }
-        };
-        const setBusy = on => {
-            S.busy = on;
-            if (el.submit) { el.submit.classList.toggle('is-busy', on); el.submit.setAttribute('aria-disabled', String(on)); }
-            if (el.submitTxt) el.submitTxt.textContent = on ? (el.submitTxt.dataset.busy || 'Sender …') : (el.submitTxt.dataset.send || 'Send forespørsel');
-            if (el.form) el.form.setAttribute('aria-busy', String(on));
-            if (on && el.submitTxt) say(el.submitTxt.textContent);
-        };
-        // Ærlig overskrift: i e-postmodus er ingenting sendt før besøkende trykker «Send»
-        const setDoneTitle = () => {
-            if (!el.doneTitle) return;
-            const t = S.mode === 'mailto' ? el.doneTitle.dataset.titleMailto : el.doneTitle.dataset.titleSent;
-            if (t) setText(el.doneTitle, t);
-        };
-        const showDone = (mode, D, href) => {
-            S.sent = true;
-            S.mode = mode;
-            S.last = Object.assign({ uid: `${D.start.toString(36)}-${Math.random().toString(36).slice(2, 10)}` }, D);
-            fillSummary();
-            if (el.form) el.form.hidden = true;
-            if (el.done) {
-                el.done.hidden = false;
-                setDoneTitle();
-                $$('[data-bk-note]', el.done).forEach(p => { p.hidden = p.dataset.bkNote !== mode; });
-                if (el.mailAgain && href) el.mailAgain.href = href;
-                if (window.PIXEL) window.PIXEL.refresh(el.done);
-            }
-            updateSteps();
-            reveal();
-            if (el.doneTitle) el.doneTitle.focus({ preventScroll: true });
-        };
-        const send = async () => {
-            const c = cfg(), D = collect();
-            if (D.trap) { showDone('sent', D); return; }                  // spamrobot: late som alt gikk bra
-            const endpoint = String(c.formEndpoint || '').trim();
-            if (!endpoint) {
-                const href = mailtoHref(D);
-                openMail(href);
-                showDone('mailto', D, href);
-                return;
-            }
-            setBusy(true);
-            let ok = false, timer = 0;
-            try {
-                const ctl = typeof AbortController === 'function' ? new AbortController() : null;
-                if (ctl) timer = setTimeout(() => ctl.abort(), 15000);
-                const res = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        _subject: subjectOf(D), navn: D.name, email: D.email, bedrift: D.company, telefon: D.phone, melding: D.message,
-                        type: `${nameOf(D.type)} (${D.type.minutes} min, ${whereLabel(D.type)})`,
-                        dato: dateText(D), tid: `${timeText(D)} ${M().tz}`, start_utc: new Date(D.start).toISOString(),
-                        språk: LANG.en() ? 'engelsk' : 'norsk'
-                    }),
-                    signal: ctl ? ctl.signal : undefined
-                });
-                ok = !!(res && res.ok);
-            } catch (err) { ok = false; }
-            clearTimeout(timer);
-            setBusy(false);
-            if (ok) showDone('sent', D);
-            else showAlert('sendError', () => ({ text: M().sendErrorLink, href: mailtoHref(D) }));
-        };
-
-        /* Kalenderfil (.ics) laget i nettleseren; tider i UTC */
-        const icsTime = ts => new Date(ts).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-        const icsText = s => String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
-        const fold = line => {                                           // maks 75 byte per linje (RFC 5545)
-            let out = '', len = 0;
-            for (const ch of line) {
-                const cp = ch.codePointAt(0), b = cp < 0x80 ? 1 : cp < 0x800 ? 2 : cp < 0x10000 ? 3 : 4;
-                if (len + b > 75) { out += '\r\n '; len = 1; }
-                out += ch;
-                len += b;
-            }
-            return out;
-        };
-        // ✏️ Teksten i kalenderfilen (tittel, beskrivelse og sted under)
-        // (tekstene står i MSG.no / MSG.en: icsTitle, icsRequest osv.)
-        const buildIcs = D => {
-            const c = cfg(), T = M(), host = String(c.email || '').split('@')[1] || 'booking.invalid';
-            const title = T.icsTitle(nameOf(D.type), c.studio);
-            const desc = [T.icsRequest(nameOf(D.type), c.studio), T.icsTentative(c.studio), '', `${T.mailName}: ${D.name}`, `${T.mailEmail}: ${D.email}`];
-            if (D.company) desc.push(`${T.mailCompany}: ${D.company}`);
-            if (D.phone) desc.push(`${T.mailPhone}: ${D.phone}`);
-            if (D.message) desc.push('', T.icsTopic, D.message);
-            if (c.email) desc.push('', `${T.icsQuestions} ${c.email}`);
-            // Ingen METHOD-linje: filen er en vanlig hendelse, ikke en invitasjon
-            return [
-                'BEGIN:VCALENDAR', 'VERSION:2.0', `PRODID:-//${icsText(c.studio)}//Booking//${LANG.en() ? 'EN' : 'NB'}`, 'CALSCALE:GREGORIAN',
-                'BEGIN:VEVENT',
-                `UID:${D.uid}@${host}`,
-                `DTSTAMP:${icsTime(Date.now())}`,
-                `DTSTART:${icsTime(D.start)}`,
-                `DTEND:${icsTime(D.end)}`,
-                `SUMMARY:${icsText(title)}`,
-                `DESCRIPTION:${icsText(desc.join('\n'))}`,
-                `LOCATION:${icsText(D.type.phone ? T.icsPhone : T.icsVideo)}`,
-                'STATUS:TENTATIVE', 'TRANSP:OPAQUE',
-                'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsText(title)}`, 'TRIGGER:-PT15M', 'END:VALARM',
-                'END:VEVENT', 'END:VCALENDAR'
-            ].map(fold).join('\r\n') + '\r\n';
-        };
-        const slug = s => String(s).toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/å/g, 'a').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'booking';
-        const downloadIcs = () => {
-            if (!S.last) return;
-            try {
-                const url = URL.createObjectURL(new Blob([buildIcs(S.last)], { type: 'text/calendar;charset=utf-8' }));
-                const a = make('a');
-                a.href = url;
-                a.download = slug(`${cfg().studio} ${nameOf(S.last.type)}`) + '.ics';
-                a.hidden = true;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                setTimeout(() => URL.revokeObjectURL(url), 5000);
-                say(M().icsDone);
-            } catch (e) { say(M().icsError); }
-        };
-
-        /* Hendelser (bindes én gang; init() kan kjøres på nytt) */
-        const onSubmit = e => {
-            if (e && e.preventDefault) e.preventDefault();
-            if (S.sent || S.busy) return;
-            // Samme knapp er «Neste» og «Send»: et dobbeltklikk skal ikke hoppe
-            // over et steg eller vise feil før besøkende har rukket å se steget
-            if (Date.now() - (S.advancedAt || 0) < 450) return;
-            if (S.step === 1) {
-                if (!S.type) { fail('pickType', el.types && $('.bk-type__input', el.types)); return; }
-                goTo(2, { focus: true });
-                S.advancedAt = Date.now();
-            } else if (S.step === 2) {
-                const before = S.date + '|' + S.time;
-                validateChoice();
-                if (before !== S.date + '|' + S.time) { renderCalendar(); renderSlots(); refresh(); }
-                if (!S.date) { fail('pickDate', el.days && el.days.querySelector('[tabindex="0"]')); return; }
-                if (S.time == null) { fail('pickTime', el.slots && $('input', el.slots)); return; }
-                goTo(3, { focus: true });
-                S.advancedAt = Date.now();
-            } else {
-                S.tried = true;
-                const bad = fields.filter(f => !checkField(f, true));
-                if (bad.length) { fail(bad.length > 1 ? () => M().fixMany(bad.length) : 'fixOne', bad[0]); return; }
-                validateChoice();                                          // tiden kan ha gått ut i mellomtiden
-                if (!S.date || S.time == null) { refresh(); goTo(2, { focus: true }); showAlert('expired'); return; }
-                send();
-            }
-        };
-        if (el.form) {
-            el.form.addEventListener('submit', onSubmit);
-            // Enter på et radiokort/klokkeslett: velg det og gå videre
-            el.form.addEventListener('keydown', e => {
-                const t = e.target;
-                if (e.key !== 'Enter' || !t || t.type !== 'radio') return;
-                e.preventDefault();
-                if (!t.checked) { t.checked = true; t.dispatchEvent(new Event('change', { bubbles: true })); }
-                onSubmit();
-            });
-        }
-        if (el.types) el.types.addEventListener('change', e => {
-            if (!e.target || e.target.name !== 'bk-type') return;
-            S.type = e.target.value;
-            validateChoice();
-            syncPhone(); clearAlert(); refresh();
-        });
-        if (el.days) {
-            el.days.addEventListener('click', e => {
-                const b = e.target.closest && e.target.closest('.bk-day');
-                if (!b) return;
-                S.focus = b.dataset.date;
-                setRove(b);
-                if (b.getAttribute('aria-disabled') === 'true') { say(M().notFree); return; }
-                S.date = b.dataset.date;
-                dayButtons().forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-                const n = renderSlots();
-                clearAlert(); refresh();
-                say(M().picked(cap(fmt(F.day, fromKey(S.date))), n));
-            });
-            el.days.addEventListener('keydown', e => {
-                const b = e.target.closest && e.target.closest('.bk-day');
-                if (!b || e.altKey || e.ctrlKey || e.metaKey) return;
-                const d = fromKey(b.dataset.date);
-                const MOVES = {
-                    ArrowLeft: () => addDays(d, -1), ArrowRight: () => addDays(d, 1),
-                    ArrowUp: () => addDays(d, -7), ArrowDown: () => addDays(d, 7),
-                    Home: () => addDays(d, -weekday(d)), End: () => addDays(d, 6 - weekday(d)),
-                    PageUp: () => addMonths(d, -1), PageDown: () => addMonths(d, 1)
-                };
-                if (!MOVES[e.key]) return;
-                e.preventDefault();
-                focusDay(keyOf(MOVES[e.key]()));
-            });
-        }
-        if (el.prev) el.prev.addEventListener('click', () => shiftMonth(-1, el.prev));
-        if (el.next) el.next.addEventListener('click', () => shiftMonth(1, el.next));
-        if (el.slots) el.slots.addEventListener('change', e => {
-            const v = parseInt(e.target && e.target.value, 10);
-            if (isNaN(v)) return;
-            S.time = v;
-            clearAlert(); refresh();
-        });
-        fields.forEach(f => {
-            f.addEventListener('blur', () => { if (S.tried || f.value.trim()) checkField(f, true); });
-            f.addEventListener('input', () => { if (f.getAttribute('aria-invalid') === 'true') checkField(f, true); });
-        });
-        el.stepBtns.forEach(b => b.addEventListener('click', () => {
-            const n = parseInt(b.dataset.bkStep, 10);
-            if (!b.disabled && n <= maxStep()) goTo(n, { focus: true });
-        }));
-        $$('[data-bk-goto]', box).forEach(b => b.addEventListener('click', () => goTo(parseInt(b.dataset.bkGoto, 10), { focus: true })));
-        if (el.back) el.back.addEventListener('click', () => goTo(S.step - 1, { focus: true }));
-        if (el.ics) el.ics.addEventListener('click', downloadIcs);
-        if (el.again) el.again.addEventListener('click', () => {
-            S = fresh();
-            if (el.form) { el.form.reset(); el.form.hidden = false; }
-            if (el.done) el.done.hidden = true;
-            clearFields(); renderTypes(); syncPhone(); refresh();
-            goTo(1, { focus: true });
-        });
-
-        /* Start: velg modus ut fra BOOKING */
-        // Punktene ved siden av kalenderen: varighet fra BOOKING.types og
-        // riktig løfte om bekreftelse for modusen (teksten står i HTML-en)
-        const syncFacts = external => {
+        // Punktene ved siden av kortet: varighet fra BOOKING.types og riktig
+        // løfte om bekreftelse (kalender: data-ext, e-post: teksten i HTML-en)
+        const syncFacts = () => {
             const scope = section || document;
             const mins = types.map(t => t.minutes);
             const lo = Math.min.apply(null, mins), hi = Math.max.apply(null, mins);
             $$('[data-bk-minutes]', scope).forEach(n => { n.textContent = lo === hi ? String(lo) : `${lo}–${hi}`; });
             $$('[data-bk-fact]', scope).forEach(n => {
-                if (external && n.dataset.ext) n.textContent = n.dataset.ext;
+                if (isExternal && n.dataset.ext) n.textContent = n.dataset.ext;
                 else LANG.fill(n);                   // vanlig tekst fra HTML-en, på riktig språk
             });
         };
-        let isExternal = false;
-        // Nytt språk: tegn alt bookingen har laget på nytt, uten å miste valg
-        // eller tekst besøkende allerede har skrevet inn (feltene røres ikke)
-        const relang = () => {
-            F = formats();
-            if (el.weekdays) { el.weekdays.textContent = ''; renderWeekdays(); }
-            syncFacts(isExternal);
-            if (isExternal) { renderExtTypes(); return; }
-            // Fokus i noe som tegnes på nytt (typekort, datoer, klokkeslett) flyttes til det nye elementet
-            const active = document.activeElement;
-            const typeFocus = el.types && el.types.contains(active);
-            renderTypes();
-            if (typeFocus) { const n = $('.bk-type__input:checked', el.types) || $('.bk-type__input', el.types); if (n) n.focus({ preventScroll: true }); }
-            if (!S.sent && S.step === 2) {
-                const dayFocus = el.days && el.days.contains(active), slotFocus = el.slots && el.slots.contains(active);
-                const target = renderCalendar();
-                renderSlots();
-                if (dayFocus && target) target.focus({ preventScroll: true });
-                if (slotFocus && el.slots) { const n = $('input:checked', el.slots) || $('input', el.slots); if (n) n.focus({ preventScroll: true }); }
-            }
-            fields.forEach(f => { if (f.getAttribute('aria-invalid') === 'true') checkField(f, true); });
-            fillSummary(); updatePicked(); updateSteps();
-            if (S.busy) { if (el.submitTxt) el.submitTxt.textContent = el.submitTxt.dataset.busy || ''; }
-            else updateFoot();
-            if (alertDraw) alertDraw();
-            if (S.sent) {
-                setDoneTitle();
-                if (el.mailAgain && S.mode === 'mailto' && S.last) el.mailAgain.href = mailtoHref(S.last);
-            }
-        };
-        LANG.on(relang);
+        const setLink = () => { const ext = linkOf(); if (ext && el.extLink) el.extLink.href = ext; };
+
         const init = () => {
-            const c = cfg();
-            types = normTypes(c.types);
-            let ext = String(c.externalUrl || '').trim();
-            if (LANG.en()) ext = ext.replace(/([?&]hl=)no(?=&|$)/, '$1en');   // Google-siden på engelsk ved ?lang=en
-            if (ext && !/^https?:\/\//i.test(ext) && /^[\w-]+(\.[\w-]+)+(\/|$)/.test(ext)) ext = 'https://' + ext;
-            const external = /^https?:\/\/\S+$/i.test(ext) && !!el.ext;
-            isExternal = external;
-            syncFacts(external);
-            if (el.ext) el.ext.hidden = !external;
-            if (el.widget) el.widget.hidden = external;
-            if (external) {
-                if (el.extLink) el.extLink.href = ext;
-                renderExtTypes();
-                if (window.PIXEL) window.PIXEL.refresh(el.ext);
-                return;
-            }
-            S = fresh();
-            range = null;
-            if (el.form) el.form.hidden = false;
-            if (el.done) el.done.hidden = true;
-            clearFields(); renderWeekdays(); renderTypes(); syncPhone(); fillSummary(); updatePicked();
-            goTo(1, { quiet: true });
+            types = normTypes(cfg().types);
+            isExternal = !!el.ext && !!linkOf();
+            syncFacts();
+            if (el.ext) el.ext.hidden = !isExternal;
+            box.classList.toggle('is-mail', !isExternal);          // e-postkortet i stedet for kalenderen
+            if (!isExternal) return;
+            setLink();
+            renderExtTypes();
+            if (window.PIXEL) window.PIXEL.refresh(el.ext);
         };
-        window.DotdevBooking = { init, ics: () => (S.last ? buildIcs(S.last) : ''), state: () => Object.assign({}, S) };
+        // Nytt språk: tekstene på kortet og språket på Google-siden (hl=no / hl=en)
+        LANG.on(() => {
+            syncFacts();
+            if (isExternal) { setLink(); renderExtTypes(); }
+        });
+        window.DotdevBooking = { init };
         init();
     })();
 })();

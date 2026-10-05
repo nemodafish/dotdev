@@ -26,3 +26,24 @@
   to = "https://plausible.io/api/event"
   status = 200
   force = true
+
+# Én adresse per side: .html-adressene sendes videre (301) til de korte, så samme side
+# ikke finnes på to adresser. Spørrestrengen (f.eks. ?lang=en) følger med. Lenk alltid
+# til de korte adressene (/, /personvern, /kunde). force = true trengs, fordi filene finnes.
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/personvern.html"
+  to = "/personvern"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/kunde.html"
+  to = "/kunde"
+  status = 301
+  force = true

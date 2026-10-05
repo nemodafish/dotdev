@@ -84,6 +84,8 @@
     .lost__en a { color: var(--c-ink); text-underline-offset: 3px; }
 
     .foot { padding-block: 2rem; background: var(--c-blue); color: var(--c-white); font-size: .9375rem; }
+    .foot .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem 1.5rem; }
+    .foot__company { color: color-mix(in srgb, var(--c-white) 82%, var(--c-blue)); }   /* som på forsiden */
     @media (max-width: 480px) { .btn { width: 100%; } }
     @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
     </style>
@@ -131,9 +133,16 @@
 
 <footer class="foot">
     <div class="wrap">
-        <p>© 2026 DOTDEV · Nerland Consulting · Org.nr. 936 133 231</p>
+        <!-- Samme bunntekst som på forsiden: bare org.nr., ikke foretaksnavnet. Året settes av skriptet
+             under (2026 er reserve). Hardt mellomrom (&nbsp;) i org.nr., så tallet aldri deles over to linjer. -->
+        <p>© <span data-year>2026</span> DOTDEV. Alle rettigheter forbeholdt.</p>
+        <p class="foot__company">Org.nr.&nbsp;936&nbsp;133&nbsp;231</p>
     </div>
 </footer>
+<script>
+    // Årstallet i bunnteksten, som på forsiden og personvernsiden
+    document.querySelectorAll('[data-year]').forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
+</script>
 
 </body>
 </html>

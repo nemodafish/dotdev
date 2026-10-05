@@ -470,6 +470,7 @@
 
     .foot { padding-block: 1.75rem; background: var(--c-blue); color: var(--c-white); font-size: .9375rem; }
     .foot .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; }
+    .foot__company { color: color-mix(in srgb, var(--c-white) 82%, var(--c-blue)); }   /* som på forsiden */
     .foot ul { display: flex; gap: 20px; list-style: none; }
     .foot a { display: inline-flex; align-items: center; min-height: 44px; }
 
@@ -597,7 +598,7 @@
                 <h2>Se hvordan nettsiden deres gjør det</h2>
                 <ul class="punkter">
                     <li>Besøk og sidevisninger for alle perioder, også nå i sanntid</li>
-                    <li>Hvor de kommer fra, hvilke sider de leser og hvor i verden de er</li>
+                    <li>Hvor de besøkende kommer fra, hvilke sider de leser og hvor i verden de er</li>
                     <li>Sammenlign med før, filtrer på det dere lurer på, og last ned tallene</li>
                     <li>Uten cookies hos de besøkende, og lagret i EU</li>
                 </ul>
@@ -614,7 +615,8 @@
             <div class="dash__topp">
                 <p class="etikett">Statistikk for</p>
                 <div class="dash__navn">
-                    <h1 id="dash-tittel" tabindex="-1" data-nettsted></h1>
+                    <!-- Teksten i overskrifter og tabellhoder under er reserve: kunde.js bytter den ut før dashbordet vises -->
+                    <h1 id="dash-tittel" tabindex="-1" data-nettsted>Nettsiden deres</h1>
                     <button class="naa" type="button" data-naa title="Se sanntid (R)" hidden>
                         <span class="naa__prikk" aria-hidden="true"></span><span data-naa-tekst></span>
                     </button>
@@ -628,7 +630,9 @@
                     <span class="velger">
                         <label class="sr-only" for="periode-velger">Periode</label>
                         <select id="periode-velger" data-periode-velger data-hurtigmeny>
-                            <option value="" hidden data-periode-gjeldende></option>
+                            <!-- Viser perioder som ikke står i menyen (egne datoer, en annen dag). kunde.js skriver
+                                 teksten; den må ikke få label="…", for da vises den i stedet for perioden. -->
+                            <option value="" hidden data-periode-gjeldende>Valgt periode</option>
                             <optgroup label="Dag">
                                 <option value="dag">I dag (D)</option>
                                 <option value="igar">I går (E)</option>
@@ -742,7 +746,7 @@
                 <div class="sr-only">
                     <table>
                         <caption data-tabell-tittel>Grafen</caption>
-                        <thead><tr data-tabell-hode></tr></thead>
+                        <thead><tr data-tabell-hode><th scope="col">Tid</th><th scope="col">Antall</th></tr></thead>
                         <tbody data-tabell></tbody>
                     </table>
                 </div>
@@ -784,7 +788,7 @@
             <dialog class="dialog dialog--detaljer" aria-labelledby="detaljer-tittel" data-detaljer>
                 <div class="dialog__topp">
                     <div>
-                        <h2 id="detaljer-tittel" data-detaljer-tittel></h2>
+                        <h2 id="detaljer-tittel" data-detaljer-tittel>Detaljer</h2>
                         <p class="dialog__under" data-detaljer-under></p>
                     </div>
                     <button class="ikonknapp dialog__lukk" type="button" aria-label="Lukk" data-lukk>×</button>
@@ -799,7 +803,7 @@
                         <div class="tabell-ramme" data-tabell-ramme>
                             <table class="tabell">
                                 <caption class="sr-only" data-detaljer-tekst></caption>
-                                <thead><tr data-detaljer-hode></tr></thead>
+                                <thead><tr data-detaljer-hode><th scope="col">Navn</th></tr></thead>
                                 <tbody data-detaljer-rader></tbody>
                             </table>
                         </div>
@@ -839,7 +843,10 @@
 
 <footer class="foot">
     <div class="wrap">
-        <p>© 2026 DOTDEV · Nerland Consulting · Org.nr. 936 133 231</p>
+        <!-- Samme bunntekst som på forsiden: bare org.nr., ikke foretaksnavnet. Året settes av kunde.js
+             (2026 er reserve). Hardt mellomrom (&nbsp;) i org.nr., så tallet aldri deles over to linjer. -->
+        <p>© <span data-year>2026</span> DOTDEV. Alle rettigheter forbeholdt.</p>
+        <p class="foot__company">Org.nr.&nbsp;936&nbsp;133&nbsp;231</p>
         <ul>
             <li><a href="/personvern">Personvern</a></li>
             <li><a href="/">Til forsiden</a></li>

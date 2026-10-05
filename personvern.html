@@ -11,13 +11,15 @@
      • Teksten ligger i to artikler i <main>: den norske (lang="no") og den
        engelske (lang="en", med hidden). Knappene «NO | EN» i toppen bytter
        hvilken artikkel som vises.
-     • Språkvalget ligger BARE i nettadressen: personvern.html?lang=en gir
+     • Språkvalget ligger BARE i nettadressen: /personvern?lang=en gir
        engelsk, uten parameter (eller ?lang=no) gir norsk. Ingenting lagres
        i nettleseren (ingen cookies eller localStorage), slik erklæringen sier.
-     • Lenker tilbake til index.html får ?lang=en automatisk når engelsk er
-       valgt. Forsiden leser samme parameter.
-     • Tittel, beskrivelse, toppknapp, «hopp til innholdet» og bunntekst
-       byttes av skriptet nederst på siden (objektet TEKST).
+     • Lenker tilbake til forsiden (/) får ?lang=en automatisk når engelsk er
+       valgt. Forsiden leser samme parameter. Lenk til «/», ikke index.html
+       (index.html sendes videre til / med 301, se netlify.toml).
+     • Tittel, beskrivelse, toppknapp, «hopp til innhold» og bunntekst
+       byttes av skriptet nederst på siden (objektet TEKST). Årstallet i
+       bunnteksten settes av samme skript, som på forsiden.
 
   VIKTIG: Endrer dere erklæringen, må endringen gjøres i BEGGE artiklene,
   både den norske og den engelske, så de sier det samme.
@@ -27,10 +29,12 @@
      • regnskapssystem (avsnitt 6) når dere tar det i bruk
      • datoen «Sist oppdatert» / «Last updated» øverst
 
-  MODUS 2 / MODUS 3 i bookingen: bytter dere fra e-post (standard) til
-  Formspree eller Cal.com/Calendly, fjern kommentartegnene rundt avsnittet
-  merket ✏️ MODUS 2 eller ✏️ MODUS 3 i avsnitt 3 (i begge artiklene), og
-  legg leverandøren til i listen i avsnitt 6.
+  BOOKING: «Velg tidspunkt» på forsiden åpner bookingsiden vår i Google
+  Kalender (BOOKING.externalUrl i index.html). Nettsiden har ikke noe eget
+  bookingskjema. Endrer dere feltene i Google-skjemaet (for eksempel
+  telefon), oppdater raden «Du booker en samtale» i avsnitt 2. Bytter dere
+  bookingtjeneste, oppdater også avsnitt 3 og listen i avsnitt 6. Alt i
+  begge artiklene.
 
   Teksten er en mal og ikke juridisk rådgivning. Datatilsynet har gode
   veiledere på datatilsynet.no hvis dere er usikre.
@@ -111,16 +115,33 @@
     .back { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: var(--r-sm); background: var(--c-blue); color: var(--c-white); font-size: .95rem; text-decoration: none; white-space: nowrap; }
     .back:hover { background: color-mix(in srgb, var(--c-blue) 85%, var(--c-ink)); }
 
-    /* Språkvalg (NO | EN), vises bare med JavaScript */
-    .lang { display: inline-flex; padding: 2px; border-radius: var(--r-sm); background: var(--c-bg); }
-    .lang button {
-        min-width: 44px; min-height: 44px; padding: 0 10px; border: 0; border-radius: 6px;
-        background: transparent; color: var(--c-ink); font: inherit; font-size: .95rem; line-height: 1;
-        cursor: pointer; transition: background-color .15s, color .15s;
+    /* Språkvalg (NO | EN), vises bare med JavaScript. Samme brikker som på forsiden:
+       hver knapp er 44 × 44 px å trykke på, den synlige brikken er mindre, og valgt språk er blått. */
+    .lang { position: relative; isolation: isolate; display: inline-flex; flex: none; }
+    .lang::before {
+        content: "";
+        position: absolute; inset: 4px 0; z-index: -1;
+        border-radius: var(--r-sm);
+        background: var(--c-bg);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-ink) 8%, transparent);
     }
-    .lang button:hover { background: color-mix(in srgb, var(--c-ink) 8%, transparent); }
-    .lang button[aria-pressed="true"] { background: var(--c-blue); color: var(--c-white); }
-    @media (prefers-reduced-motion: reduce) { .lang button { transition: none; } }
+    .lang button {
+        display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0;
+        border-radius: var(--r-sm); background: transparent; cursor: pointer;
+    }
+    .lang button:focus-visible { outline-offset: -2px; }
+    .lang__chip {
+        display: grid; place-items: center; min-width: 34px; height: 28px; padding-inline: 6px;
+        border-radius: 6px; color: var(--c-muted);
+        font-family: var(--f-title); font-size: .8125rem; font-weight: 600; letter-spacing: .04em; line-height: 1;
+        transition: background-color .3s, color .3s;
+    }
+    .lang button[aria-pressed="true"] { cursor: default; }
+    .lang button[aria-pressed="true"] .lang__chip { background: var(--c-blue); color: var(--c-white); }
+    @media (hover: hover) and (pointer: fine) {
+        .lang button[aria-pressed="false"]:hover .lang__chip { color: var(--c-blue); }
+    }
+    @media (prefers-reduced-motion: reduce) { .lang__chip { transition: none; } }
 
     /* Innhold */
     main { padding-block: clamp(3rem, 7vw, 6rem); }
@@ -150,7 +171,9 @@
 
     /* Footer */
     .foot { padding-block: 2.5rem; background: var(--c-blue); color: var(--c-white); }
-    .foot .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; }
+    .foot .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1.5rem; }
+    .foot p { margin-top: 0; }   /* står på linje med lenken (p har ellers luft over seg) */
+    .foot__company { color: color-mix(in srgb, var(--c-white) 82%, var(--c-blue)); }   /* som på forsiden */
     .foot a { display: inline-flex; align-items: center; min-height: 44px; }
     </style>
     <!-- Besøksstatistikk uten cookies (Plausible). Lastes og sendes via eget domene (/dd/ i netlify.toml), så CSP kan stå som 'self'. -->
@@ -161,22 +184,23 @@
     </script>
 </head>
 <body>
-<a class="skip" href="#innhold" data-i18n="skip">Hopp til innholdet</a>
+<a class="skip" href="#innhold" data-i18n="skip">Hopp til innhold</a>
 
 <header class="top">
     <div class="wrap">
         <div class="top__bar">
-            <a class="logo" href="index.html" data-home aria-label="DOTDEV, til forsiden">
+            <a class="logo" href="/" data-home aria-label="DOTDEV, til forsiden">
                 <svg class="mark" viewBox="0 0 9 7" aria-hidden="true"><path d="M0 0h2v7H0zM2 0h3v1H2zM2 6h3v1H2zM5 1h2v5H5zM8 6h1v1H8z"/></svg>
                 <span>DOTDEV</span>
             </a>
             <div class="top__actions">
                 <!-- Språkvalg: skjult uten JavaScript (norsk vises da) -->
                 <div class="lang" role="group" aria-label="Språk / Language" hidden>
-                    <button type="button" data-lang="no" lang="no" aria-pressed="true">NO</button>
-                    <button type="button" data-lang="en" lang="en" aria-pressed="false">EN</button>
+                    <button type="button" data-lang="no" lang="no" aria-pressed="true"><span class="lang__chip">NO</span></button>
+                    <button type="button" data-lang="en" lang="en" aria-pressed="false"><span class="lang__chip">EN</span></button>
                 </div>
-                <a class="back" href="index.html" data-home data-i18n="back">← Til forsiden</a>
+                <!-- Uten pil: ← finnes ikke i fontene, så den ble tegnet i Arial -->
+                <a class="back" href="/" data-home data-i18n="back">Til forsiden</a>
             </div>
         </div>
     </div>
@@ -189,13 +213,13 @@
             <p class="label">Personvern</p>
             <h1>Personvern&shy;erklæring</h1>
             <!-- ✏️ Oppdater datoen når teksten endres (også i den engelske artikkelen) -->
-            <p class="updated">Sist oppdatert: 4. oktober 2026</p>
+            <p class="updated">Sist oppdatert: 5. oktober 2026</p>
 
             <section class="summary" aria-labelledby="kort">
                 <h2 id="kort">Kort fortalt</h2>
                 <ul>
-                    <li>Vi bruker ikke informasjonskapsler (cookies) og sporer deg ikke på tvers av nettsteder. Vi teller besøk med Plausible, som ikke lagrer noe på enheten din og ikke vet hvem du er. Eneste unntak er kundeportalen, som setter én nødvendig cookie når en kunde logger inn.</li>
-                    <li>Vi samler bare inn opplysninger du selv sender oss, via bookingsiden eller på e-post.</li>
+                    <li>Vi bruker ikke informasjonskapsler (cookies) og sporer deg ikke på tvers av nettsteder. Vi teller besøk med Plausible, som ikke lagrer noe på enheten din og ikke vet hvem du er. Eneste unntak er kundeportalen, som setter to nødvendige cookies når en kunde logger inn.</li>
+                    <li>Utenom tekniske logger hos Netlify og besøkstellingen over samler vi bare inn opplysninger du selv sender oss, via bookingsiden eller <span class="nw">på e-post</span>.</li>
                     <li>Vi bruker opplysningene bare til å svare deg og gjennomføre samtalen eller oppdraget.</li>
                     <li>Vi selger aldri opplysningene dine, og vi deler dem bare med leverandører vi trenger for å drive (se avsnitt 6).</li>
                 </ul>
@@ -213,7 +237,7 @@
                 <tbody>
                     <tr>
                         <td data-th="Når">Du booker en samtale</td>
-                        <td data-th="Opplysninger">Navn, e-post, dato og tid. Frivillig: bedrift, telefon og det du skriver i bookingskjemaet.</td>
+                        <td data-th="Opplysninger">Navn, e-post, dato og tid. Frivillig: telefonnummer, bedrift og nettside. Du fyller dem inn på bookingsiden vår i Google Kalender (se avsnitt&nbsp;3).</td>
                         <td data-th="Formål og grunnlag">Avtale og gjennomføre samtalen, og eventuelt gi deg et tilbud. Grunnlag: tiltak før en mulig avtale som du har bedt om (GDPR art. 6 nr. 1 b).</td>
                     </tr>
                     <tr>
@@ -228,7 +252,7 @@
                     </tr>
                     <tr>
                         <td data-th="Når">Du logger inn i kundeportalen (bare for kunder)</td>
-                        <td data-th="Opplysninger">E-postadressen din, passordet (lagret bare som en hash som ikke kan gjøres om til passordet) og en innloggingscookie (se avsnitt 5).</td>
+                        <td data-th="Opplysninger">E-postadressen din, passordet (lagret bare som en hash som ikke kan gjøres om til passordet) og innloggingscookies (se avsnitt 5).</td>
                         <td data-th="Formål og grunnlag">Gi deg tilgang til besøksstatistikken for nettsiden dere har kjøpt av oss. Grunnlag: avtale (art. 6 nr. 1 b), eller berettiget interesse (art. 6 nr. 1 f) når du logger inn på vegne av en bedrift.</td>
                     </tr>
                     <tr>
@@ -246,18 +270,9 @@
             <p>Vi bruker ikke opplysningene til profilering eller automatiserte avgjørelser.</p>
 
             <h2 id="skjema">3. Slik fungerer bookingen</h2>
-            <p>Knappen «Velg tidspunkt» åpner bookingsiden vår i Google Kalender i en ny fane. Der ser du bare tider som er ledige, og du booker direkte i kalenderen vår. Opplysningene du oppgir, lagres i Google Kalender i vår Google Workspace-konto, og du får bekreftelse på e-post med en lenke til Google Meet. Google behandler opplysningene på våre vegne som databehandler. Ingenting lagres på selve nettsiden.</p>
+            <p>Knappen «Velg tidspunkt» åpner bookingsiden vår i Google Kalender i en ny fane. Der ser du bare tider som er ledige, og du booker direkte i kalenderen vår. Nettsiden har ikke noe eget bookingskjema. Navn, <span class="nw">e-post</span> og det andre du oppgir, fyller du inn på Google-siden, og det lagres i Google Kalender i vår Google Workspace-konto. Du får bekreftelse på e-post med en lenke til Google Meet, der vi tar samtalen på video. Google behandler opplysningene på våre vegne som databehandler. Ingenting lagres på selve nettsiden.</p>
+            <p>Foretrekker du e-post, kan du skrive til <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a> i stedet.</p>
             <p>Nettsiden driftes hos Netlify, som lagrer tekniske logger (blant annet IP-adresse) i en begrenset periode for drift og sikkerhet.</p>
-
-            <!-- ✏️ MODUS 2 (Formspree): fjern kommentartegnene rundt avsnittet under hvis bookingen sendes via Formspree (gjør det samme i den engelske artikkelen)
-            <h3>Skjematjeneste</h3>
-            <p>Bookingskjemaet sendes via Formspree (Formspree Inc., USA), som videresender forespørselen til oss på e-post. Formspree lagrer innsendingen på våre vegne. Overføringen til USA bygger på EU-kommisjonens beslutning om EU–US Data Privacy Framework eller EUs standardkontrakter.</p>
-            -->
-
-            <!-- ✏️ MODUS 3 (Cal.com/Calendly): fjern kommentartegnene rundt avsnittet under hvis dere bruker ekstern kalender (gjør det samme i den engelske artikkelen)
-            <h3>Ekstern bookingtjeneste</h3>
-            <p>Knappen «Velg tidspunkt» sender deg til Cal.com, der du booker direkte i kalenderen vår. Opplysningene du oppgir der, behandles av Cal.com på våre vegne. Les også Cal.com sin personvernerklæring.</p>
-            -->
 
             <h2 id="lagring">4. Hvor lenge vi lagrer opplysningene</h2>
             <ul>
@@ -265,14 +280,14 @@
                 <li>Er du kunde, lagrer vi korrespondanse og kontaktopplysninger så lenge kundeforholdet varer, og deretter i opptil 12 måneder.</li>
                 <li>Regnskapsmateriale (som fakturaer) lagres i 5 år etter regnskapsårets slutt, slik bokføringsloven krever.</li>
                 <li>Besøksstatistikken lagres hos Plausible uten IP-adresse så lenge vi bruker tjenesten. Koden som skiller besøkende fra hverandre, byttes hver dag og kan ikke kobles til deg etter at døgnet er omme.</li>
-                <li>Innloggingen til kundeportalen slettes når kundeforholdet avsluttes. Innloggingscookien slettes når du logger ut, og ellers etter 14 dager.</li>
+                <li>Innloggingen til kundeportalen slettes når kundeforholdet avsluttes. Innloggingscookiene slettes når du logger ut, og ellers etter 14 dager.</li>
             </ul>
 
             <h2 id="cookies">5. Informasjonskapsler (cookies)</h2>
             <p>Nettsiden bruker ingen informasjonskapsler og lagrer ingen opplysninger om deg på enheten din (unntaket er kundeportalen, se under). Fontene og statistikkskriptet lastes fra vårt eget domene, så nettleseren din henter ikke innhold direkte fra andre nettsteder. Derfor ber vi heller ikke om samtykke til cookies.</p>
             <p>Vi teller besøk med Plausible Analytics. Plausible bruker ingen informasjonskapsler. IP-adressen din brukes bare til å finne omtrentlig sted og, sammen med nettlesertypen, til å lage en kode som byttes hver dag. IP-adressen lagres ikke. Derfor kan Plausible ikke kjenne deg igjen fra dag til dag eller på tvers av nettsteder. Vi ser bare samlede tall, for eksempel antall besøk, hvilke sider som leses, hvilke nettsteder besøkende kommer fra, land og type enhet. Statistikken sendes via vårt eget domene til Plausible og lagres i EU.</p>
             <p>Velger du engelsk, ligger språkvalget bare i nettadressen (?lang=en). Det lagres ikke på enheten din.</p>
-            <p>Kundeportalen (dotdev.no/kunde) er bare for kunder. Når du logger inn der, setter vi én informasjonskapsel som holder deg innlogget i 14 dager, eller til du logger ut. Den er nødvendig for at innloggingen skal virke, og krever derfor ikke samtykke (ekomloven § 3-15). Den inneholder ikke e-posten eller passordet ditt, kan ikke leses av skript på siden og brukes ikke til noe annet. Kundeportalen har ingen besøksstatistikk.</p>
+            <p>Kundeportalen (dotdev.no/kunde) er bare for kunder. Når du logger inn der, setter vi to informasjonskapsler. Den ene holder deg innlogget i 14 dager, eller til du logger ut. Den inneholder ikke e-posten eller passordet ditt, kan ikke leses av skript på siden og brukes ikke til noe annet. Den andre inneholder bare tallet 1 og forteller forsiden at du er innlogget, så det står «Min side» i stedet for «Logg inn». Begge hører til innloggingen du selv har bedt om, og krever derfor ikke samtykke (ekomloven § 3-15). Kundeportalen har ingen besøksstatistikk.</p>
             <p>Lenker til andre nettsider, for eksempel prosjektene våre, tar deg til nettsteder med egne personvernregler.</p>
 
             <h2 id="deling">6. Hvem vi deler opplysningene med</h2>
@@ -298,7 +313,7 @@
                 <li>få utlevert opplysninger du har gitt oss, i et maskinlesbart format (dataportabilitet)</li>
             </ul>
             <p>Besøksstatistikken kan ikke knyttes til deg, så vi kan ikke finne frem til eller slette dine besøk i den (GDPR art. 11).</p>
-            <p>Send en e-post til <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>, så svarer vi innen en måned. Det er gratis.</p>
+            <p>Send en e-post til <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>, så svarer vi innen én måned. Det er gratis.</p>
             <p>Mener du at vi behandler opplysningene dine i strid med regelverket, kan du klage til <a href="https://www.datatilsynet.no/" target="_blank" rel="noopener">Datatilsynet</a>. Vi setter pris på om du tar kontakt med oss først, så vi kan rydde opp.</p>
 
             <h2 id="sikkerhet">8. Sikkerhet</h2>
@@ -314,13 +329,13 @@
             <p class="label">Privacy</p>
             <h1>Privacy policy</h1>
             <!-- ✏️ Oppdater datoen når teksten endres (også i den norske artikkelen) -->
-            <p class="updated">Last updated: 4 October 2026</p>
+            <p class="updated">Last updated: 5 October 2026</p>
 
             <section class="summary" aria-labelledby="en-short">
                 <h2 id="en-short">In short</h2>
                 <ul>
-                    <li>We do not use cookies and do not track you across websites. We count visits with Plausible, which stores nothing on your device and does not know who you are. The only exception is the client portal, which sets one necessary cookie when a customer logs in.</li>
-                    <li>We only collect information you send us yourself, through the booking page or by e-mail.</li>
+                    <li>We do not use cookies and do not track you across websites. We count visits with Plausible, which stores nothing on your device and does not know who you are. The only exception is the client portal, which sets two necessary cookies when a customer logs in.</li>
+                    <li>Apart from technical logs at Netlify and the visit counting above, we only collect information you send us yourself, through the booking page or by email.</li>
                     <li>We only use that information to reply to you and to carry out the call or the project.</li>
                     <li>We never sell your information, and we only share it with service providers we need to run our business (see section 6).</li>
                 </ul>
@@ -338,12 +353,12 @@
                 <tbody>
                     <tr>
                         <td data-th="When">You book a call</td>
-                        <td data-th="Information">Name, e-mail, date and time. Optional: company, phone number and what you write in the booking form.</td>
+                        <td data-th="Information">Name, email, date and time. Optional: phone number, company and website. You enter them on our booking page in Google Calendar (see section&nbsp;3).</td>
                         <td data-th="Purpose and basis">To arrange and hold the call, and possibly to send you a quote. Basis: steps taken at your request before a possible contract (GDPR <span class="nw">Art. 6(1)(b)</span>).</td>
                     </tr>
                     <tr>
-                        <td data-th="When">You send us an e-mail</td>
-                        <td data-th="Information">Name, e-mail address and what you write.</td>
+                        <td data-th="When">You send us an email</td>
+                        <td data-th="Information">Name, email address and what you write.</td>
                         <td data-th="Purpose and basis">To reply to your enquiry. Basis: our legitimate interest in answering enquiries (<span class="nw">Art. 6(1)(f)</span>), or contract (<span class="nw">Art. 6(1)(b)</span>) when the enquiry concerns a project.</td>
                     </tr>
                     <tr>
@@ -353,7 +368,7 @@
                     </tr>
                     <tr>
                         <td data-th="When">You log in to the client portal (customers only)</td>
-                        <td data-th="Information">Your e-mail address, your password (stored only as a hash that cannot be turned back into the password) and a login cookie (see section 5).</td>
+                        <td data-th="Information">Your email address, your password (stored only as a hash that cannot be turned back into the password) and login cookies (see section 5).</td>
                         <td data-th="Purpose and basis">To give you access to the visitor statistics for the website you bought from us. Basis: contract (<span class="nw">Art. 6(1)(b)</span>), or legitimate interest (<span class="nw">Art. 6(1)(f)</span>) when you log in on behalf of a business.</td>
                     </tr>
                     <tr>
@@ -371,39 +386,30 @@
             <p>We do not use the information for profiling or automated decision-making.</p>
 
             <h2 id="en-form">3. How booking works</h2>
-            <p>The “Choose a time” button opens our booking page in Google Calendar in a new tab. There you only see times that are free, and you book directly in our calendar. The information you enter is stored in Google Calendar in our Google Workspace account, and you get a confirmation by e-mail with a Google Meet link. Google processes the information on our behalf as a data processor. Nothing is stored on the website itself.</p>
+            <p>The “Choose a time” button opens our booking page in Google Calendar in a new tab. There you only see times that are free, and you book directly in our calendar. The website has no booking form of its own. You enter your name, email and any other details on Google’s page, and they are stored in Google Calendar in our Google Workspace account. You get a confirmation by email with a Google Meet link, where we hold the call on video. Google processes the information on our behalf as a data processor. Nothing is stored on the website itself.</p>
+            <p>If you prefer email, you can write to <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a> instead.</p>
             <p>The website is hosted by Netlify, which keeps technical logs (including IP addresses) for a limited period for operation and security.</p>
-
-            <!-- ✏️ MODUS 2 (Formspree), engelsk: fjern kommentartegnene rundt avsnittet under hvis bookingen sendes via Formspree (gjør det samme i den norske artikkelen)
-            <h3>Form service</h3>
-            <p>The booking form is sent via Formspree (Formspree Inc., USA), which forwards the request to us by e-mail. Formspree stores the submission on our behalf. The transfer to the USA is based on the European Commission’s decision on the EU–US Data Privacy Framework or on the EU Standard Contractual Clauses.</p>
-            -->
-
-            <!-- ✏️ MODUS 3 (Cal.com/Calendly), engelsk: fjern kommentartegnene rundt avsnittet under hvis dere bruker ekstern kalender (gjør det samme i den norske artikkelen). Bruk samme knappetekst som på den engelske forsiden.
-            <h3>External booking service</h3>
-            <p>The “Choose a time” button takes you to Cal.com, where you book directly in our calendar. The information you provide there is processed by Cal.com on our behalf. Please also read Cal.com’s privacy policy.</p>
-            -->
 
             <h2 id="en-retention">4. How long we keep the information</h2>
             <ul>
-                <li>Bookings, requests and e-mails that do not lead to a project are deleted no later than 12 months after our last contact.</li>
+                <li>Bookings, requests and emails that do not lead to a project are deleted no later than 12 months after our last contact.</li>
                 <li>If you are a customer, we keep correspondence and contact details for as long as the customer relationship lasts, and then for up to 12 months.</li>
                 <li>Accounting records (such as invoices) are kept for 5 years after the end of the financial year, as required by the Norwegian Bookkeeping Act.</li>
                 <li>Visitor statistics are kept by Plausible, without IP addresses, for as long as we use the service. The code that tells visitors apart changes every day and cannot be linked to you once the day is over.</li>
-                <li>Your client portal login is deleted when the customer relationship ends. The login cookie is deleted when you log out, and otherwise after 14 days.</li>
+                <li>Your client portal login is deleted when the customer relationship ends. The login cookies are deleted when you log out, and otherwise after 14 days.</li>
             </ul>
 
             <h2 id="en-cookies">5. Cookies</h2>
             <p>The website uses no cookies and stores no information about you on your device (the exception is the client portal, see below). The fonts and the statistics script are loaded from our own domain, so your browser does not load content directly from other sites. That is also why we do not ask for your consent to cookies.</p>
             <p>We count visits with Plausible Analytics. Plausible uses no cookies. Your IP address is only used to find your approximate location and, together with your browser type, to create a code that changes every day. Your IP address is not stored. This means Plausible cannot recognise you from one day to the next or across websites. We only see totals, such as the number of visits, which pages are read, which websites visitors come from, country and device type. The statistics are sent via our own domain to Plausible and stored in the EU.</p>
             <p>If you choose English, your language choice is kept only in the web address (?lang=en). It is not stored on your device.</p>
-            <p>The client portal (dotdev.no/kunde) is for customers only. When you log in there, we set one cookie that keeps you logged in for 14 days, or until you log out. It is necessary for the login to work and therefore does not require consent (section 3-15 of the Norwegian Electronic Communications Act). It does not contain your e-mail address or password, cannot be read by scripts on the page and is not used for anything else. The client portal has no visitor statistics.</p>
+            <p>The client portal (dotdev.no/kunde) is for customers only. When you log in there, we set two cookies. One keeps you logged in for 14 days, or until you log out. It does not contain your email address or password, cannot be read by scripts on the page and is not used for anything else. The other contains only the number 1 and tells the front page that you are logged in, so it shows “My page” instead of “Log in”. Both are part of the login you asked for and therefore do not require consent (section 3-15 of the Norwegian Electronic Communications Act). The client portal has no visitor statistics.</p>
             <p>Links to other websites, such as our projects, take you to sites with their own privacy rules.</p>
 
             <h2 id="en-sharing">6. Who we share the information with</h2>
             <p>We only share information with service providers we need to run our business. They are our data processors, only process the information on our instructions and have a data processing agreement with us:</p>
             <ul>
-                <li>E-mail and booking calendar: Google (Google Workspace)</li>
+                <li>Email and booking calendar: Google (Google Workspace)</li>
                 <li>Website hosting and operation: Netlify, Inc. (USA)</li>
                 <li>Visitor statistics: Plausible Insights OÜ (Estonia, data stored in the EU)</li>
                 <!-- ✏️ Regnskapssystem, engelsk: fjern kommentartegnene og skriv inn leverandøren når dere tar det i bruk (også i den norske artikkelen)
@@ -423,12 +429,12 @@
                 <li>receive the information you have given us in a machine-readable format (data portability)</li>
             </ul>
             <p>The visitor statistics cannot be linked to you, so we cannot find or delete your visits in them (GDPR Art. 11).</p>
-            <p>Send an e-mail to <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a> and we will reply within one month. It is free of charge.</p>
+            <p>Send an email to <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a> and we will reply within one month. It is free of charge.</p>
             <p>If you believe we are processing your information in breach of the rules, you can complain to the Norwegian Data Protection Authority (<a href="https://www.datatilsynet.no/en/" target="_blank" rel="noopener">Datatilsynet</a>). We would appreciate it if you contacted us first, so that we can put things right.</p>
 
             <h2 id="en-security">8. Security</h2>
             <!-- ✏️ Skriv bare det som faktisk stemmer (slå på tofaktor hvis dere ikke har det), også i den norske artikkelen -->
-            <p>The website uses an encrypted connection (HTTPS). Only we have access to the e-mail and customer information, and the accounts are protected with two-factor login. Client portal passwords are long and random, and we only store them as hashes.</p>
+            <p>The website uses an encrypted connection (HTTPS). Only we have access to the email and customer information, and the accounts are protected with two-factor login. Client portal passwords are long and random, and we only store them as hashes.</p>
 
             <h2 id="en-changes">9. Changes</h2>
             <p>We update this policy when we change how we process personal data. The date at the top shows when it was last changed.</p>
@@ -438,9 +444,12 @@
 
 <footer class="foot">
     <div class="wrap">
-        <!-- ✏️ Samme firmaopplysninger som på forsiden (norsk og engelsk står i TEKST i skriptet under) -->
-        <p data-i18n="foot">© 2026 DOTDEV · Nerland Consulting · Org.nr. 936 133 231</p>
-        <a href="index.html" data-home data-i18n="footLink">Til forsiden</a>
+        <!-- ✏️ Samme bunntekst som på forsiden: bare org.nr., ikke foretaksnavnet (det står i avsnitt 1).
+             Norsk og engelsk står i TEKST i skriptet under. Året oppdateres automatisk med JS
+             (2026 er reserve). Hardt mellomrom (&nbsp;) i org.nr., så tallet aldri deles over to linjer. -->
+        <p>© <span data-year>2026</span> DOTDEV. <span data-i18n="rights">Alle rettigheter forbeholdt.</span></p>
+        <p class="foot__company" data-i18n="company">Org.nr.&nbsp;936&nbsp;133&nbsp;231</p>
+        <a href="/" data-home data-i18n="footLink">Til forsiden</a>
     </div>
 </footer>
 
@@ -452,22 +461,28 @@
         no: {
             title: 'Personvernerklæring · DOTDEV',
             desc: 'Slik behandler DOTDEV personopplysninger: hva vi samler inn, hvorfor, hvor lenge og hvilke rettigheter du har.',
-            skip: 'Hopp til innholdet',
-            back: '← Til forsiden',
+            skip: 'Hopp til innhold',
+            back: 'Til forsiden',
             logo: 'DOTDEV, til forsiden',
-            foot: '© 2026 DOTDEV · Nerland Consulting · Org.nr. 936 133 231',
+            rights: 'Alle rettigheter forbeholdt.',
+            // \u00a0 = hardt mellomrom, så org.nr. står samlet på én linje
+            company: 'Org.nr.\u00a0936\u00a0133\u00a0231',
             footLink: 'Til forsiden'
         },
         en: {
             title: 'Privacy policy · DOTDEV',
             desc: 'How DOTDEV processes personal data: what we collect, why, for how long and what rights you have.',
             skip: 'Skip to content',
-            back: '← Back to home',
+            back: 'Back to home',
             logo: 'DOTDEV, back to home',
-            foot: '© 2026 DOTDEV · Nerland Consulting · Org. no. 936 133 231',
+            rights: 'All rights reserved.',
+            company: 'Org.\u00a0no.\u00a0936\u00a0133\u00a0231',
             footLink: 'Back to home'
         }
     };
+
+    // Årstallet i bunnteksten (2026 står i HTML-en som reserve uten JavaScript)
+    document.querySelectorAll('[data-year]').forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
 
     var group = document.querySelector('.lang');
     var buttons = group.querySelectorAll('button[data-lang]');
@@ -491,7 +506,7 @@
         });
         document.querySelector('.logo').setAttribute('aria-label', t.logo);
         homeLinks.forEach(function (a) {
-            a.setAttribute('href', lang === 'en' ? 'index.html?lang=en' : 'index.html');
+            a.setAttribute('href', lang === 'en' ? '/?lang=en' : '/');
         });
         buttons.forEach(function (b) {
             b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === lang));

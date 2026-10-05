@@ -10,8 +10,8 @@
 #     addEventListener i <script>-blokken i stedet.
 #   • Alt ligger på dotdev.no i dag. Tar dere i bruk noe eksternt, må det
 #     legges til her:
-#   • Formspree (modus 2 i BOOKING): legg til https://formspree.io i connect-src
-#   • Cal.com/Calendly som lenke (modus 3): trengs ingen endring
+#   • Bookingsiden i Google Kalender (BOOKING.externalUrl) er bare en lenke som
+#     åpnes i ny fane: trengs ingen endring
 #   • Innebygd kalender, video, analyse o.l.: legg til domenet i riktig direktiv
 #   • Kundeportalen (/api/kunde/…) ligger på dotdev.no, så den trenger ingen endring.
 #     Svarene fra serverfunksjonen får sine egne headere (Netlify bruker ikke denne
@@ -31,13 +31,52 @@
   X-Permitted-Cross-Domain-Policies: none
   Strict-Transport-Security: max-age=63072000; includeSubDomains
 
-# Fonter endrer aldri innhold (nye fonter får nye filnavn): ett år i nettleserens mellomlager
-/fonter/*
+# Fonter endrer aldri innhold (nye fonter får nye filnavn): ett år i nettleserens mellomlager.
+# Én blokk per fil, ikke /fonter/*: da ville også en 404 for en feilskrevet fontadresse
+# bli lagret i ett år. Legger dere til en font, legg den til her også.
+/fonter/inter-tight-latin.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonter/inter-tight-latin-ext.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonter/outfit-latin.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonter/outfit-latin-ext.woff2
   Cache-Control: public, max-age=31536000, immutable
 
 # Bilder: én uke (bytt filnavn hvis dere bytter et bilde og vil at endringen vises med en gang)
 /bilder/*
   Cache-Control: public, max-age=604800
+
+# Delingsbildet har versjon i adressen (?v=2 i <head>), så det kan også lagres en uke
+/delingsbilde.png
+  Cache-Control: public, max-age=604800
+
+# Ikonene og manifestet: ett døgn, så et nytt ikon slår igjennom innen en dag.
+# Manifestet får riktig type (Netlify sender det ellers som application/octet-stream).
+/site.webmanifest
+  Content-Type: application/manifest+json; charset=utf-8
+  Cache-Control: public, max-age=86400
+
+/favicon.ico
+  Cache-Control: public, max-age=86400
+
+/favicon.svg
+  Cache-Control: public, max-age=86400
+
+/favicon-32.png
+  Cache-Control: public, max-age=86400
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=86400
+
+/icon-192.png
+  Cache-Control: public, max-age=86400
+
+/icon-512.png
+  Cache-Control: public, max-age=86400
 
 # Kundeportalen skal ikke vises i Google
 /kunde

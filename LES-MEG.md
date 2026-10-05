@@ -9,7 +9,7 @@
 | `netlify/functions/kunde-api.mjs` | Serverfunksjonen bak kundeportalen. Sjekker innloggingen og henter tallene fra Plausible. Resten av koden ligger i `netlify/kunde/` (perioder, filtre, lister, nedlasting). |
 | `lag-kunde.mjs` | Lager innlogging til en kunde (kjøres på egen PC). Publiseres ikke. |
 | `bygg.py` | Lager en publiseringsklar kopi i `dist/` (uten guiden og kommentarene), og fyller inn sikkerhetsreglene i `_headers`. |
-| `netlify.toml` | Får Netlify til å kjøre `bygg.py` og publisere bare `dist/`. |
+| `netlify.toml` | Får Netlify til å kjøre `bygg.py` og publisere bare `dist/`, sender statistikken via eget domene (`/dd/`), og sender gamle `.html`-adresser videre til de korte (`/personvern.html` → `/personvern`). |
 | `dist/` | Det som publiseres. Netlify lager den på nytt hver gang, så den ligger ikke i GitHub. Ikke rediger her. |
 | `_headers` | Sikkerhetsheadere og mellomlagring på Netlify. Se «Sikkerhet» under. |
 | `.well-known/security.txt` | Forteller hvor man melder fra om sikkerhetshull (kontakt@dotdev.no). Må fornyes hvert år. |
@@ -30,6 +30,17 @@ Bare `dist/` blir publisert, så guiden, kommentarene, `LES-MEG.md` og `bygg.py`
 - **Telefon og sosiale medier:** linjene står klare i footeren og som `telephone`/`sameAs` i JSON-LD i `<head>`.
 - **Startpris:** skriv den i svaret på «Hva koster en nettside?».
 - **Les gjennom de nye tekstene:** tjenestene (særlig AI-eksemplene), Om oss og spørsmål og svar. Alt skal stemme med det dere faktisk leverer.
+- **Bookingsiden i Google:** beskrivelsen der tilbyr fortsatt telefon. Nettsiden sier at samtalen er på video, så rett beskrivelsen i Google Kalender.
+
+## Booking
+
+«Book en samtale» på forsiden bruker bookingsiden «Introsamtale med DOTDEV» i Google Kalender (kontoen kontakt@dotdev.no). Nettsiden har ikke noe eget bookingskjema: knappen «Velg tidspunkt» åpner Google-siden i en ny fane, der den besøkende ser ledige tider og booker selv. Google legger bookingen i kalenderen og sender bekreftelse med lenke til Google Meet. Samtalen er på video. Uten JavaScript viser siden en e-postknapp til kontakt@dotdev.no i stedet, og lenken «Foretrekker du e-post? kontakt@dotdev.no» står alltid i bookingseksjonen.
+
+- **Bytte lenken:** lim inn den nye adressen i `BOOKING.externalUrl` (øverst i skriptet nederst i `index.html`). Bruk den lange adressen (`https://calendar.google.com/calendar/appointments/schedules/…?hl=no`), ikke kortlenken `calendar.app.google/…`, som mister `?hl=no` når den sender videre. På engelsk bytter siden selv `hl=no` til `hl=en`.
+- **Endrer dere samtalen i Google** (navn eller lengde), endre `BOOKING.types` også, så kortet på nettsiden stemmer.
+- **Endrer dere feltene i Google-skjemaet** (i dag navn og e-post, og frivillig telefon og «Bedrift og nettside»), oppdater raden «Du booker en samtale» i avsnitt 2 i `personvern.html`, på norsk og engelsk.
+- **Bytter dere bookingtjeneste**, bytt lenken og oppdater avsnitt 3 og 6 i `personvern.html` (begge språk). `_headers` trenger ingen endring, fordi siden bare lenker til bookingsiden og ikke bygger den inn.
+- **Telling:** et klikk på «Velg tidspunkt» telles som målet «Book samtale» i Plausible.
 
 ## Kundeportalen
 
@@ -87,13 +98,14 @@ Det som ikke finnes i Plausibles API, er ikke med: trakter, brukerreiser, Google
 - **Kvotevern:** Hvert nettsted kan bruke 120 spørringer i én rykk, og får 4 nye i minuttet (240 i timen). Bruker en kunde mer, ser den kunden «Du har hentet mange tall på kort tid. Vent et par minutter» for de delene som ikke fikk plass, mens de andre kundene ikke merker noe. Portalen sender i tillegg høyst 500 spørringer per klokketime og 50 per 10 sekunder (litt under Plausibles grenser), og svarer Plausible likevel «for mange», tar den pause til neste klokketime (eller 10 sekunder) i stedet for å sende spørringer som uansett blir avvist. Da ser kundene «Mange spør etter tall akkurat nå». Grensene ligger i `netlify/kunde/plausible.mjs` (KVOTE). Merk: de gjelder per serverinstans, og Netlify kan kjøre flere samtidig, så de er en brems, ikke en mur. Får dere mange kunder, be Plausible om høyere grense.
 - **Tid:** Netlify stopper en forespørsel etter 60 sekunder. Portalen gir hver forespørsel en frist på 25 sekunder (nedlastingen 45), og svarer med det som rakk å bli ferdig. Er Plausible veldig tregt, kan en nedlasting feile med «Plausible svarer tregt akkurat nå»; den kan da prøves igjen med en gang.
 - **Netlify:** Er kontoen på Netlifys nye kredittplan, koster hver publisering (også Trigger deploy) 15 kreditter, og gratisplanen har 300 i måneden. Samle gjerne flere kundeendringer før dere publiserer. Feil fra funksjonen står under Logs → Functions.
-- **Sikkerhet:** Passordene lagres som scrypt-hasher. Innloggingen er en signert cookie (HttpOnly, Secure, SameSite=Strict) som bare sendes til `/api/kunde`, ikke inneholder e-post eller navn og varer i 14 dager. Netlify stopper en IP som sender over 90 forespørsler i minuttet til portalen.
+- **Sikkerhet:** Passordene lagres som scrypt-hasher. Innloggingen er en signert cookie (HttpOnly, Secure, SameSite=Strict) som bare sendes til `/api/kunde`, ikke inneholder e-post eller navn og varer i 14 dager. I tillegg settes flagget `__Secure-dd_innlogget=1` (ikke HttpOnly, gjelder hele nettstedet, samme levetid). Det gir ingen tilgang til noe, men forteller forsiden at kunden er innlogget: da spør forsiden `/api/kunde/meg` og viser «Min side» i stedet for «Logg inn» (headeren og footeren). Besøkende uten flagget gir ingen kall til portalen. Utlogging fjerner begge, og `/meg` fjerner flagget hvis innloggingen har gått ut. Netlify stopper en IP som sender over 90 forespørsler i minuttet til portalen.
 
 ## Sikkerhet
 
 - **Sikkerhetsreglene (CSP):** nettleseren kjører bare kode som ligger på dotdev.no, og innebygde `<script>`- og `<style>`-blokker bare hvis hashen deres står i `_headers`. Hashene fyller `bygg.py` inn automatisk ved hver publisering, så dere trenger ikke gjøre noe når dere endrer koden. Bruk aldri `onclick="…"`, `style="…"` eller `javascript:`-lenker i HTML-en: byggingen stopper da med en feilmelding (og forrige versjon blir liggende ute). Tar dere i bruk noe eksternt (innebygd video, kalender, skjematjeneste), må domenet legges til i `_headers`.
 - **Kundeportalen** har i tillegg Trusted Types: `innerHTML` og lignende virker ikke der. Bruk `textContent` og `createElement`.
 - **HTTPS på alle underdomener:** `_headers` sier til nettleseren at hele dotdev.no, også underdomener, bare skal brukes med HTTPS i to år. Et nytt underdomene (for eksempel til en kunde eller en Google-tjeneste) må ha gyldig HTTPS fra første dag. Google Workspace sine «egne adresser» (CNAME til ghs.googlehosted.com) har ikke HTTPS og virker derfor ikke.
+- **Kjent avvik (godtatt):** svarene fra statistikk-proxyen (`/dd/js/s.js` og `/dd/api/e`) har Plausibles egne headere, blant annet `Strict-Transport-Security: max-age=31536000` uten `includeSubDomains`. Etter et besøk på en side med statistikk gjelder HTTPS-kravet derfor bare dotdev.no (ett år), ikke underdomenene. Det er godtatt fordi www selv sender regelen med `includeSubDomains`, innloggingscookien bare gjelder dotdev.no, og HSTS-preload bare sjekker svaret fra forsiden. Skal det rettes, trengs en edge-funksjon på de to stiene som setter headeren (ett ekstra kall per sidevisning på Netlify).
 - **security.txt:** `.well-known/security.txt` har en utløpsdato (Expires). Flytt den ett år fram hver høst.
 - **Ingen avhengigheter:** byggingen og serverfunksjonen bruker ingen pakker fra npm eller pip, og ingen Netlify-utvidelser. La det være slik: alt som kjøres under bygging, kan lese nøklene.
 
