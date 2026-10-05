@@ -191,7 +191,7 @@ const slettCookie = () => `${COOKIE}=; Path=${COOKIE_STI}; Max-Age=0; HttpOnly; 
 // /meg om hvem som er innlogget, og kan vise «Min side» i stedet for «Logg inn». Vanlige besøkende har
 // ikke flagget, så forsiden spør aldri portalen for dem. Det gir ingen tilgang: alt sjekkes mot COOKIE.
 const FLAGG = '__Secure-dd_innlogget';
-const lagFlagg = () => `${FLAGG}=1; Path=/; Max-Age=${OKT_DAGER * 86400}; Secure; SameSite=Lax`;
+const lagFlagg = (sekunder = OKT_DAGER * 86400) => `${FLAGG}=1; Path=/; Max-Age=${Math.max(0, Math.floor(sekunder))}; Secure; SameSite=Lax`;
 const slettFlagg = () => `${FLAGG}=; Path=/; Max-Age=0; Secure; SameSite=Lax`;
 const harFlagg = (req) => (req.headers.get('cookie') || '').split(';').some((del) => del.trim().startsWith(FLAGG + '='));
 
@@ -204,10 +204,11 @@ function lesCookies(req) {
     return verdier.slice(0, 5);
 }
 
-function innloggetKunde(req, nokkel) {
+// Gyldig innlogging → { kunde, utloper } (utloper i unix-sekunder), ellers null
+function innlogging(req, nokkel) {
     for (const verdi of lesCookies(req)) {
-        const k = kundeFraCookie(verdi, nokkel);
-        if (k) return k;
+        const s = kundeFraCookie(verdi, nokkel);
+        if (s) return s;
     }
     return null;
 }
@@ -221,7 +222,8 @@ function kundeFraCookie(verdi, nokkel) {
     let innhold;
     try { innhold = JSON.parse(Buffer.from(data, 'base64url').toString('utf8')); } catch { return null; }
     if (!innhold || typeof innhold.e !== 'number' || typeof innhold.f !== 'string' || innhold.e * 1000 < Date.now()) return null;
-    return kunder().find((x) => fingeravtrykk(x) === innhold.f) || null;
+    const kunde = kunder().find((x) => fingeravtrykk(x) === innhold.f);
+    return kunde ? { kunde, utloper: innhold.e } : null;
 }
 
 // ── Forsøk per IP ───────────────────────────────────────────────────────────
@@ -434,11 +436,17 @@ export default async (req, context) => {
     }
     if (sti === '/api/kunde/meg' || Object.hasOwn(STATISTIKK, sti)) {
         if (metode !== 'GET') return feil(405, 'Bruk GET.', { Allow: 'GET' });
-        const k = innloggetKunde(req, nokkel);
+        const s = innlogging(req, nokkel);
+        const k = s ? s.kunde : null;
         // /meg spør bare om noen er innlogget, og «nei» er et vanlig svar (200), ikke en feil. Da får
         // innloggingssiden ingen rød 401 i konsollen ved hvert besøk. Statistikken svarer fortsatt 401.
         if (sti === '/api/kunde/meg') {
-            if (k) return svar(200, { innlogget: true, navn: k.navn, nettsted: k.nettsted, epost: k.epost });
+            if (k) {
+                // Mangler flagget (innlogget fra før flagget fantes, eller det er slettet), settes det her,
+                // med samme utløpstid som innloggingen. Portalen spør /meg hver gang den åpnes.
+                const flagg = harFlagg(req) ? {} : { 'Set-Cookie': lagFlagg(s.utloper - Date.now() / 1000) };
+                return svar(200, { innlogget: true, navn: k.navn, nettsted: k.nettsted, epost: k.epost }, flagg);
+            }
             // Utløpt eller ugyldig innlogging: fjern flagget, så forsiden slutter å spørre
             return svar(200, { innlogget: false }, harFlagg(req) ? { 'Set-Cookie': slettFlagg() } : {});
         }
