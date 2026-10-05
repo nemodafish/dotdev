@@ -47,7 +47,8 @@
     <title>Personvernerklæring · DOTDEV</title>
     <meta name="description" content="Slik behandler DOTDEV personopplysninger: hva vi samler inn, hvorfor, hvor lenge og hvilke rettigheter du har.">
     <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#0004f6">
+    <meta name="theme-color" content="#0004f6" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0b0b10" media="(prefers-color-scheme: dark)">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="DOTDEV">
     <meta property="og:title" content="Personvernerklæring · DOTDEV">
@@ -175,6 +176,67 @@
     .foot p { margin-top: 0; }   /* står på linje med lenken (p har ellers luft over seg) */
     .foot__company { color: color-mix(in srgb, var(--c-white) 82%, var(--c-blue)); }   /* som på forsiden */
     .foot a { display: inline-flex; align-items: center; min-height: 44px; }
+
+    /* Mørk modus: samme «Mørk premium» som forsiden (seksjon 19 i index.html, samme --x-tokens).
+       Slår seg på av seg selv når telefonen eller nettleseren står i mørk modus. Bare skjerm,
+       så utskrift er lys. Lys modus over er uendret. */
+    @media screen and (prefers-color-scheme: dark) {
+        :root {
+            color-scheme: dark;
+            --x-bg: #0b0b10;
+            --x-deep: #060609;
+            --x-surface: #121219;
+            --x-line: rgba(255, 255, 255, .08);
+            --x-line-2: rgba(255, 255, 255, .14);
+            --x-soft: #c4c4d0;
+            --x-accent: #8285ff;      /* liten tekst: 6.2:1 mot bakgrunnen */
+            --x-accent-lg: #5b5fff;
+            --f-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+            --c-lime: #9bff60;
+            --c-bg: var(--x-bg);
+            --c-ink: #f3f3f6;
+            --c-muted: #a1a1b2;
+        }
+        ::selection { background: var(--c-blue); color: #fff; }
+        :focus-visible { outline-color: var(--c-lime); }
+        .top__bar { background: var(--x-surface); box-shadow: inset 0 0 0 1px var(--x-line-2), 0 18px 40px -22px rgba(0, 0, 0, .9); }
+        .logo .mark { fill: var(--x-accent-lg); filter: drop-shadow(0 0 6px rgba(0, 4, 246, .75)); }
+        .back { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 10px 32px -10px rgba(0, 4, 246, .9); }
+        .lang::before { box-shadow: inset 0 0 0 1px var(--x-line); }
+        @media (hover: hover) and (pointer: fine) {
+            .lang button[aria-pressed="false"]:hover .lang__chip { color: var(--c-ink); }
+        }
+        /* Etiketten over tittelen: mono, versaler og en lime piksel, som på forsiden */
+        .label {
+            color: var(--x-soft);
+            font-family: var(--f-mono);
+            font-size: .75rem;
+            font-weight: 500;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+        .label::before {
+            content: "";
+            display: inline-block;
+            width: 6px; height: 6px;
+            margin-right: .9em;
+            vertical-align: .14em;
+            background: var(--c-lime);
+            box-shadow: 0 0 10px rgba(155, 255, 96, .6);
+        }
+        h1 {
+            background: linear-gradient(180deg, #ffffff 35%, #c9c9d6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .summary { background: var(--x-surface); box-shadow: inset 0 0 0 1px var(--x-line); }
+        li::marker { color: var(--x-accent); }
+        .table th, .table td, .table tr { border-bottom-color: var(--x-line-2); }
+        .foot { background: var(--x-deep); color: var(--x-soft); border-top: 1px solid var(--x-line); }
+        .foot__company { color: var(--c-muted); }
+        .foot a:hover { color: var(--c-ink); }
+    }
     </style>
     <!-- Besøksstatistikk uten cookies (Plausible). Lastes og sendes via eget domene (/dd/ i netlify.toml), så CSP kan stå som 'self'. -->
     <script async src="/dd/js/s.js"></script>

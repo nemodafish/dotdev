@@ -40,6 +40,9 @@
      Endrer du --c-blue, endres aksentfargen overalt, også i pikselkunsten.
      Unntak: <head> kan ikke lese tokens, så bytt også #0004f6 i
      <meta name="theme-color"> og %230004f6 i favicon-lenken.
+     Mørk modus («Mørk premium») slår seg på av seg selv når telefonen
+     eller nettleseren står i mørk modus. Fargene står i seksjon 19
+     nederst i <style> (tokens --x-…), og i den mørke theme-color-taggen.
      Ny font: legg .woff2-filene i fonter/, oppdater @font-face øverst i
      <style> (og preload-lenkene i <head>) og bytt --f-title / --f-body.
 
@@ -250,8 +253,10 @@
     <meta name="twitter:image" content="https://dotdev.no/delingsbilde.png?v=2">
     <meta name="twitter:image:alt" content="DOTDEV – Design. Utvikling. Vekst. Webdesign og AI-automatisering.">
     <!-- ✏️ Aksentfarge i nettleserlinjen og favicon (kan ikke lese tokens: bytt #0004f6 / %230004f6 selv).
+         Mørk modus har sin egen farge i nettleserlinjen (#0b0b10 = --x-bg i seksjon 19).
          Ikonfilene (favicon.ico, favicon-32.png, apple-touch-icon.png, icon-192/512.png) er bilder: lag nye hvis logo eller farge endres. -->
-    <meta name="theme-color" content="#0004f6">
+    <meta name="theme-color" content="#0004f6" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0b0b10" media="(prefers-color-scheme: dark)">
     <link rel="icon" href="/favicon.ico" sizes="48x48">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
@@ -373,6 +378,10 @@
         --c-lime:   #9bff60;   /* små kategorietiketter på cover */
         --c-error:  #c8102e;   /* feilmeldinger i skjema (AA på hvit og grå) */
         --c-off:    #b3b3b3;   /* utilgjengelige datoer i kalenderen */
+        /* Planeten i hero (JS leser dem). Mørk modus bytter dem til blått (19) */
+        --c-planet:      var(--c-tint);   /* lyse piksler */
+        --c-planet-deep: var(--c-blue);   /* skyggesiden */
+        --c-planet-glow: var(--c-lav);    /* glød langs venstre kant */
 
         /* Fonter */
         --f-title: "Inter Tight", "Inter Tight fallback", "Helvetica Neue", Arial, sans-serif;
@@ -1603,6 +1612,257 @@
             animation: none !important;
         }
     }
+
+    /* ═════════════════════════════════════════════════════════════════
+       19. MØRK MODUS («Mørk premium», designforslag 2)
+       Slår seg på av seg selv når telefonen eller nettleseren står i mørk
+       modus (prefers-color-scheme: dark). Lys modus over er uendret.
+       Bare skjerm: utskrift og «Lagre som PDF» er alltid lyse (17b).
+       Mørk bakgrunn, off-white tekst, elektrisk blå og lime som sparsomme
+       aksenter. Pikselmotivet gløder svakt. Planeten i hero tegnes av JS
+       med fargene --c-planet… (overstyres her), så den blir blå, ikke grå.
+       Nye farger i mørk modus: bruk tokens --x-… under, og hold kontrasten
+       (4.5:1 for vanlig tekst, 3:1 for store titler og ikoner).
+       ═════════════════════════════════════════════════════════════════ */
+    @media screen and (prefers-color-scheme: dark) {
+        :root {
+            color-scheme: dark;
+            --x-bg: #0b0b10;
+            --x-deep: #060609;
+            --x-surface: #121219;
+            --x-surface-2: #1a1a24;
+            --x-line: rgba(255, 255, 255, .08);
+            --x-line-2: rgba(255, 255, 255, .14);
+            --x-text: #f3f3f6;
+            --x-soft: #c4c4d0;
+            --x-muted: #a1a1b2;
+            --x-accent: #8285ff;      /* liten tekst: 6.2:1 mot bakgrunnen */
+            --x-accent-lg: #5b5fff;   /* store titler: 4.2:1 */
+            --x-glow: rgba(0, 4, 246, .55);
+            --f-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+            --c-bg: var(--x-bg);
+            --c-ink: var(--x-text);
+            --c-muted: var(--x-muted);
+            --fw-title: 560;
+            /* Planeten: elektrisk blå i stedet for lys lavendel (som ble grå på mørk bakgrunn) */
+            --c-planet: #5c60ff;
+            --c-planet-deep: #0004f6;
+            --c-planet-glow: #2a2eff;
+        }
+        html { background: var(--x-bg); }
+        body { background: var(--x-bg); color: var(--x-text); }
+        ::selection { background: var(--c-blue); color: #fff; }
+        :focus-visible, .on-dark :focus-visible, .footer :focus-visible { outline-color: var(--c-lime); }
+        .skip:focus-visible { outline-color: var(--c-lime); }
+        .sbtn:focus-visible { outline-color: var(--c-lime); box-shadow: 0 0 0 3px var(--x-bg); }
+        .accent { color: var(--x-accent-lg); }
+
+        /* Små etiketter: mono, versaler, en lime piksel */
+        .kicker, .kicker--light {
+            color: var(--x-soft);
+            opacity: 1;
+            font-family: var(--f-mono);
+            font-size: .75rem;
+            font-weight: 500;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+        .kicker::before {
+            content: "";
+            display: inline-block;
+            width: 6px; height: 6px;
+            margin-right: .9em;
+            vertical-align: .14em;
+            background: var(--c-lime);
+            box-shadow: 0 0 10px rgba(155, 255, 96, .6);
+        }
+
+        /* Knapper */
+        .sbtn {
+            --sb-ico-bg: var(--x-text);
+            --sb-ico-fg: #0b0b10;
+        }
+        .sbtn:not(.sbtn--white):not(.sbtn--black) .sbtn__txt {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 10px 32px -10px rgba(0, 4, 246, .9);
+        }
+        .sbtn__ico { box-shadow: none; }
+        .sbtn--white { --sb-bg: var(--x-text); --sb-fg: #0b0b10; --sb-ico-bg: #fff; }
+        .sbtn--black { --sb-bg: var(--x-text); --sb-fg: #0b0b10; --sb-ico-bg: var(--c-blue); --sb-ico-fg: #fff; }
+
+        /* Chips og ikonbrikker */
+        .chip { border-color: var(--x-line-2); color: var(--x-soft); font-family: var(--f-mono); font-size: .8125rem; letter-spacing: .06em; }
+        .chip--blue { background: var(--c-blue); border-color: var(--c-blue); color: #fff; }
+        .ichip { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18), 0 0 26px -6px rgba(0, 4, 246, .95); }
+
+        /* Header og meny */
+        .nav__backdrop { background: rgba(3, 3, 6, .62); }
+        .nav__bar::before {
+            background: rgba(16, 16, 23, .84);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            backdrop-filter: blur(18px) saturate(140%);
+            box-shadow: inset 0 0 0 1px var(--x-line-2), 0 18px 40px -22px rgba(0, 0, 0, .9);
+        }
+        .nav.is-open .nav__bar::before { background: #111118; }
+        .nav__top::after { background: var(--x-line); }
+        .nav__logo .mark { color: var(--x-accent-lg); filter: drop-shadow(0 0 6px rgba(0, 4, 246, .75)); }
+        .lang::before { background: var(--x-bg); box-shadow: inset 0 0 0 1px var(--x-line); }
+        @media (hover: hover) and (pointer: fine) {
+            .lang__btn[aria-pressed="false"]:hover .lang__chip { color: var(--x-text); }
+        }
+        .nav__login:hover, .nav__login:focus-visible,
+        .nav__page:hover, .nav__page:focus-visible,
+        .nav__svc:hover .nav__svc-title, .nav__svc:focus-visible .nav__svc-title { color: var(--x-accent); }
+        .nav__eyebrow, .nav__lang-label { color: var(--x-muted); font-family: var(--f-mono); font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; }
+        .nav__group-label { color: var(--x-accent); font-family: var(--f-mono); }
+        .nav__svc:hover, .nav__svc:focus-visible { background: rgba(255, 255, 255, .04); border-color: var(--x-line); }
+        @media (max-width: 767px) {
+            .nav__login { background: var(--x-bg); box-shadow: inset 0 0 0 1px var(--x-line); }
+            .nav__login .ico { color: var(--x-accent); }
+        }
+
+        /* Hero: blå glød bak planeten og et svakt prikkerutenett bak teksten */
+        .hero { background: var(--x-bg); }
+        .hero::before, .hero::after {
+            content: "";
+            position: absolute; inset: 0; z-index: 0;
+            pointer-events: none;
+        }
+        .hero::before {
+            background:
+                radial-gradient(ellipse 34% 52% at 84% 40%, rgba(0, 4, 246, .26), transparent 70%),
+                radial-gradient(ellipse 60% 40% at 10% 0%, rgba(91, 95, 255, .07), transparent 70%);
+        }
+        .hero::after {
+            background: radial-gradient(rgba(255, 255, 255, .09) 1px, transparent 1.6px) 0 0 / 24px 24px;
+            -webkit-mask-image: radial-gradient(ellipse 55% 75% at 22% 38%, #000, transparent 72%);
+            mask-image: radial-gradient(ellipse 55% 75% at 22% 38%, #000, transparent 72%);
+        }
+        .hero__top { z-index: 1; }
+        .hero__orb.is-drawn { filter: drop-shadow(0 0 10px rgba(0, 4, 246, .7)); }
+        .hero__visual::before {
+            background:
+                radial-gradient(var(--c-blue) 1.3px, transparent 1.8px) 0 0 / 7px 7px,
+                #14143a;
+        }
+        .intro-tag { background: var(--x-surface); box-shadow: inset 0 0 0 1px var(--x-line-2); }
+        .intro-tag .mark { color: var(--x-accent-lg); }
+        .intro-tag__chip {
+            background: var(--c-lime); color: #0b0b10;
+            font-family: var(--f-mono); font-size: .6875rem; font-weight: 600;
+            letter-spacing: .1em; text-transform: uppercase;
+        }
+        .hero__heading .accent { text-shadow: 0 0 46px rgba(0, 4, 246, .75); }
+        .hero__lead { color: var(--x-soft); }
+        .hero__link { color: var(--x-text); }
+        @media (max-width: 900px) {
+            /* Planeten står under teksten: gløden bak den tones ut før bunnen av hero,
+               så den ikke slutter med en skarp kant mot Tjenester */
+            .hero::before {
+                background: radial-gradient(ellipse 80% 24% at 72% 84%, rgba(0, 4, 246, .32), transparent 70%);
+                -webkit-mask-image: linear-gradient(#000 76%, transparent 99%);
+                mask-image: linear-gradient(#000 76%, transparent 99%);
+            }
+            .hero::after {
+                -webkit-mask-image: radial-gradient(ellipse 90% 45% at 30% 30%, #000, transparent 72%);
+                mask-image: radial-gradient(ellipse 90% 45% at 30% 30%, #000, transparent 72%);
+            }
+        }
+
+        /* Titler: svak vertikal toning i off-white */
+        .hero__heading, .services__title, .about__title, .work__title, .process__title, .faq__title, .booking__title {
+            background: linear-gradient(180deg, #ffffff 35%, #c9c9d6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .hero__heading .accent, .services__title .accent { color: var(--x-accent-lg); }
+
+        /* Tjenester */
+        .services__intro { color: var(--x-muted); }
+        .plan { background: var(--x-surface); box-shadow: inset 0 0 0 1px var(--x-line); }
+        @media (hover: hover) and (pointer: fine) {
+            .plan:hover { box-shadow: inset 0 0 0 1px var(--x-line-2), 0 26px 50px -30px rgba(0, 4, 246, .8); }
+        }
+        .plan__list .ico { color: var(--x-accent); }
+        .plan__list li { color: var(--x-soft); }
+        .plan__note { opacity: 1; color: var(--x-muted); }
+        .plan__note strong { color: var(--x-text); font-weight: 500; }
+        .plan--featured {
+            background: var(--c-night);
+            box-shadow: inset 0 0 0 1px rgba(91, 95, 255, .5), 0 30px 80px -34px rgba(0, 4, 246, .95);
+        }
+        .plan--featured .plan__list li { color: var(--x-text); }
+        .plan--featured .plan__list .ico { color: var(--c-tint); }
+        .plan--featured .plan__note { color: var(--x-soft); }
+
+        /* Om oss: helsvart stripe og pikseltrapp som toner over i blått */
+        .about { background: #040407; }
+        .about::before {
+            height: calc(var(--about-band) + 40px);
+            background:
+                linear-gradient(var(--x-bg), var(--x-bg)) 0 0 / 100% var(--about-band) no-repeat,
+                linear-gradient(90deg, var(--x-bg) 0 24px, transparent 0) 0 var(--about-band) / 40px 8px repeat-x,
+                linear-gradient(90deg, var(--x-bg) 0 8px, transparent 0) 32px var(--about-band) / 56px 8px repeat-x,
+                linear-gradient(90deg, var(--x-bg) 0 16px, transparent 0) 16px calc(var(--about-band) + 8px) / 72px 8px repeat-x,
+                linear-gradient(90deg, rgba(91, 95, 255, .5) 0 8px, transparent 0) 40px calc(var(--about-band) + 16px) / 88px 8px repeat-x,
+                linear-gradient(90deg, rgba(91, 95, 255, .28) 0 8px, transparent 0) 96px calc(var(--about-band) + 24px) / 152px 8px repeat-x,
+                linear-gradient(90deg, rgba(91, 95, 255, .14) 0 8px, transparent 0) 8px calc(var(--about-band) + 32px) / 232px 8px repeat-x;
+        }
+        .about__num { font-family: var(--f-mono); font-size: .8125rem; letter-spacing: .06em; box-shadow: 0 0 22px -4px rgba(0, 4, 246, .9); }
+        .about__panel { box-shadow: inset 0 0 0 1px rgba(91, 95, 255, .35), 0 40px 120px -50px rgba(0, 4, 246, .8); }
+
+        /* Prosjekter */
+        .case { background: var(--x-surface); box-shadow: none; border: 1px solid var(--x-line); }
+        .case__chip { background: var(--x-surface-2); color: var(--x-muted); }
+        .case__chip strong { color: var(--x-text); }
+        .case__cat { font-family: var(--f-mono); letter-spacing: .18em; }
+        .case__bar { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16); }
+
+        /* Prosess */
+        .step { border-top-color: var(--x-line-2); }
+        .step__text { color: var(--x-soft); }
+
+        /* Spørsmål og svar */
+        .faq__item { background: var(--x-surface); box-shadow: inset 0 0 0 1px var(--x-line); transition: box-shadow .3s; }
+        .faq__item[open] { box-shadow: inset 0 0 0 1px var(--x-line-2); }
+        .faq__icon { background: var(--x-surface-2); }
+        .faq__item[open] .faq__icon { background: var(--c-blue); color: #fff; box-shadow: 0 0 20px -4px rgba(0, 4, 246, .95); }
+        @media (hover: hover) and (pointer: fine) {
+            .faq__item summary:hover { color: var(--x-accent); }
+        }
+        .faq__answer { color: var(--x-soft); }
+        .faq__answer a { color: var(--x-text); }
+
+        /* Booking */
+        .booking__lead { color: var(--x-muted); }
+        .booking__facts li { border-top-color: var(--x-line); color: var(--x-soft); }
+        .booking__facts li:last-child { border-bottom-color: var(--x-line); }
+        .booking__alt { color: var(--x-muted); }
+        .booking__alt a { color: var(--x-text); }
+        .bk-ext, .bk-nojs { background: var(--x-surface); box-shadow: inset 0 0 0 1px var(--x-line); }
+        .bk-ext__head { box-shadow: inset 0 0 0 1px rgba(91, 95, 255, .35); }
+        .bk-ext__eyebrow { font-family: var(--f-mono); opacity: 1; color: var(--c-tint); }
+        .bk-ext__types li { border-bottom-color: var(--x-line); }
+        .bk-ext__types .chip { border-color: var(--x-line-2); color: var(--x-soft); }
+        .bk-ext__text, .bk-nojs__text { color: var(--x-muted); }
+
+        /* Kontakt */
+        .cta { background: #000; }
+
+        /* Footer: nesten svart i stedet for blå */
+        .footer { background: var(--x-deep); color: var(--x-text); border-top: 1px solid var(--x-line); }
+        .footer__logo .mark { color: var(--x-accent-lg); filter: drop-shadow(0 0 7px rgba(0, 4, 246, .75)); }
+        .footer__tagline { color: var(--x-soft); }
+        .footer__links h2 { color: var(--x-muted); font-family: var(--f-mono); font-size: .75rem; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; }
+        .footer__links a { color: var(--x-soft); transition: color .3s; }
+        .footer__links a:hover, .footer__links a:focus-visible { color: var(--x-text); }
+        .footer__mail { color: var(--x-accent); }
+        .footer__mail a { color: inherit; }
+        .footer__base { border-top-color: var(--x-line); color: var(--x-muted); }
+        .footer__company { color: var(--x-muted); }
+        .footer__meta a { color: var(--x-soft); }
+        .footer__meta a:hover, .footer__meta a:focus-visible { color: var(--x-text); }
+    }
     </style>
     <!-- Besøksstatistikk uten cookies (Plausible). Lastes og sendes via eget domene (/dd/ i netlify.toml), så CSP kan stå som 'self'. -->
     <script async src="/dd/js/s.js"></script>
@@ -2686,7 +2946,10 @@ const I18N = {
         const pal = () => P || (P = {
             blue: hex(tok('--c-blue')), black: hex(tok('--c-black')), coal: hex(tok('--c-coal')),
             night: hex(tok('--c-night')), bg: hex(tok('--c-bg')), white: hex(tok('--c-white')), tint: hex(tok('--c-tint')),
-            lav: hex(tok('--c-lav'))
+            lav: hex(tok('--c-lav')),
+            // Planeten har egne tokens, så mørk modus kan gjøre den blå (seksjon 19 i <style>)
+            planet: hex(tok('--c-planet') || tok('--c-tint')), planetDeep: hex(tok('--c-planet-deep') || tok('--c-blue')),
+            planetGlow: hex(tok('--c-planet-glow') || tok('--c-lav'))
         });
 
         // Frøbasert tilfeldighetsgenerator (samme frø = samme bilde)
@@ -2768,7 +3031,9 @@ const I18N = {
         /* Planet med ring (hero) — gjennomsiktig bakgrunn.
            To fargenivåer (lavendel og blått), lyset kommer fra høyre, og en
            tynn, skrå ring som blekner mot venstre. Smal skjerm (planeten under
-           teksten): større kule, lavere og mer til venstre. */
+           teksten): større kule, lavere og mer til venstre.
+           Fargene er --c-planet, --c-planet-deep og --c-planet-glow
+           (lys modus: --c-tint, --c-blue og --c-lav; mørk modus: blått). */
         function planet(ctx, w, h, seed) {
             const C = pal(), N = noise(seed);
             const narrow = window.matchMedia('(max-width: 900px)').matches;
@@ -2784,8 +3049,8 @@ const I18N = {
             ctx.arc(cx, cy, R, 0, Math.PI * 2);
             ctx.clip();
             const g = ctx.createLinearGradient(cx - R, 0, cx - R * .55, 0);
-            g.addColorStop(0, rgb(C.lav));
-            g.addColorStop(1, `rgba(${C.lav.join(',')},0)`);
+            g.addColorStop(0, rgb(C.planetGlow));
+            g.addColorStop(1, `rgba(${C.planetGlow.join(',')},0)`);
             ctx.globalAlpha = .85;
             ctx.fillStyle = g;
             ctx.fillRect(cx - R, cy - R, R, R * 2);
@@ -2815,7 +3080,7 @@ const I18N = {
                 let out = ring;
                 if (d2 < 1.5) out = Math.max(out, (1.5 - d2) / .5 * .34 * N(x * .03, y * .03, 2) * (nx > 0 ? 1 : .4));
                 return out;
-            }, [rgb(C.tint), rgb(C.blue)]);
+            }, [rgb(C.planet), rgb(C.planetDeep)]);
         }
 
         /* Dither-felt i mørke bånd. Masken sier hvor pikslene samler seg
@@ -3036,6 +3301,13 @@ const I18N = {
         window.addEventListener('resize', () => {
             clearTimeout(t);
             t = setTimeout(() => canvases.forEach(cv => { if (!io || visible.has(cv) || cv._size) draw(cv); }), 200);
+        });
+
+        // Lys/mørk modus byttet mens siden er åpen (f.eks. automatisk om kvelden på mobil):
+        // les fargene på nytt og tegn lerretene igjen. Skjulte lerreter tegnes når de vises.
+        onMQ(window.matchMedia('(prefers-color-scheme: dark)'), () => {
+            P = null;
+            canvases.forEach(cv => { cv._size = ''; if (!io || visible.has(cv)) draw(cv); });
         });
 
         return { refresh: (scope = document) => $$('canvas[data-pixel]', scope).forEach(cv => requestAnimationFrame(() => setTimeout(() => draw(cv), 450))) };

@@ -24,6 +24,10 @@
 
 Bare `dist/` blir publisert, så guiden, kommentarene, `LES-MEG.md` og `bygg.py` er ikke synlige på nettsiden. Feiler byggingen, blir forrige versjon liggende ute, og feilen står under **Deploys** i Netlify.
 
+## Lys og mørk modus
+
+Nettsiden følger innstillingen til den besøkende: står telefonen eller nettleseren i mørk modus (for eksempel mørkt tema i Chrome), vises den mørke utgaven, ellers den lyse som før. Den mørke utgaven er designforslag 2, «Mørk premium». CSS-en står i seksjon 19 nederst i `<style>` i `index.html` (fargene er tokens `--x-…`, og planeten i hero blir blå via `--c-planet…`), og i en tilsvarende blokk nederst i `<style>` i `personvern.html` og `404.html`. Nettleserlinjen får en egen mørk farge (`theme-color` med `media`), og utskrift er alltid lys. Kundeportalen (dotdev.no/kunde) er foreløpig bare lys.
+
 ## Venter på dere
 
 - **Team:** navn, roller, bilder og LinkedIn. Blokken ✏️ TEAM i SEKSJON: Om oss.
