@@ -220,8 +220,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <!-- Settes før siden tegnes, så menyen og språkvelgeren ikke skifter form når skriptet nederst kjører -->
-    <script>document.documentElement.classList.add('js')</script>
+    <!-- Settes før siden tegnes, så menyen og språkvelgeren ikke skifter form når skriptet nederst kjører.
+         «innlogget»: kunden har flagget fra kundeportalen, så «Min side» vises fra første stund (se 1b). -->
+    <script>
+    document.documentElement.classList.add('js');
+    if (/(?:^|;\s*)__Secure-dd_innlogget=1(?:;|$)/.test(document.cookie)) document.documentElement.classList.add('innlogget');
+    </script>
     <!-- ✏️ Sidetittel og beskrivelse (vises i Google og når lenken deles) -->
     <title>Nettsider og webdesign for bedrifter | DOTDEV</title>
     <meta name="description" content="DOTDEV designer og utvikler moderne nettsider for bedrifter. Få en rask, profesjonell og skreddersydd nettside som hjelper bedriften din å vokse.">
@@ -756,6 +760,10 @@
         .lang__btn[aria-pressed="false"]:hover .lang__chip { color: var(--c-blue); }
     }
     .nav__top .lang { margin-left: auto; margin-right: 14px; }
+    /* «Logg inn» eller «Min side» (header og footer): klassen settes i <head> før siden tegnes,
+       så teksten ikke blinker når en innlogget kunde kommer tilbake til forsiden */
+    [data-innlogget], .innlogget [data-utlogget] { display: none; }
+    .innlogget [data-innlogget] { display: inline; }
     /* «Logg inn» for kunder, foran språkvelgeren. Under 768 px: knapp i stedet for NO/EN */
     .nav__login {
         display: inline-flex; align-items: center; gap: 8px;
@@ -1625,7 +1633,7 @@
                     <a class="nav__login" href="/kunde" data-min-side>
                         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.3-3.4 3.9-5 7-5s5.7 1.6 7 5"/></svg>
                         <span data-i18n="nav.login" data-utlogget>Logg inn</span>
-                        <span data-i18n="nav.mypage" data-innlogget hidden>Min side</span>
+                        <span data-i18n="nav.mypage" data-innlogget>Min side</span>
                     </a>
                     <!-- Språkvelger NO | EN (vises bare med JavaScript, se punkt 10 i guiden) -->
                     <div class="lang" role="group" aria-label="Språk / Language">
@@ -2146,8 +2154,8 @@
         <!-- ✏️ Avslutning -->
         <h2 class="cta__title" id="kontakt-title" data-i18n="cta.title">Skal vi ta en prat?</h2>
         <p class="cta__copy" data-i18n="cta.copy">Fortell kort om bedriften og hva du trenger, så svarer vi innen én&nbsp;arbeidsdag.</p>
-        <!-- ✏️ E-posten åpnes med emne og et kort skjema ferdig utfylt (engelsk: cta.mailHref) -->
-        <a class="sbtn sbtn--white" href="mailto:kontakt@dotdev.no?subject=Nytt%20prosjekt&amp;body=Hei%20DOTDEV!%0D%0A%0D%0ABedrift%3A%0D%0ANettside%20i%20dag%20(hvis%20noen)%3A%0D%0AHva%20gjelder%20det%3A%0D%0A%C3%98nsket%20oppstart%3A%0D%0A%0D%0A" data-i18n-attr="href:cta.mailHref">
+        <!-- ✏️ Leder til «Book en samtale». E-post står rett under. -->
+        <a class="sbtn sbtn--white" href="#booking">
             <span class="sbtn__ico sbtn__ico--lead" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
             <span class="sbtn__txt" data-i18n="btn.start">Start et prosjekt</span>
             <span class="sbtn__ico sbtn__ico--tail" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 8.5v9h-9"/></svg></span>
@@ -2205,7 +2213,7 @@
         <p class="footer__company" data-i18n="footer.company">Org.nr. 936 133 231</p>
         <ul class="footer__meta">
             <li><a class="ulink" href="/personvern" data-lang-carry data-i18n="footer.privacy">Personvern</a></li>
-            <li><a class="ulink" href="/kunde" data-min-side><span data-i18n="footer.portal" data-utlogget>Kundeinnlogging</span><span data-i18n="footer.mypage" data-innlogget hidden>Min side</span></a></li>
+            <li><a class="ulink" href="/kunde" data-min-side><span data-i18n="footer.portal" data-utlogget>Kundeinnlogging</span><span data-i18n="footer.mypage" data-innlogget>Min side</span></a></li>
             <li><a class="ulink" href="#hjem" data-i18n="footer.top">Til toppen ↑</a></li>
         </ul>
     </div>
@@ -2392,7 +2400,6 @@ const I18N = {
         'cta.ring': 'Get started — Get started — Get started — Get started — Get started — ',
         'cta.title': 'Ready to talk?',
         'cta.copy': 'Tell us briefly about your business and what you need, and we’ll get back to you within one working&nbsp;day.',
-        'cta.mailHref': 'mailto:kontakt@dotdev.no?subject=New%20project&body=Hi%20DOTDEV!%0D%0A%0D%0ACompany%3A%0D%0ACurrent%20website%20(if%20any)%3A%0D%0AWhat%20is%20it%20about%3A%0D%0APreferred%20start%3A%0D%0A%0D%0A',
 
         // Footer
         'footer.tagline': 'Websites and AI automation for businesses that want to stand out.',
@@ -2534,19 +2541,19 @@ const I18N = {
 
     /* ── 1b. «Min side» for kunder som er innlogget i kundeportalen ─ */
     // Innloggingscookien er HttpOnly og sendes bare til /api/kunde, så forsiden ser bare flagget
-    // __Secure-dd_innlogget (bare «1»). Uten flagget spør vi ikke portalen i det hele tatt.
-    if (/(?:^|;\s*)__Secure-dd_innlogget=1(?:;|$)/.test(document.cookie)) {
+    // __Secure-dd_innlogget (bare «1»). Skriptet i <head> har allerede satt klassen «innlogget», så
+    // «Min side» vises med en gang. Her sjekker vi i bakgrunnen at innloggingen fortsatt gjelder
+    // (ellers tilbake til «Logg inn»; /meg fjerner da flagget) og henter bedriftsnavnet til title.
+    // Uten flagget spør vi ikke portalen i det hele tatt.
+    if (root.classList.contains('innlogget')) {
         fetch('/api/kunde/meg', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
             .then(res => (res.ok ? res.json() : null))
             .then(d => {
-                if (!d || d.innlogget !== true) return;
-                $$('[data-min-side]').forEach(a => {
-                    $$('[data-utlogget]', a).forEach(s => { s.hidden = true; });
-                    $$('[data-innlogget]', a).forEach(s => { s.hidden = false; });
-                    if (typeof d.navn === 'string' && d.navn) a.title = d.navn;
-                });
+                if (!d) return;                      // ukjent svar: la «Min side» stå, lenken virker uansett
+                if (d.innlogget !== true) { root.classList.remove('innlogget'); return; }
+                if (typeof d.navn === 'string' && d.navn) $$('[data-min-side]').forEach(a => { a.title = d.navn; });
             })
-            .catch(() => {});                        // ingen svar: «Logg inn» blir stående
+            .catch(() => {});                        // ingen svar: samme som over
     }
 
     /* ── 2. Meny (åpne/lukke, Esc, fokusfelle, scroll-lås) ──────── */
@@ -3106,6 +3113,8 @@ const I18N = {
             $$('a[href="#booking"]').forEach(a => {
                 const li = a.closest('.nav__pages li, .footer__links li');
                 if (li) li.hidden = true;
+                // «Start et prosjekt» står selv i Kontakt, så den får e-post i stedet for å peke på seg selv
+                else if (a.closest('#kontakt')) a.setAttribute('href', 'mailto:kontakt@dotdev.no');
                 else if ($('#kontakt')) a.setAttribute('href', '#kontakt');
             });
             return;
