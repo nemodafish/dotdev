@@ -5,8 +5,8 @@
 | Fil / mappe | Hva |
 |---|---|
 | `index.html`, `personvern.html`, `404.html` | Kildefilene. Det er disse dere redigerer. Guiden øverst i `index.html` forklarer alt. |
-| `kunde.html` | Kundeportalen (dotdev.no/kunde): innlogging og statistikk for kundene. Se «Kundeportalen» under. |
-| `netlify/functions/kunde-api.mjs` | Serverfunksjonen bak kundeportalen. Sjekker innloggingen og henter tallene fra Plausible. |
+| `kunde.html`, `kunde.js` | Kundeportalen (dotdev.no/kunde): innlogging og statistikk for kundene. `kunde.html` er utseendet, `kunde.js` koden. Se «Kundeportalen» under. |
+| `netlify/functions/kunde-api.mjs` | Serverfunksjonen bak kundeportalen. Sjekker innloggingen og henter tallene fra Plausible. Resten av koden ligger i `netlify/kunde/` (perioder, filtre, lister, nedlasting). |
 | `lag-kunde.mjs` | Lager innlogging til en kunde (kjøres på egen PC). Publiseres ikke. |
 | `bygg.py` | Lager en publiseringsklar kopi i `dist/` (uten guiden og kommentarene), og fyller inn sikkerhetsreglene i `_headers`. |
 | `netlify.toml` | Får Netlify til å kjøre `bygg.py` og publisere bare `dist/`. |
@@ -33,7 +33,20 @@ Bare `dist/` blir publisert, så guiden, kommentarene, `LES-MEG.md` og `bygg.py`
 
 ## Kundeportalen
 
-Kunder som har kjøpt nettside av oss, kan logge inn på **dotdev.no/kunde** og se besøksstatistikken for sin egen nettside: besøkende, sidevisninger, hvor de kommer fra, sider, land, enheter og handlinger (mål). Tallene hentes fra Plausible av serverfunksjonen `netlify/functions/kunde-api.mjs`. API-nøkkelen og passordene ligger bare i Netlify, aldri i GitHub og aldri i nettleseren.
+Kunder som har kjøpt nettside av oss, kan logge inn på **dotdev.no/kunde** og se besøksstatistikken for sin egen nettside, med de samme tallene som i Plausible-dashbordet:
+
+- **Tallene øverst** (unike besøkende, besøk, sidevisninger, sider per besøk, fluktfrekvens, besøkstid) med endring mot perioden før. Med filter på en side eller et mål bytter de til scrolldybde og tid på siden, eller konverteringer, inntekt og konverteringsrate, som i Plausible. Trykk på et tall for å vise det i grafen.
+- **Grafen** per time, dag, uke eller måned, med sammenligningen som en blålilla trappelinje. Søyler som ikke dekker en hel time, dag eller uke (ennå), er hule. Trykk på en dag eller måned for å åpne den.
+- **Periode:** i dag, i går, sanntid, siste 24 timer, 7, 28, 30 og 91 dager, denne og forrige måned, siste 6 og 12 måneder, i år, all tid og egne datoer, med ◀ ▶ for dag, måned og år. **Sammenligning** med forrige periode, samme periode i fjor eller egne datoer (samme ukedag eller nøyaktig dato).
+- **Fem paneler med faner:** kanaler, kilder (henvisninger når en kilde er valgt) og kampanjer (UTM), mest besøkte sider, inngangs- og utgangssider (sti eller hele URL-en), kart, land, regioner og byer, nettlesere, operativsystemer og skjermstørrelse (med versjoner når en nettleser eller et system er valgt), og mål og egenskaper. «Vis alle» åpner hele listen med flere tall, søk og sortering.
+- **Filtre:** trykk på en rad, eller bruk «Filtrer» (er, er ikke, inneholder, inneholder ikke, flere verdier). Filtrene vises som knapper øverst. «Mål er ikke» betyr besøk som ikke fullførte målet (som i Plausible).
+- **Last ned** gir en ZIP med CSV-filer i Plausibles format. Hurtigtastene er de samme som i Plausible (lista står under «Om tallene» i portalen, der de også kan slås av).
+
+Alt kunden velger, står i adressen, så en visning kan deles og tilbake-knappen virker. Portalen lagrer ingenting i nettleseren. Tallene hentes fra Plausible av serverfunksjonen `netlify/functions/kunde-api.mjs` (med koden i `netlify/kunde/`). API-nøkkelen og passordene ligger bare i Netlify, aldri i GitHub og aldri i nettleseren.
+
+Det som ikke finnes i Plausibles API, er ikke med: trakter, brukerreiser, Google-søkeord, notater i grafen, lagrede segmenter og minuttgrafen i sanntid.
+
+**Kartet** under «Hvor de er» lastes fra `kunde-kart.json` (ca. 40 KB pakket) bare når fanen vises. Det er laget av `verktoy/lag-kart.mjs` fra Natural Earth-data via world-atlas (fritt, ISC-lisens, lisensteksten ligger i selve fila). Krym er tegnet som en del av Ukraina, etter de internasjonalt anerkjente grensene. Skal kartet lages på nytt, se toppen av `verktoy/lag-kart.mjs`. Mangler fila, skjules fanen og «Land» vises i stedet.
 
 **Repoet er offentlig. Ikke legg API-nøkler, passord eller verdiene fra `lag-kunde.mjs` i noen fil her.**
 
@@ -50,7 +63,7 @@ Kunder som har kjøpt nettside av oss, kan logge inn på **dotdev.no/kunde** og 
 
 ### Ny kunde
 
-1. Legg kundens nettside til i Plausible (i samme lag som API-nøkkelen), og legg inn skriptet på nettsiden deres.
+1. Legg kundens nettside til i Plausible (i samme lag som API-nøkkelen), og legg inn skriptet på nettsiden deres. Bruker kunden egne egenskaper (custom properties), legg dem inn under Site settings → Custom properties: portalen viser bare egenskapene som står der (pluss Plausibles egne `url` og `path` for utgående lenker, nedlastinger og 404). Står listen tom, vises ingen egenskaper.
 2. Kjør på egen PC, i denne mappen, i et vanlig terminalvindu (ikke via en AI-assistent, fordi den lagrer det som vises):
 
    ```
@@ -70,9 +83,11 @@ Kunder som har kjøpt nettside av oss, kan logge inn på **dotdev.no/kunde** og 
 ### Godt å vite
 
 - **Personvern:** For kundens nettside er vi databehandler (kunden er ansvarlig, Plausible er underleverandør). Inngå databehandleravtale med kunden, og sørg for at personvernerklæringen på kundens nettside nevner Plausible.
-- **Plausible-pakken:** Business-planen dekker 10 nettsider, og dotdev.no er én av dem (plass til 9 kunder). Alle sidevisningene på kundenes nettsider teller med i vår pakke, så kunder med mye trafikk kan gjøre den dyrere. Plausible tillater 600 spørringer i timen per nøkkel. Portalen bruker 8 per visning og husker tallene i 5 minutter, så det holder godt.
+- **Plausible-pakken:** Business-planen dekker 10 nettsider, og dotdev.no er én av dem (plass til 9 kunder). Alle sidevisningene på kundenes nettsider teller med i vår pakke, så kunder med mye trafikk kan gjøre den dyrere. Plausible tillater 600 spørringer i timen for hele laget (alle nøkler og alle kundene til sammen, fast klokketime), og 60 på 10 sekunder. Portalen husker hver spørring i 5 minutter (sanntid 1 minutt, oppsettet 1 time) og henter bare det kunden ser på: en full visning koster 11 spørringer første gang og ingen de neste 5 minuttene, et nytt filter rundt 8, en ny fane 1, «Vis alle» 1–2 per side med 100 rader, og en nedlasting 22 pluss én per egenskap (høyst 32, og høyst én gang i minuttet per nettsted). «Besøkende nå» koster 1 spørring i minuttet per nettsted mens portalen er åpen og synlig, og sanntid 4–5 i minuttet (tallene øverst hvert minutt, listene annethvert). Det stopper etter et kvarter uten aktivitet (sanntid etter fem minutter), når fanen er skjult, og når kvoten er brukt opp (til kunden gjør noe igjen).
+- **Kvotevern:** Hvert nettsted kan bruke 120 spørringer i én rykk, og får 4 nye i minuttet (240 i timen). Bruker en kunde mer, ser den kunden «Du har hentet mange tall på kort tid. Vent et par minutter» for de delene som ikke fikk plass, mens de andre kundene ikke merker noe. Portalen sender i tillegg høyst 500 spørringer per klokketime og 50 per 10 sekunder (litt under Plausibles grenser), og svarer Plausible likevel «for mange», tar den pause til neste klokketime (eller 10 sekunder) i stedet for å sende spørringer som uansett blir avvist. Da ser kundene «Mange spør etter tall akkurat nå». Grensene ligger i `netlify/kunde/plausible.mjs` (KVOTE). Merk: de gjelder per serverinstans, og Netlify kan kjøre flere samtidig, så de er en brems, ikke en mur. Får dere mange kunder, be Plausible om høyere grense.
+- **Tid:** Netlify stopper en forespørsel etter 60 sekunder. Portalen gir hver forespørsel en frist på 25 sekunder (nedlastingen 45), og svarer med det som rakk å bli ferdig. Er Plausible veldig tregt, kan en nedlasting feile med «Plausible svarer tregt akkurat nå»; den kan da prøves igjen med en gang.
 - **Netlify:** Er kontoen på Netlifys nye kredittplan, koster hver publisering (også Trigger deploy) 15 kreditter, og gratisplanen har 300 i måneden. Samle gjerne flere kundeendringer før dere publiserer. Feil fra funksjonen står under Logs → Functions.
-- **Sikkerhet:** Passordene lagres som scrypt-hasher. Innloggingen er en signert cookie (HttpOnly, Secure, SameSite=Strict) som bare sendes til `/api/kunde`, ikke inneholder e-post eller navn og varer i 14 dager. Netlify stopper en IP som sender over 30 forespørsler i minuttet til portalen.
+- **Sikkerhet:** Passordene lagres som scrypt-hasher. Innloggingen er en signert cookie (HttpOnly, Secure, SameSite=Strict) som bare sendes til `/api/kunde`, ikke inneholder e-post eller navn og varer i 14 dager. Netlify stopper en IP som sender over 90 forespørsler i minuttet til portalen.
 
 ## Sikkerhet
 

@@ -35,7 +35,10 @@ COPY = [
     "robots.txt", "sitemap.xml", "site.webmanifest", ".well-known",
     "favicon.ico", "favicon.svg", "favicon-32.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png",
     "delingsbilde.png", "fonter", "bilder",
+    "kunde.js", "kunde-kart.json",
 ]
+# Egne skriptfiler (ikke innebygd) som også syntakssjekkes før publisering
+JS_FILES = ["kunde.js"]
 # _headers kopieres ikke rett over: write_headers() fyller inn hashene først.
 HASH_SCRIPT = "HASHER-FOR-SKRIPT"
 HASH_STYLE = "HASHER-FOR-STIL"
@@ -345,6 +348,11 @@ def main():
         else:
             print(f"  Advarsel: fant ikke {name}")
 
+    # Skriptfilene får kommentarene og innrykkene fjernet som de innebygde, og sjekkes som klassiske skript
+    for name in JS_FILES:
+        js = strip_js((ROOT / name).read_text(encoding="utf-8"))
+        (DIST / name).write_text(js, encoding="utf-8")
+        scripts.append(js)
     check_js(scripts)
 
     # Hashene regnes ut fra filene slik de ble skrevet (bytes, uten linjeskift-omgjøring)

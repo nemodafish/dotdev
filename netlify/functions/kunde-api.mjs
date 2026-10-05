@@ -1,22 +1,48 @@
 // DOTDEV · kundeportalen (dotdev.no/kunde): innlogging og statistikk.
 //
 // Netlify kjører filen som en serverfunksjon på /api/kunde/*. Siden kunde.html
-// snakker bare med denne funksjonen, aldri direkte med Plausible.
+// snakker bare med denne funksjonen, aldri direkte med Plausible. Resten av koden ligger i
+// netlify/kunde/ (perioder, Plausible-kall, filtre, lister, nedlasting).
 //
 //   POST /api/kunde/logginn   { epost, passord } → setter innloggingscookien
 //   POST /api/kunde/loggut                       → sletter den
 //   GET  /api/kunde/meg                          → hvem som er logget inn
-//   GET  /api/kunde/tall?periode=30d             → tallene (idag | 7d | 30d | 12m)
+//   GET  /api/kunde/oppsett                      → tidssone, mål og egenskaper for nettstedet
+//   GET  /api/kunde/data?<periode>&deler=…       → flere deler på én gang: topp, nå, graf:…, liste:…
+//   GET  /api/kunde/detaljer?rapport=…&<periode> → én liste med 100 rader per side, søk og sortering
+//   GET  /api/kunde/eksport?<periode>            → ZIP med CSV-filer (som «Export stats» i Plausible)
+//
+//   <periode> = periode (sanntid | dag | 24t | 7d | 28d | 30d | 91d | mnd | aar | 6mnd | 12mnd | alt | egen),
+//   dato (dag/mnd/aar), fra og til (egen), sml (av | forrige | aar | egen) med sml_fra og sml_til,
+//   ukedag (1 | 0), og f=<op>,<dim>,<verdier…> (filtre, høyst 10). /data tar i tillegg deler=…,
+//   /detaljer rapport, sok, sorter (<kolonne|navn>:<asc|desc>) og side (0–50), /eksport intervall.
+//   Alt sjekkes mot faste lister, og ukjente parametre gir 400 { feil }. Feiler Plausible, gir
+//   /data { feil } bare for den delen (502/503/504 når alle deler feiler).
+//
+// KVOTE
+//   Plausible tillater 600 kall i timen (og 60 på 10 sekunder) for hele laget, delt av alle kundene.
+//   Hvert kall mellomlagres for seg i 5 minutter (sanntid og «besøkende nå» 1 minutt, oppsett 1 time),
+//   og nettleseren ber bare om det som vises. En full visning uten mellomlager koster 11 kall:
+//   oppsett 2, tallene øverst 2, grafen 1, fem lister 5 og besøkende nå 1. /data tar høyst 10 deler
+//   og én graf. Nedlastingen koster 22 + én per egenskap (høyst 32) og kan tas én gang i minuttet
+//   per nettsted. plausible.mjs gir hvert nettsted en egen del av kvoten (429 «Du har hentet mange
+//   tall …» når den er brukt opp), holder laget under Plausibles grenser og tar pause etter 429.
+//   Alle grensene i minnet gjelder per serverinstans.
+//
+// TID
+//   Netlify stopper en forespørsel etter 60 sekunder. Hver forespørsel får en frist (25 s,
+//   nedlasting 45 s, FRIST i plausible.mjs); kall til Plausible som ikke er ferdige da, avbrytes, og /data
+//   svarer med de delene som rakk å bli ferdige (504 når ingen gjorde det).
 //
 // SIKKERHET
 //   • Plausible-nøkkelen og passordene ligger bare i miljøvariabler på Netlify,
 //     aldri i nettleseren og aldri i GitHub (repoet er offentlig).
-//   • Hvilket nettsted som spørres, bestemmes her ut fra innloggingen. Nettleseren
-//     sender bare perioden, så en kunde kan aldri se en annen kundes tall.
-//   • Passordene lagres som scrypt-hasher. Innloggingen er en signert cookie
-//     (HttpOnly, Secure, SameSite=Strict) som varer i OKT_DAGER dager. Den sendes
-//     bare til /api/kunde, og den inneholder verken e-post eller navn.
-//   • Netlify stopper en IP som sender mer enn 30 forespørsler i minuttet (config nederst).
+//   • Hvilket nettsted som spørres, bestemmes her ut fra innloggingen. Nettleseren sender aldri
+//     nettstedet, så en kunde kan aldri se en annen kundes tall.
+//   • Passordene lagres som scrypt-hasher. Innloggingen er en signert cookie (HttpOnly, Secure,
+//     SameSite=Strict) som varer i OKT_DAGER dager. Den sendes bare til /api/kunde, og den
+//     inneholder verken e-post eller navn.
+//   • Netlify stopper en IP som sender mer enn 90 forespørsler i minuttet (config nederst).
 //
 // MILJØVARIABLER (Netlify → Project configuration → Environment variables, bare for
 // Production-konteksten, se LES-MEG.md)
@@ -29,50 +55,70 @@
 // (Deploys → Trigger deploy → Deploy project).
 
 import { createHash, createHmac, scrypt, timingSafeEqual } from 'node:crypto';
+import { Ugyldig } from '../kunde/perioder.mjs';
+import { PlausibleFeil, KvoteSide, Frist, FRIST, medRamme, sjekkKvote } from '../kunde/plausible.mjs';
+import { lesFiltre, kontekst, MalUkjent } from '../kunde/filtre.mjs';
+import {
+    hentOppsett, lesPeriode, periodeJson, lesDeler, kjorDel, ryddMerknader, lesDetaljvalg, detaljer, PERIODE_PARAMETRE,
+} from '../kunde/statistikk.mjs';
+import { lagEksport, filnavn, eksportKall } from '../kunde/eksport.mjs';
 
 const OKT_DAGER = 14;                     // så lenge kunden er innlogget på en enhet
 const COOKIE = '__Secure-dd_kunde';
 const COOKIE_STI = '/api/kunde';           // cookien sendes bare hit, ikke til resten av nettsiden
-const TIDSSONE = 'Europe/Oslo';           // «i dag» og datoene regnes i norsk tid
-const LAGER_MS = 5 * 60 * 1000;           // tallene mellomlagres i 5 minutter
 const MAKS_FORSOK = 8;                    // feilede innlogginger per IP …
 const SPERRE_MS = 15 * 60 * 1000;         // … per kvarter
-const PLAUSIBLE = 'https://plausible.io/api/v2/query';
-
-// Periodene kunden kan velge. Alt annet avvises.
-const PERIODER = {
-    idag: { dager: 1, inndeling: 'time:hour', sammenlign: false },
-    '7d': { dager: 7, inndeling: 'time:day' },
-    '30d': { dager: 30, inndeling: 'time:day' },
-    '12m': { maneder: 12, inndeling: 'time:month' },
-};
-const NOKKELTALL = ['visitors', 'visits', 'pageviews', 'bounce_rate', 'visit_duration'];
+const EKSPORT_PAUSE_MS = 60 * 1000;       // én nedlasting per nettsted i minuttet
+const MAKS_ADRESSE = 32768;               // lengste spørrestreng (10 filtre med 10 verdier får plass)
 
 // Brukes når e-posten ikke finnes, så svaret tar like lang tid som et feil passord.
 const DUMMY = 'scrypt$131072$8$1$AAAAAAAAAAAAAAAAAAAAAA$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
+const MELDING_KVOTE = 'Mange spør etter tall akkurat nå. Prøv igjen om noen minutter.';
+const MELDING_FEIL = 'Fikk ikke hentet tallene akkurat nå. Prøv igjen om litt.';
+const MELDING_SIDE = 'Du har hentet mange tall på kort tid. Vent et par minutter og prøv igjen.';
+const MELDING_TREG = 'Plausible svarer tregt akkurat nå. Prøv igjen om litt.';
+
 // ── Svar ────────────────────────────────────────────────────────────────────
 // Netlify legger ikke headerne fra _headers på svar fra funksjoner, så de settes her.
+
+const SIKKERHET = {
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'X-Robots-Tag': 'noindex',
+    'Referrer-Policy': 'no-referrer',
+    'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+    'Cross-Origin-Resource-Policy': 'same-origin',
+    'Strict-Transport-Security': 'max-age=63072000; includeSubDomains',
+};
 
 function svar(status, data, ekstra = {}) {
     return new Response(JSON.stringify(data), {
         status,
-        headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            'Cache-Control': 'no-store',
-            'X-Content-Type-Options': 'nosniff',
-            'X-Frame-Options': 'DENY',
-            'X-Robots-Tag': 'noindex',
-            'Referrer-Policy': 'no-referrer',
-            'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
-            'Cross-Origin-Resource-Policy': 'same-origin',
-            'Strict-Transport-Security': 'max-age=63072000; includeSubDomains',
-            ...ekstra,
-        },
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...SIKKERHET, ...ekstra },
     });
 }
 
 const feil = (status, melding, ekstra) => svar(status, { feil: melding }, ekstra);
+
+// Valideringsfeil → 400 med meldingen; nettstedets kvote brukt opp → 429 (med Retry-After);
+// lagets kvote → 503; fristen gikk ut → 504; andre Plausible-feil → 502 (detaljene bare i loggen,
+// aldri til nettleseren)
+function feilSvar(e, hva, nettsted) {
+    if (e instanceof Ugyldig) return feil(400, e.message);
+    console.error(`${hva} for ${nettsted} feilet: ${e.message}`);
+    if (e instanceof KvoteSide) return feil(429, MELDING_SIDE, { 'Retry-After': String(e.sekunder) });
+    if (e instanceof PlausibleFeil && e.status === 429) return feil(503, MELDING_KVOTE);
+    if (e instanceof Frist) return feil(504, MELDING_TREG);
+    return feil(502, MELDING_FEIL);
+}
+function delFeil(e) {
+    if (e instanceof KvoteSide) return MELDING_SIDE;
+    if (e instanceof PlausibleFeil && e.status === 429) return MELDING_KVOTE;
+    if (e instanceof Frist) return MELDING_TREG;
+    return MELDING_FEIL;
+}
 
 // ── Kunder ──────────────────────────────────────────────────────────────────
 // Hver KUNDE_…-variabel er JSON: {"epost":"…","nettsted":"…","navn":"…","passord":"scrypt$…"}
@@ -195,151 +241,39 @@ function fraOssSelv(req) {
     try { return new URL(origin).host === new URL(req.url).host; } catch { return false; }
 }
 
-// ── Datoer ──────────────────────────────────────────────────────────────────
+// ── Parametre ───────────────────────────────────────────────────────────────
+// Bare kjente navn, hvert høyst én gang (unntatt filtrene «f»). Alt annet gir 400, så en
+// skrivefeil i nettleseren ikke stille gir feil tall, og ingen parameter kan velge nettsted.
 
-const iso = (d) => d.toISOString().slice(0, 10);
+const TILLATT = {
+    data: [...PERIODE_PARAMETRE, 'f', 'deler'],
+    detaljer: [...PERIODE_PARAMETRE, 'f', 'rapport', 'sok', 'sorter', 'side'],
+    eksport: [...PERIODE_PARAMETRE, 'f', 'intervall'],
+    oppsett: [],
+};
 
-function idag() {
-    // en-CA gir ÅÅÅÅ-MM-DD
-    const dato = new Intl.DateTimeFormat('en-CA', { timeZone: TIDSSONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-    return new Date(dato + 'T00:00:00Z');
-}
-
-function naaTime() {
-    const d = new Intl.DateTimeFormat('en-CA', { timeZone: TIDSSONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
-    const del = (t) => d.find((x) => x.type === t).value;
-    return `${del('year')}-${del('month')}-${del('day')} ${del('hour')}`;
-}
-
-function plussDager(d, n) {
-    const x = new Date(d);
-    x.setUTCDate(x.getUTCDate() + n);
-    return x;
-}
-
-function plussManeder(d, n) {
-    // 31. mars minus én måned blir 28./29. februar, ikke 3. mars
-    const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1));
-    const sisteDag = new Date(Date.UTC(x.getUTCFullYear(), x.getUTCMonth() + 1, 0)).getUTCDate();
-    x.setUTCDate(Math.min(d.getUTCDate(), sisteDag));
-    return x;
-}
-
-// «I dag» er dagen så langt. 7 og 30 dager er hele dager som slutter i går (som «Last 7 days»
-// i Plausible), så de sammenlignes med like mange hele dager før. 12 måneder går til i dag.
-function datoer(p) {
-    if (p.maneder) {
-        const til = idag();
-        const fra = new Date(Date.UTC(til.getUTCFullYear(), til.getUTCMonth() - (p.maneder - 1), 1));
-        return { fra, til, forrigeFra: plussManeder(fra, -12), forrigeTil: plussManeder(til, -12) };
+function parametre(adresse, rute) {
+    if (adresse.search.length > MAKS_ADRESSE) throw new Ugyldig('Adressen er for lang.');
+    const sp = adresse.searchParams;
+    const tillatt = TILLATT[rute];
+    const sett = new Set();
+    for (const navn of sp.keys()) {
+        if (!tillatt.includes(navn)) throw new Ugyldig(`Ukjent parameter: ${navn.slice(0, 40)}.`);
+        if (navn !== 'f' && sett.has(navn)) throw new Ugyldig(`Parameteren ${navn} står to ganger.`);
+        sett.add(navn);
     }
-    const til = p.dager === 1 ? idag() : plussDager(idag(), -1);
-    const fra = plussDager(til, -(p.dager - 1));
-    return { fra, til, forrigeFra: plussDager(fra, -p.dager), forrigeTil: plussDager(til, -p.dager) };
+    return sp;
 }
 
-// ── Plausible ───────────────────────────────────────────────────────────────
-
-async function sporPlausible(apiNokkel, sporring) {
-    const res = await fetch(PLAUSIBLE, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${apiNokkel}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(sporring),
-        signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) {
-        const tekst = (await res.text().catch(() => '')).slice(0, 300);
-        const e = new Error(`Plausible svarte ${res.status}: ${tekst}`);
-        e.status = res.status;
-        throw e;
-    }
-    return res.json();
+// Det som trengs for å hente tall: oppsett, filtre og periode
+async function forbered(sp, k, apiNokkel) {
+    const opp = await hentOppsett(apiNokkel, k.nettsted);
+    const filtre = lesFiltre(sp.getAll('f'), { mal: opp.mal ? opp.mal.map((m) => m.navn) : null, egenskaper: opp.egenskaper });
+    const per = await lesPeriode(apiNokkel, k.nettsted, sp, opp.tidssone, Date.now());
+    return { opp, ctx: { apiNokkel, nettsted: k.nettsted, per, filtre, k: kontekst(filtre, per.key === 'sanntid') } };
 }
 
-const rader = (svar) => (svar && Array.isArray(svar.results) ? svar.results : []);
-const tall = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
-
-function nokkeltall(svar) {
-    const m = rader(svar)[0]?.metrics || [];
-    return Object.fromEntries(NOKKELTALL.map((navn, i) => [navn, tall(m[i])]));
-}
-
-// Tidsetikettene kommer som «2026-10-04», «2026-10-04 13:00:00» eller «2026-10-01».
-// Nøkkelen kuttes til dag, time eller måned, så tomme perioder blir 0 i stedet for å mangle.
-// Timene i «I dag» lages her (00–23): dagene da klokka stilles, har 23 eller 25 timer, og da
-// legges de to 02-timene sammen i stedet for at en time forsvinner eller en ekstra dukker opp.
-function graf(svar, inndeling, dato) {
-    const lengde = inndeling === 'time:hour' ? 13 : inndeling === 'time:month' ? 7 : 10;
-    const verdier = new Map();
-    for (const r of rader(svar)) {
-        const t = String(r.dimensions[0]).slice(0, lengde);
-        const forrige = verdier.get(t);
-        verdier.set(t, forrige ? [tall(forrige[0]) + tall(r.metrics[0]), tall(forrige[1]) + tall(r.metrics[1])] : r.metrics);
-    }
-    const etiketter = lengde === 13
-        ? Array.from({ length: 24 }, (_, h) => dato + ' ' + String(h).padStart(2, '0'))
-        : Array.isArray(svar?.meta?.time_labels) ? svar.meta.time_labels.map((t) => String(t).slice(0, lengde)) : [...verdier.keys()];
-    const naa = naaTime();
-    return etiketter.map((t) => {
-        const m = verdier.get(t) || [];
-        const punkt = { t, besokende: tall(m[0]), visninger: tall(m[1]) };
-        if (lengde === 13 && t > naa) punkt.senere = true;     // timer som ikke har vært ennå i dag
-        return punkt;
-    });
-}
-
-const liste = (svar, felt) => rader(svar).map((r) => Object.fromEntries([['navn', String(r.dimensions[0] ?? '')], ...felt.map((f, i) => [f, tall(r.metrics[i])])]));
-
-async function hentTall(apiNokkel, nettsted, periodeNavn) {
-    const p = PERIODER[periodeNavn];
-    const d = datoer(p);
-    const periode = [iso(d.fra), iso(d.til)];
-    const q = (sporring) => sporPlausible(apiNokkel, { site_id: nettsted, date_range: periode, ...sporring });
-
-    const [naa, forrige, tid, kilder, sider, land, enheter, mal] = await Promise.all([
-        q({ metrics: NOKKELTALL }),
-        p.sammenlign === false ? null : q({ metrics: NOKKELTALL, date_range: [iso(d.forrigeFra), iso(d.forrigeTil)] }),
-        q({ metrics: ['visitors', 'pageviews'], dimensions: [p.inndeling], include: { time_labels: true } }),
-        q({ metrics: ['visitors'], dimensions: ['visit:source'], pagination: { limit: 6 } }),
-        q({ metrics: ['visitors', 'pageviews'], dimensions: ['event:page'], order_by: [['visitors', 'desc']], pagination: { limit: 6 } }),
-        q({ metrics: ['visitors'], dimensions: ['visit:country'], pagination: { limit: 6 } }),
-        q({ metrics: ['visitors'], dimensions: ['visit:device'] }),
-        q({ metrics: ['visitors', 'events'], dimensions: ['event:goal'] }),
-    ]);
-
-    return {
-        nettsted,
-        periode: periodeNavn,
-        fra: periode[0],
-        til: periode[1],
-        forrigeFra: forrige ? iso(d.forrigeFra) : null,
-        forrigeTil: forrige ? iso(d.forrigeTil) : null,
-        oppdatert: new Date().toISOString(),
-        tall: nokkeltall(naa),
-        forrige: forrige ? nokkeltall(forrige) : null,
-        graf: graf(tid, p.inndeling, periode[0]),
-        inndeling: p.inndeling.slice(5),
-        kilder: liste(kilder, ['besokende']),
-        sider: liste(sider, ['besokende', 'visninger']),
-        land: liste(land, ['besokende']),
-        enheter: liste(enheter, ['besokende']),
-        mal: liste(mal, ['besokende', 'antall']),
-    };
-}
-
-// Samme tall til alle innlogginger på samme nettsted i LAGER_MS, så Plausible-grensen
-// (600 spørringer i timen per nøkkel) holder godt.
-const lager = new Map();
-
-async function tallMedLager(apiNokkel, nettsted, periode) {
-    const nokkel = `${nettsted}|${periode}`;
-    const treff = lager.get(nokkel);
-    if (treff && treff.til > Date.now()) return treff.data;
-    const data = await hentTall(apiNokkel, nettsted, periode);
-    lager.set(nokkel, { data, til: Date.now() + LAGER_MS });
-    if (lager.size > 200) lager.delete(lager.keys().next().value);
-    return data;
-}
+const tidligst = (liste) => new Date(liste.length ? Math.min(...liste) : Date.now()).toISOString();
 
 // ── Rutene ──────────────────────────────────────────────────────────────────
 
@@ -364,20 +298,104 @@ async function loggInn(req, ip, nokkel) {
     return svar(200, { navn: k.navn, nettsted: k.nettsted, epost: k.epost }, { 'Set-Cookie': lagCookie(k, nokkel) });
 }
 
-async function statistikk(req, k) {
-    const periode = new URL(req.url).searchParams.get('periode') || '30d';
-    if (!Object.hasOwn(PERIODER, periode)) return feil(400, 'Ukjent periode.');
+// mal og egenskaper er null når Plausible ikke svarte (siden viser da «Fikk ikke hentet målene»)
+async function oppsett(adresse, k, apiNokkel) {
+    parametre(adresse, 'oppsett');
+    const opp = await hentOppsett(apiNokkel, k.nettsted);
+    return svar(200, { tidssone: opp.tidssone, mal: opp.mal, egenskaper: opp.egenskaper, interne: opp.interne, inntekt: opp.inntekt });
+}
+
+async function data(adresse, k, apiNokkel) {
+    const sp = parametre(adresse, 'data');
+    const { opp, ctx } = await forbered(sp, k, apiNokkel);
+    const deler = lesDeler(sp.get('deler'), ctx.per, ctx.k, opp);
+    // Hver del for seg: en del som feiler, får { feil } uten å ta med seg resten
+    const resultater = await Promise.allSettled(deler.map((d) => kjorDel(ctx, d)));
+    const ut = {};
+    const hentet = [];
+    const grunner = [];
+    resultater.forEach((r, i) => {
+        if (r.status === 'fulfilled') {
+            ut[deler[i].navn] = r.value.verdi;
+            hentet.push(...r.value.hentet);
+            return;
+        }
+        grunner.push(r.reason);
+        console.error(`Delen ${deler[i].navn} for ${k.nettsted} feilet: ${r.reason?.message}`);
+        ut[deler[i].navn] = { feil: delFeil(r.reason) };
+    });
+    if (grunner.length === deler.length) {
+        // Ingen deler: samme status som én feil ville gitt (kvoten først, så frist, så annet)
+        const side = grunner.find((e) => e instanceof KvoteSide);
+        if (side) return feil(429, MELDING_SIDE, { 'Retry-After': String(side.sekunder) });
+        if (grunner.some((e) => e instanceof PlausibleFeil && e.status === 429)) return feil(503, MELDING_KVOTE);
+        if (grunner.some((e) => e instanceof Frist)) return feil(504, MELDING_TREG);
+        return feil(502, MELDING_FEIL);
+    }
+    ryddMerknader(ut, k.nettsted);
+    return svar(200, { periode: periodeJson(ctx.per), oppdatert: tidligst(hentet), deler: ut });
+}
+
+async function detaljvisning(adresse, k, apiNokkel) {
+    const sp = parametre(adresse, 'detaljer');
+    const { opp, ctx } = await forbered(sp, k, apiNokkel);
+    const valg = lesDetaljvalg(sp, opp);
+    const r = await detaljer(ctx, valg);
+    return svar(200, { ...r.verdi, oppdatert: tidligst(r.hentet) });
+}
+
+// Siste nedlasting per nettsted (i minnet til instansen, som innloggingssperren)
+const nedlastet = new Map();
+
+async function eksport(adresse, k, apiNokkel) {
+    const sp = parametre(adresse, 'eksport');
+    const { opp, ctx } = await forbered(sp, k, apiNokkel);
+    if (ctx.per.key === 'sanntid') throw new Ugyldig('Sanntid kan ikke lastes ned.');
+    const intervall = sp.get('intervall') ?? ctx.per.standardIntervall;
+    if (!ctx.per.intervaller.includes(intervall)) throw new Ugyldig('Ugyldig intervall for perioden.');
+    const forrige = nedlastet.get(k.nettsted) || 0;
+    if (Date.now() - forrige < EKSPORT_PAUSE_MS) {
+        return feil(429, 'Vent litt før du laster ned igjen.', { 'Retry-After': String(Math.ceil((forrige + EKSPORT_PAUSE_MS - Date.now()) / 1000)) });
+    }
+    // Nok kvote igjen til hele nedlastingen? Ellers ikke start (halve filer hjelper ingen)
+    sjekkKvote(k.nettsted, eksportKall(ctx.filtre, opp.egenskaper));
+    if (nedlastet.size > 1000) nedlastet.clear();
+    const tid = Date.now();
+    nedlastet.set(k.nettsted, tid);
+    let zip;
+    try {
+        zip = await lagEksport(ctx, intervall, opp.egenskaper);
+    } catch (e) {
+        if (nedlastet.get(k.nettsted) === tid) nedlastet.delete(k.nettsted);    // feilet: kan prøves igjen med en gang
+        throw e;
+    }
+    console.log(`Nedlasting: ${k.nettsted} ${ctx.per.fraDato}–${ctx.per.tilDato}`);
+    return new Response(zip, {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/zip',
+            'Content-Disposition': filnavn(k.nettsted, ctx.per.fraDato, ctx.per.tilDato),
+            'Content-Length': String(zip.length),
+            ...SIKKERHET,
+        },
+    });
+}
+
+const STATISTIKK = { '/api/kunde/oppsett': oppsett, '/api/kunde/data': data, '/api/kunde/detaljer': detaljvisning, '/api/kunde/eksport': eksport };
+
+async function statistikk(rute, adresse, k) {
     const apiNokkel = process.env.PLAUSIBLE_API_KEY;
     if (!apiNokkel) {
         console.error('PLAUSIBLE_API_KEY mangler i miljøvariablene på Netlify.');
         return feil(503, 'Statistikken er ikke koblet til ennå. Prøv igjen senere.');
     }
     try {
-        return svar(200, await tallMedLager(apiNokkel, k.nettsted, periode));
+        // Fristen gjelder alle kall til Plausible i denne forespørselen (se plausible.mjs)
+        const frist = AbortSignal.timeout(rute === eksport ? FRIST.eksport : FRIST.vanlig);
+        return await medRamme({ frist, nettsted: k.nettsted }, () => rute(adresse, k, apiNokkel));
     } catch (e) {
-        console.error(`Statistikk for ${k.nettsted} feilet: ${e.message}`);
-        if (e.status === 429) return feil(503, 'Mange spør etter tall akkurat nå. Prøv igjen om noen minutter.');
-        return feil(502, 'Fikk ikke hentet tallene akkurat nå. Prøv igjen om litt.');
+        if (e instanceof MalUkjent) e = new PlausibleFeil(502, e.message);
+        return feilSvar(e, adresse.pathname, k.nettsted);
     }
 }
 
@@ -403,18 +421,20 @@ export default async (req, context) => {
     if (sti === '/api/kunde/loggut') {
         return metode === 'POST' ? svar(200, { ok: true }, { 'Set-Cookie': slettCookie() }) : feil(405, 'Bruk POST.', { Allow: 'POST' });
     }
-    if (sti === '/api/kunde/meg' || sti === '/api/kunde/tall') {
+    if (sti === '/api/kunde/meg' || Object.hasOwn(STATISTIKK, sti)) {
         if (metode !== 'GET') return feil(405, 'Bruk GET.', { Allow: 'GET' });
         const k = innloggetKunde(req, nokkel);
         if (!k) return feil(401, 'Ikke innlogget.');
-        return sti === '/api/kunde/meg' ? svar(200, { navn: k.navn, nettsted: k.nettsted, epost: k.epost }) : statistikk(req, k);
+        if (sti === '/api/kunde/meg') return svar(200, { navn: k.navn, nettsted: k.nettsted, epost: k.epost });
+        return statistikk(STATISTIKK[sti], adresse, k);
     }
     return feil(404, 'Finnes ikke.');
 };
 
 export const config = {
     path: '/api/kunde/*',
-    // Netlify stopper en IP som sender over 30 forespørsler i minuttet (svarer 429). Vanlig bruk
-    // er et par i minuttet. Bremser gjetting og hindrer at noen bruker opp Plausible-kvoten.
-    rateLimit: { windowLimit: 30, windowSize: 60, aggregateBy: ['ip', 'domain'] },
+    // Netlify stopper en IP som sender over 90 forespørsler i minuttet (svarer 429). En visning
+    // er et par forespørsler (oppsett, data, detaljer), så dette holder godt, og det bremser
+    // gjetting. Plausible-kvoten passes i tillegg per nettsted i plausible.mjs.
+    rateLimit: { windowLimit: 90, windowSize: 60, aggregateBy: ['ip', 'domain'] },
 };

@@ -29,3 +29,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Kildedata og mellomresultat for verktoy/lag-kart.mjs (bare kunde-kart.json i rotmappa skal i git)
+verktoy/countries-110m.json
+verktoy/LICENSE.txt
+verktoy/kunde-kart.json

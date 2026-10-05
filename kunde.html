@@ -3,20 +3,28 @@
 ═══════════════════════════════════════════════════════════════════════════
   DOTDEV · KUNDEPORTALEN (dotdev.no/kunde)
 ═══════════════════════════════════════════════════════════════════════════
-  Kunder logger inn her og ser besøksstatistikken for nettsiden sin.
+  Kunder logger inn her og ser besøksstatistikken for nettsiden sin, med de
+  samme tallene som i Plausible: tallene øverst med endring, grafen, kilder,
+  sider, land og byer, enheter, mål og egenskaper. Kunden kan velge periode
+  (også sanntid og egne datoer), sammenligne, filtrere, se hele listene og
+  laste ned tallene.
 
-  • Siden er bare skallet. Innloggingen og tallene kommer fra serverfunksjonen
-    netlify/functions/kunde-api.mjs (/api/kunde/…), som henter dem fra
-    Plausible. Plausible-nøkkelen og passordene finnes aldri her.
+  • Denne filen er skallet og utseendet. Koden ligger i kunde.js, og tallene
+    kommer fra serverfunksjonen netlify/functions/kunde-api.mjs (/api/kunde/…),
+    som henter dem fra Plausible. Plausible-nøkkelen og passordene finnes
+    aldri her.
   • Nye kunder: node lag-kunde.mjs (se LES-MEG.md, «Kundeportalen»).
-  • Alt som kommer fra statistikken (sidenavn, kilder, mål), settes inn med
-    textContent, aldri innerHTML. Hvem som helst kan sende falske besøk med
-    rare sidenavn til en Plausible-konto, så tekstene må behandles som utrygge.
-    Trusted Types (meta-taggen i <head>) gjør at innerHTML ikke virker på
-    siden i det hele tatt, så feilen kan ikke snike seg inn senere heller.
-  • Ingen localStorage og ingen statistikk på selve portalen. Den eneste
-    cookien er innloggingen (HttpOnly), som er nødvendig og ikke krever
-    samtykke (ekomloven § 3-15).
+  • Alt som kommer fra statistikken (sidenavn, kilder, mål, egenskaper),
+    settes inn med textContent, aldri innerHTML. Hvem som helst kan sende
+    falske besøk med rare sidenavn til en Plausible-konto, så tekstene må
+    behandles som utrygge. Trusted Types (meta-taggen i <head>) gjør at
+    innerHTML ikke virker på siden i det hele tatt.
+  • Ingen localStorage, sessionStorage eller IndexedDB, og ingen statistikk
+    på selve portalen. Alt kunden velger, står i adressen. Den eneste cookien
+    er innloggingen (HttpOnly), som er nødvendig og ikke krever samtykke
+    (ekomloven § 3-15).
+  • Kartet under «Hvor de er» leses fra /kunde-kart.json når fanen vises.
+    Finnes ikke filen, skjules fanen.
   • Siden er ikke på engelsk og skal ikke i Google (noindex).
 ═══════════════════════════════════════════════════════════════════════════
 -->
@@ -53,8 +61,10 @@
         --c-muted: #5c5c5c;
         --c-tint:  #c9caff;
         --c-lav:   #8a8dff;
+        --c-sml:   #5e62ff;   /* sammenligningen i grafen: 4,5:1 mot hvitt */
         --c-lime:  #9bff60;
         --c-error: #c8102e;
+        --c-good:  #1f7a1f;
         --c-line:  color-mix(in srgb, var(--c-ink) 12%, transparent);
         --f-title: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
         --f-body:  "Outfit", "Helvetica Neue", Arial, sans-serif;
@@ -75,7 +85,7 @@
         -webkit-font-smoothing: antialiased;
     }
     a { color: inherit; text-underline-offset: 3px; }
-    button, input { font: inherit; color: inherit; }
+    button, input, select { font: inherit; color: inherit; }
     button { cursor: pointer; }
     [hidden] { display: none !important; }
     :focus-visible { outline: 2px solid var(--c-blue); outline-offset: 3px; border-radius: 4px; }
@@ -90,7 +100,7 @@
         border-radius: var(--r); background: var(--c-white); box-shadow: var(--shadow);
     }
     .top__id { display: flex; align-items: center; gap: 14px; min-width: 0; }
-    .logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+    .logo { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; text-decoration: none; }
     .logo svg { width: 36px; fill: var(--c-blue); }
     .logo span { font-family: var(--f-title); font-size: 1.5rem; font-weight: 600; letter-spacing: -.05em; }
     .top__tag { padding-left: 14px; border-left: 1px solid var(--c-line); color: var(--c-muted); font-size: .9375rem; white-space: nowrap; }
@@ -102,27 +112,31 @@
         display: inline-flex; align-items: center; justify-content: center; gap: .5em;
         min-height: 56px; padding: 0 1.6em; border: 0;
         border-radius: var(--r-sm); background: var(--c-blue); color: var(--c-white);
-        font-size: 1.0625rem; text-decoration: none;
+        font-size: 1.0625rem; text-decoration: none; white-space: nowrap;
         transition: background-color .3s;
     }
     .btn:hover { background: color-mix(in srgb, var(--c-blue) 85%, var(--c-ink)); }
-    .btn:disabled { cursor: progress; opacity: .7; }
+    .btn:disabled, .btn[aria-disabled="true"] { cursor: progress; opacity: .7; }
     .btn--liten { min-height: 44px; padding: 0 1.1em; font-size: .9375rem; }
     .btn--ghost { background: var(--c-white); color: var(--c-ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-ink) 14%, transparent); }
     .btn--ghost:hover { background: var(--c-white); color: var(--c-blue); }
+    .btn svg { width: 14px; height: 14px; fill: currentColor; flex: none; }
+    .lenkeknapp { min-height: 44px; padding: 0 8px; border: 0; background: none; color: var(--c-ink); font-size: .9375rem; text-decoration: underline; text-underline-offset: 3px; }
+    .lenkeknapp:hover { color: var(--c-blue); }
 
     .felt { display: grid; gap: 6px; margin-top: 18px; }
     .felt label { font-size: .9375rem; font-weight: 500; }
     .felt__boks { position: relative; }
-    .felt input {
+    .felt input, .inndata {
         width: 100%; height: 56px; padding: 0 16px;
         /* 52 % gir kontrast 3,4:1 mot hvitt, nok til at feltet synes (WCAG krever 3:1) */
         border: 1px solid color-mix(in srgb, var(--c-ink) 52%, transparent); border-radius: var(--r-sm);
         background: var(--c-white); font-size: 1.0625rem;
         transition: border-color .2s, box-shadow .2s;
     }
-    .felt input:focus { border-color: var(--c-blue); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-blue) 18%, transparent); outline: none; }
-    .felt input[aria-invalid="true"] { border-color: var(--c-error); }
+    .inndata { height: 44px; padding: 0 12px; font-size: 1rem; }
+    .felt input:focus, .inndata:focus { border-color: var(--c-blue); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-blue) 18%, transparent); outline: none; }
+    .felt input[aria-invalid="true"], .inndata[aria-invalid="true"] { border-color: var(--c-error); }
     .felt__boks input { padding-right: 76px; }
     .felt__vis {
         position: absolute; top: 8px; right: 8px; height: 40px; padding: 0 12px;
@@ -131,6 +145,37 @@
     .felt__vis:hover { color: var(--c-blue); }
     .skjema__feil { min-height: 1.5em; margin-top: 14px; color: var(--c-error); font-size: .9375rem; }
     .skjema .btn { width: 100%; margin-top: 6px; }
+
+    /* Nedtrekksliste med egen pil (bakgrunnsbilder er stengt av CSP-en, så pila er en kant) */
+    .velger { position: relative; display: inline-flex; min-width: 0; }
+    .velger select {
+        appearance: none; max-width: 100%; height: 44px; padding: 0 38px 0 14px; border: 0; border-radius: 7px;
+        background: var(--c-bg); color: var(--c-ink); font-size: .9375rem; text-overflow: ellipsis; cursor: pointer;
+    }
+    .velger select:hover { background: color-mix(in srgb, var(--c-ink) 8%, var(--c-bg)); }
+    .velger::after {
+        position: absolute; top: 50%; right: 16px; width: 7px; height: 7px;
+        border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+        content: ""; pointer-events: none; transform: translateY(-70%) rotate(45deg);
+    }
+    .velger--hvit select { background: var(--c-white); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-ink) 14%, transparent); }
+    .velger--hvit select:hover { background: var(--c-white); color: var(--c-blue); }
+
+    .ikonknapp { display: inline-grid; flex: none; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 7px; background: transparent; color: var(--c-ink); }
+    .ikonknapp:hover:not(:disabled) { background: var(--c-bg); color: var(--c-blue); }
+    .ikonknapp:disabled { color: color-mix(in srgb, var(--c-ink) 25%, transparent); cursor: default; }
+    .ikonknapp svg { width: 8px; height: 14px; fill: currentColor; }
+
+    .bryter { display: inline-flex; gap: 2px; padding: 0; border-radius: 8px; background: var(--c-bg); }
+    .bryter button {
+        min-width: 44px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 7px;
+        background: transparent; color: var(--c-muted); font-size: .875rem; white-space: nowrap;
+        transition: background-color .2s, color .2s;
+    }
+    .bryter button:hover { color: var(--c-ink); }
+    .bryter button[aria-pressed="true"] { background: var(--c-blue); color: var(--c-white); }
+    .bryter--rolig { padding: 2px; border-radius: 9px; }
+    .bryter--rolig button[aria-pressed="true"] { background: var(--c-white); color: var(--c-ink); box-shadow: inset 0 -2px 0 var(--c-blue), var(--shadow); }
 
     /* ── Innlogging ───────────────────────────────────────────────────── */
     main { flex: 1; }
@@ -157,111 +202,343 @@
     .login__kunst .skygge { fill: var(--c-lav); }
     .login__kunst .front { fill: var(--c-white); }
 
-    /* ── Dashbordet ───────────────────────────────────────────────────── */
+    /* ── Dashbordet: toppen ───────────────────────────────────────────── */
     .dash { padding-block: clamp(1.75rem, 3.5vw, 3rem) clamp(3rem, 6vw, 5rem); }
-    .dash__topp { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 32px; margin-bottom: 20px; }
-    .dash h1 { margin-top: .25rem; font-family: var(--f-title); font-size: clamp(2.2rem, 4.4vw, 3.6rem); font-weight: 590; letter-spacing: -.045em; line-height: 1.02; overflow-wrap: anywhere; }
+    .dash__topp { margin-bottom: 20px; }
+    .dash__navn { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; margin-top: .25rem; }
+    .dash h1 { min-width: 0; font-family: var(--f-title); font-size: clamp(2.2rem, 4.4vw, 3.6rem); font-weight: 590; letter-spacing: -.045em; line-height: 1.02; overflow-wrap: anywhere; }
     .dash h1:focus { outline: none; }
     .dash__meta { min-height: 1.5em; margin-top: .6rem; color: var(--c-muted); font-size: .9375rem; }
 
-    .perioder { display: inline-flex; gap: 4px; padding: 4px; border-radius: 10px; background: var(--c-white); box-shadow: var(--shadow); }
-    .perioder button {
-        min-height: 44px; padding: 0 16px; border: 0; border-radius: 7px;
-        background: transparent; color: var(--c-muted); font-size: .9375rem; white-space: nowrap;
-        transition: background-color .2s, color .2s;
+    /* «● 4 besøkende nå»: en grønn piksel som puster rolig */
+    .naa {
+        display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px;
+        border: 0; border-radius: 999px; background: var(--c-white); box-shadow: var(--shadow);
+        font-size: .9375rem; white-space: nowrap;
     }
-    .perioder button:hover { color: var(--c-ink); }
-    .perioder button[aria-pressed="true"] { background: var(--c-blue); color: var(--c-white); }
-    .perioder .kortform { display: none; }
+    .naa:hover { color: var(--c-blue); }
+    .naa__prikk { flex: none; width: 10px; height: 10px; background: var(--c-good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-lime) 75%, transparent); animation: puls 2.4s ease-in-out infinite; }
+    @keyframes puls { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--c-lime) 25%, transparent); } }
 
-    .varsel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-bottom: var(--gap); padding: 16px 16px 16px 20px; border-radius: var(--r); background: var(--c-white); box-shadow: inset 4px 0 0 var(--c-error), var(--shadow); }
+    .verktoy { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 6px; border-radius: 10px; background: var(--c-white); box-shadow: var(--shadow); }
+    .verktoy__gruppe { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
+    .verktoy__gruppe label:not(.sr-only) { padding: 0 6px 0 8px; color: var(--c-muted); font-size: .9375rem; }
+    .verktoy__hoyre { gap: 8px; margin-left: auto; }
+    .verktoy__status { min-height: 0; margin-top: 8px; color: var(--c-muted); font-size: .875rem; text-align: right; }
+    .verktoy__status:empty { display: none; }
+    .verktoy__status.feil { color: var(--c-error); }
 
-    .kpier { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--gap); }
-    .kpi { display: flex; flex-direction: column; min-height: 168px; padding: 20px 22px; border-radius: var(--r); background: var(--c-white); box-shadow: var(--shadow); }
-    .kpi__navn { font-family: var(--f-title); font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
-    .kpi__hjelp { margin-top: 2px; color: var(--c-muted); font-size: .8125rem; line-height: 1.35; }
-    .kpi__verdi { margin-top: auto; padding-top: 14px; font-family: var(--f-title); font-size: clamp(2rem, 2.7vw, 2.75rem); font-weight: 590; letter-spacing: -.045em; line-height: 1.05; font-variant-numeric: tabular-nums; }
-    /* Alltid to linjer («▲ 12 %» + «fra forrige periode»), så tallene står på linje i alle kortene */
-    .kpi__endring { min-height: 2.7em; margin-top: 6px; color: var(--c-muted); font-size: .875rem; line-height: 1.35; }
+    .datoer { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin-top: 8px; padding: 18px 20px; border-radius: var(--r); background: var(--c-white); box-shadow: var(--shadow); }
+    .datoer__tittel { flex-basis: 100%; font-family: var(--f-title); font-size: 1rem; font-weight: 600; }
+    .datoer__felt { display: grid; gap: 4px; font-size: .875rem; }
+    .datoer__felt .inndata { width: auto; min-width: 11rem; }
+    .datoer__feil { flex-basis: 100%; color: var(--c-error); font-size: .875rem; }
+    .datoer__feil:empty { display: none; }
+
+    .filtre { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+    .filtre__liste { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; list-style: none; }
+    .pille { display: inline-flex; align-items: center; min-width: 0; max-width: 100%; border-radius: 999px; background: var(--c-tint); }
+    .pille__tekst {
+        min-width: 0; max-width: 40ch; min-height: 44px; padding: 0 2px 0 16px; border: 0; background: transparent;
+        font-size: .9375rem; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .pille__tekst:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .pille__fjern { flex: none; width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; font-size: 1.25rem; line-height: 1; }
+    .pille__fjern:hover { color: var(--c-blue); }
+
+    .varsel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: var(--gap); padding: 16px 16px 16px 20px; border-radius: var(--r); background: var(--c-white); box-shadow: inset 4px 0 0 var(--c-error), var(--shadow); }
+
+    /* ── Tallene øverst: én knapp per tall, valgt tall vises i grafen ── */
+    .kpier { display: flex; gap: var(--gap); margin-top: var(--gap); }
+    .kpi {
+        display: flex; flex: 1 1 0; flex-direction: column; align-items: flex-start; min-width: 0; min-height: 152px;
+        padding: 18px 20px; border: 0; border-radius: var(--r); background: var(--c-white); box-shadow: var(--shadow);
+        color: var(--c-ink); text-align: left;
+    }
+    button.kpi { transition: background-color .2s, color .2s, box-shadow .2s; }
+    button.kpi:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-blue) 40%, transparent), var(--shadow); }
+    .kpi[aria-pressed="true"] { background: var(--c-blue); color: var(--c-white); }
+    .kpi > span { display: block; max-width: 100%; }
+    .kpi__navn { font-family: var(--f-title); font-size: .9375rem; font-weight: 600; letter-spacing: -.01em; line-height: 1.3; }
+    .kpi__verdi { margin-top: auto; padding-top: 12px; overflow: hidden; font-family: var(--f-title); font-size: clamp(1.6rem, 2.1vw, 2.25rem); font-weight: 590; letter-spacing: -.04em; line-height: 1.1; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+    /* Alltid to linjer («▲ 12 %» + «mot forrige periode»), så tallene står på linje i alle kortene */
+    .kpi__endring { min-height: 2.7em; margin-top: 6px; color: var(--c-muted); font-size: .8125rem; line-height: 1.35; }
     .kpi__endring > span { display: block; white-space: nowrap; }
-    .kpi__endring .bra { color: #1f7a1f; }
-    .kpi__endring .darlig { color: var(--c-error); }
-    .kpi--hoved { background: var(--c-blue); color: var(--c-white); }
-    .kpi--hoved .kpi__hjelp, .kpi--hoved .kpi__endring { color: color-mix(in srgb, var(--c-white) 80%, transparent); }
-    .kpi--hoved .kpi__endring .bra { color: var(--c-lime); }
-    .kpi--hoved .kpi__endring .darlig { color: #ffc7cf; }
+    .kpi__sml { width: 100%; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--c-line); color: var(--c-muted); font-size: .8125rem; line-height: 1.35; }
+    .kpi__sml > span { display: block; }
+    .kpi__smlverdi { margin-top: 2px; color: var(--c-ink); font-family: var(--f-title); font-size: 1.125rem; font-weight: 590; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+    .bra { color: var(--c-good); }
+    .darlig { color: var(--c-error); }
+    .kpi[aria-pressed="true"] .kpi__endring, .kpi[aria-pressed="true"] .kpi__sml { border-color: color-mix(in srgb, var(--c-white) 30%, transparent); color: color-mix(in srgb, var(--c-white) 82%, transparent); }
+    .kpi[aria-pressed="true"] .kpi__smlverdi { color: var(--c-white); }
+    .kpi[aria-pressed="true"] .bra { color: var(--c-lime); }
+    .kpi[aria-pressed="true"] .darlig { color: #ffc7cf; }
+    .merknad { margin-top: 8px; color: var(--c-muted); font-size: .8125rem; }
 
-    .kort { padding: clamp(20px, 2.4vw, 30px); border-radius: var(--r); background: var(--c-white); box-shadow: var(--shadow); }
+    /* ── Kortene ──────────────────────────────────────────────────────── */
+    .kort { min-width: 0; padding: clamp(20px, 2.4vw, 30px); border-radius: var(--r); background: var(--c-white); box-shadow: var(--shadow); }
     .kort h2 { font-family: var(--f-title); font-size: 1.25rem; font-weight: 600; letter-spacing: -.025em; }
-    .kort__topp { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+    .kort__topp { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+    .kort__valg { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
     .kort__info { color: var(--c-muted); font-size: .875rem; }
     .kort--graf { margin-top: var(--gap); }
+    /* Mens tallene hentes: kortet dempes litt, og det gamle står til det nye kommer */
+    [aria-busy="true"] > .kpi, .kort[aria-busy="true"] .graf, .kort[aria-busy="true"] .liste, .kort[aria-busy="true"] .kart { transition: opacity .2s; opacity: .5; }
 
-    /* Grafen: piksler i et rutenett. Blå = besøkende, lys grå = tomt. */
+    .delfeil { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: 16px; padding: 12px 12px 12px 16px; border-radius: var(--r-sm); background: var(--c-bg); color: var(--c-ink); font-size: .9375rem; }
+    .delfeil--hvit { margin-top: var(--gap); background: var(--c-white); box-shadow: var(--shadow); }
+    .tom { margin-top: 16px; padding: 14px 12px; border-radius: 6px; background: var(--c-bg); color: var(--c-muted); font-size: .9375rem; }
+    .henter { margin-top: 16px; padding: 14px 12px; color: var(--c-muted); font-size: .9375rem; }
+
+    /* Grafen: piksler i et rutenett. Blå = valgt tall, lys grå = tomt, lavendel = sammenligningen. */
     .graf { position: relative; height: clamp(190px, 26vw, 280px); margin-top: 18px; touch-action: pan-y; }
     .graf:focus-visible { outline-offset: 6px; }
     .graf svg { display: block; width: 100%; height: 100%; }
     .graf .av { fill: color-mix(in srgb, var(--c-ink) 6%, transparent); }
     .graf .pa { fill: var(--c-blue); }
+    /* Søyler som ikke dekker hele timen/dagen/uken (ennå): hule blå piksler, så de ikke ligner sammenligningen */
+    .graf .delvis { fill: var(--c-blue); fill-rule: evenodd; }
+    .graf .delvis-lys { fill: color-mix(in srgb, var(--c-blue) 38%, var(--c-white)); }
     .graf .senere { fill: color-mix(in srgb, var(--c-ink) 2.5%, transparent); }
     .graf .markor { fill: color-mix(in srgb, var(--c-tint) 70%, transparent); }
-    .graf__tips {
+    .graf .sml-kant { fill: none; stroke: var(--c-white); stroke-width: 4; shape-rendering: crispEdges; }
+    .graf .sml { fill: none; stroke: var(--c-sml); stroke-width: 2; shape-rendering: crispEdges; }
+    .graf__tom { height: auto; }
+    .graf--zoom { cursor: pointer; }
+    /* Aldri bredere enn grafen eller kartet (smal skjerm), så siden ikke kan rulles sidelengs */
+    .tips {
         position: absolute; z-index: 2; bottom: calc(100% + 8px); left: 0;
+        width: max-content; max-width: 100%;
         padding: 8px 12px; border-radius: var(--r-sm); background: var(--c-ink); color: var(--c-white);
-        font-size: .875rem; line-height: 1.35; white-space: nowrap; pointer-events: none;
+        font-size: .875rem; line-height: 1.4; overflow-wrap: anywhere; pointer-events: none;
         transform: translateX(-50%);
     }
-    .graf__tips b { display: block; font-weight: 600; }
+    .tips > span { display: block; }
+    .tips b { display: block; font-weight: 600; }
+    .tips .tips__sml { color: color-mix(in srgb, var(--c-white) 75%, transparent); }
+    .tips .tips__hint { margin-top: 2px; color: color-mix(in srgb, var(--c-white) 60%, transparent); font-size: .8125rem; }
+    .tips .bra { color: var(--c-lime); }
+    .tips .darlig { color: #ffc7cf; }
     .graf__akse { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; color: var(--c-muted); font-size: .8125rem; }
+    .graf__forklaring { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: 10px; color: var(--c-muted); font-size: .8125rem; }
+    .graf__forklaring span { display: inline-flex; align-items: center; gap: 8px; }
+    .graf__forklaring span::before { width: 10px; height: 10px; background: var(--c-blue); content: ""; }
+    .graf__forklaring .sml::before { width: 14px; height: 2px; background: var(--c-sml); }
+    .graf__forklaring .delvis::before { background: transparent; box-shadow: inset 0 0 0 2px var(--c-blue); }
 
-    .lister { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: var(--gap); margin-top: var(--gap); }
-    .liste__hode { display: flex; justify-content: space-between; margin: 16px 0 6px; padding: 0 12px; color: var(--c-muted); font-size: .8125rem; }
+    /* ── Panelene med faner ──────────────────────────────────────────── */
+    .lister { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); margin-top: var(--gap); }
+    .panel { display: flex; flex-direction: column; }
+    .panel--bred { grid-column: 1 / -1; }
+    .panel__topp { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; }
+    .faner { display: inline-flex; gap: 2px; max-width: 100%; padding: 2px; overflow-x: auto; border-radius: 9px; background: var(--c-bg); scrollbar-width: none; }
+    .fane {
+        flex: none; min-height: 44px; padding: 0 14px; border: 0; border-radius: 7px;
+        background: transparent; color: var(--c-muted); font-size: .9375rem; white-space: nowrap;
+        transition: background-color .2s, color .2s;
+    }
+    .fane:hover { color: var(--c-ink); }
+    .fane[aria-selected="true"] { background: var(--c-white); color: var(--c-ink); box-shadow: inset 0 -2px 0 var(--c-blue), var(--shadow); }
+    .fane:focus-visible { outline-offset: -2px; }
+    .kortform { display: none; }
+    .panel__innhold { display: flex; flex: 1; flex-direction: column; min-height: 31.5rem; }
+    .panel--bred .panel__innhold, .panel--tom .panel__innhold { min-height: 0; }
+    /* Sanntid har få rader (siste 5 minutter), så kortene trenger ikke plass til ni */
+    .dash[data-periode="sanntid"] .panel__innhold { min-height: 0; }
+    .panel__valg { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-top: 16px; }
+    .panel__valg:empty { display: none; }
+    /* Bunnen: valg til venstre («Sti / URL», kartskalaen), «Vis alle» til høyre */
+    .panel__bunn { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-top: auto; padding-top: 12px; }
+    .panel__bunnvalg { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .panel__bunnvalg:empty { display: none; }
+    .panel__bunn > .btn { margin-left: auto; }
+    .cta { margin-top: 16px; padding: 18px 20px; border-radius: var(--r-sm); background: var(--c-bg); color: var(--c-muted); font-size: .9375rem; }
+
+    .liste__hode { display: flex; gap: 12px; margin: 16px 0 6px; padding: 0 12px; color: var(--c-muted); font-size: .8125rem; }
+    .liste__hode > span:first-child { flex: 1; min-width: 0; }
+    /* Bredden settes av kunde.js etter tallene (--b, og --bs på smal skjerm) */
+    .kol { flex: none; width: var(--b, 4.25rem); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+    .kol--bred { width: var(--b, 6.25rem); }
     .liste { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; list-style: none; }
-    .liste li { position: relative; display: flex; justify-content: space-between; gap: 16px; padding: 8px 12px; border-radius: 6px; isolation: isolate; font-size: .9375rem; }
-    /* Stolpen går bak navnet, ikke inn under tallet til høyre */
-    .liste li::before { position: absolute; z-index: -1; inset: 0; width: calc((100% - 4.5rem) * var(--andel, 0)); border-radius: 6px; background: color-mix(in srgb, var(--c-tint) 60%, transparent); content: ""; }
-    .liste__navn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .liste__tall { font-variant-numeric: tabular-nums; }
-    .tom { margin-top: 16px; padding: 14px 12px; border-radius: 6px; background: var(--c-bg); color: var(--c-muted); font-size: .9375rem; }
+    .rad { display: flex; align-items: center; gap: 12px; min-height: 44px; padding-right: 12px; border-radius: 6px; font-size: .9375rem; }
+    .rad:hover { background: color-mix(in srgb, var(--c-ink) 3%, transparent); }
+    /* Stolpen ligger bak navnet, så den aldri går inn under tallene til høyre */
+    .rad__navn {
+        position: relative; display: flex; flex: 1; align-items: center; gap: 8px; align-self: stretch; min-width: 0;
+        padding: 0 12px; border: 0; border-radius: 6px; background: transparent; text-align: left; isolation: isolate;
+    }
+    .rad__navn::before { position: absolute; z-index: -1; inset: 0 auto 0 0; width: calc(100% * var(--andel, 0)); border-radius: 6px; background: color-mix(in srgb, var(--c-tint) 60%, transparent); content: ""; }
+    .rad__navn:hover .rad__tekst { text-decoration: underline; text-underline-offset: 3px; }
+    .rad__navn:focus-visible { outline-offset: -2px; }
+    .rad__tekst { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rad__flagg { flex: none; width: 1.5em; font-size: 1rem; text-align: center; }
+    .rad__lenke { display: inline-grid; flex: none; place-items: center; width: 44px; height: 44px; margin-inline: -12px -10px; border-radius: 6px; color: var(--c-muted); opacity: 0; }
+    .rad:hover .rad__lenke, .rad__lenke:focus-visible { opacity: 1; }
+    .rad__lenke:hover { color: var(--c-blue); }
+    .rad__lenke svg { width: 12px; height: 12px; fill: currentColor; }
+    /* Prosenten kommer fram når pekeren er over listen (som i Plausible); på berøringsskjerm står den i «Vis alle» */
+    .pst { opacity: 0; transition: opacity .2s; }
+    .panel:hover .pst, .panel:focus-within .pst { opacity: 1; }
 
+    /* Kartet går fra kant til kant i kortet og står midt i høyden ved siden av et høyere kort */
+    .kart { position: relative; margin-top: 16px; }
+    .panel__innhold > .kart { display: flex; flex: 1; flex-direction: column; justify-content: center; }
+    .kart svg { display: block; width: calc(100% + 2 * clamp(20px, 2.4vw, 30px)); height: auto; max-height: 400px; margin-inline: calc(-1 * clamp(20px, 2.4vw, 30px)); }
+    .kart__land { fill: color-mix(in srgb, var(--c-ink) 7%, transparent); stroke: var(--c-white); stroke-width: .6; vector-effect: non-scaling-stroke; transition: fill .2s; }
+    .kart__land.n1 { fill: color-mix(in srgb, var(--c-tint) 55%, var(--c-white)); }
+    .kart__land.n2 { fill: var(--c-tint); }
+    .kart__land.n3 { fill: var(--c-lav); }
+    .kart__land.n4 { fill: color-mix(in srgb, var(--c-blue) 60%, var(--c-lav)); }
+    .kart__land.n5 { fill: var(--c-blue); }
+    .kart__land[data-har] { cursor: pointer; }
+    .kart__land[data-har]:hover { stroke: var(--c-ink); stroke-width: 1.2; }
+    .kart__skala { display: flex; align-items: center; gap: 4px; color: var(--c-muted); font-size: .8125rem; }
+    .kart__skala i { width: 12px; height: 12px; }
+    .kart__skala i:nth-of-type(1) { margin-left: 6px; background: color-mix(in srgb, var(--c-tint) 55%, var(--c-white)); }
+    .kart__skala i:nth-of-type(2) { background: var(--c-tint); }
+    .kart__skala i:nth-of-type(3) { background: var(--c-lav); }
+    .kart__skala i:nth-of-type(4) { background: color-mix(in srgb, var(--c-blue) 60%, var(--c-lav)); }
+    .kart__skala i:nth-of-type(5) { margin-right: 6px; background: var(--c-blue); }
+
+    /* ── Dialogene (detaljer og filter) ──────────────────────────────── */
+    .dialog {
+        width: min(960px, calc(100% - 32px)); max-height: calc(100% - 32px); max-height: calc(100dvh - 32px);
+        margin: auto; padding: 0; border: 0; border-radius: var(--r);
+        background: var(--c-white); color: var(--c-ink); box-shadow: 0 24px 64px color-mix(in srgb, var(--c-ink) 28%, transparent);
+    }
+    .dialog[open] { display: flex; flex-direction: column; }
+    .dialog::backdrop { background: color-mix(in srgb, var(--c-ink) 45%, transparent); }
+    .dialog--smal { width: min(680px, calc(100% - 32px)); }
+    .dialog__topp { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 16px 0 24px; }
+    .dialog__topp h2 { font-family: var(--f-title); font-size: 1.375rem; font-weight: 600; letter-spacing: -.03em; line-height: 1.2; overflow-wrap: anywhere; }
+    .dialog__under { margin-top: 2px; color: var(--c-muted); font-size: .875rem; }
+    .dialog__lukk { font-size: 1.5rem; line-height: 1; }
+    .dialog__kropp { flex: 1; min-height: 0; padding: 16px 24px 24px; overflow: auto; overscroll-behavior: contain; }
+    .dialog__sok { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 8px; }
+    .dialog__sok .inndata { flex: 1 1 16rem; width: auto; }
+    .dialog__info { color: var(--c-muted); font-size: .875rem; }
+    .dialog__knapper { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+    /* Detaljvinduet: tabellen ruller selv (begge veier), så overskriftene kan stå fast øverst og
+       navnene fast til venstre på smal skjerm. Skygge til høyre når det er flere kolonner. */
+    .dialog--detaljer .dialog__kropp { display: flex; flex-direction: column; overflow: hidden; }
+    .dialog--detaljer .dialog__sok, .dialog--detaljer .dialog__knapper, .dialog--detaljer .tom, .dialog--detaljer .delfeil { flex: none; }
+    .tabell-vindu { position: relative; display: flex; flex: 0 1 auto; flex-direction: column; min-height: 0; }
+    .tabell-vindu::after { position: absolute; top: 0; right: 0; bottom: 0; width: 28px; background: linear-gradient(to right, transparent, color-mix(in srgb, var(--c-ink) 12%, transparent)); content: ""; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .tabell-vindu.mer::after { opacity: 1; }
+    .tabell-ramme { flex: 0 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+    .tabell thead th { position: sticky; top: 0; z-index: 2; background: var(--c-white); }
+    .tabell { width: 100%; border-collapse: separate; border-spacing: 0 4px; font-size: .9375rem; }
+    .tabell th { padding: 0 6px; color: var(--c-muted); font-size: .8125rem; font-weight: 500; text-align: right; white-space: nowrap; }
+    .tabell th:first-child { text-align: left; }
+    .tabell th button { min-width: 44px; min-height: 44px; padding: 0 6px; border: 0; border-radius: 6px; background: none; color: inherit; font-weight: 500; white-space: nowrap; }
+    .tabell th button:hover { color: var(--c-blue); }
+    .tabell th[aria-sort] button { color: var(--c-ink); font-weight: 600; }
+    .tabell td { padding: 0 12px; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+    .tabell td:first-child { width: 100%; min-width: 12rem; max-width: 0; padding: 0; text-align: left; }
+    .tabell td:first-child .rad__navn { min-height: 44px; }
+    .tabell tbody tr:hover td { background: color-mix(in srgb, var(--c-ink) 3%, var(--c-white)); }
+    .tabell .celle { display: flex; align-items: center; }
+
+    .grupper { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr)); gap: 8px; }
+    .grupper button { min-height: 52px; padding: 0 16px; border: 0; border-radius: var(--r-sm); background: var(--c-bg); font-size: 1rem; text-align: left; }
+    .grupper button:hover { background: color-mix(in srgb, var(--c-tint) 60%, transparent); }
+    .frad { display: grid; gap: 10px; padding: 18px 0; border-top: 1px solid var(--c-line); }
+    .frad:first-child { border-top: 0; padding-top: 4px; }
+    .frad__topp { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+    .frad__navn { flex: 1 1 auto; font-weight: 600; }
+    .frad__verdi { display: flex; gap: 6px; }
+    .frad__verdi .inndata { flex: 1; min-width: 0; }
+    .frad > .lenkeknapp, .dialog__kropp > div > .lenkeknapp { justify-self: start; padding-left: 0; }
+    .frad__feil { color: var(--c-error); font-size: .875rem; }
+    .frad__feil:empty { display: none; }
+
+    /* ── Om tallene ───────────────────────────────────────────────────── */
     .om { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px 40px; margin-top: clamp(2rem, 4vw, 3rem); padding-top: 1.5rem; border-top: 1px solid var(--c-line); color: var(--c-muted); font-size: .9375rem; }
     .om h2 { margin-bottom: .35rem; color: var(--c-ink); font-family: var(--f-title); font-size: 1rem; font-weight: 600; }
+    .om p + p { margin-top: .6rem; }
     .om a { color: var(--c-ink); }
-
-    /* Mens tallene hentes: alt dempes litt (første gang står det «–» i tallene) */
-    .dash[aria-busy="true"] .kpier, .dash[aria-busy="true"] .kort { transition: opacity .2s; opacity: .55; }
+    .taster { margin-top: 1rem; }
+    .taster summary { display: inline-flex; align-items: center; min-height: 44px; color: var(--c-ink); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    .taster dl { display: grid; gap: 4px; margin-top: 6px; }
+    .taster div { display: flex; gap: 12px; }
+    .taster dt { flex: none; width: 7.5rem; color: var(--c-ink); font-variant-numeric: tabular-nums; }
+    .taster dl.av { opacity: .55; }
+    .taster .lenkeknapp { margin-top: 4px; padding-left: 0; }
 
     .laster { display: grid; place-items: center; min-height: 50vh; color: var(--c-muted); }
 
     .foot { padding-block: 1.75rem; background: var(--c-blue); color: var(--c-white); font-size: .9375rem; }
-    .foot .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; }
+    .foot .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; }
     .foot ul { display: flex; gap: 20px; list-style: none; }
+    .foot a { display: inline-flex; align-items: center; min-height: 44px; }
 
+    /* To kort ved siden av hverandre, men smalt: overskrift og faner alltid på hver sin linje, så
+       listene i kortene ved siden av hverandre starter i samme høyde */
+    @media (min-width: 861px) and (max-width: 1199px) {
+        .panel__topp { flex-direction: column; align-items: flex-start; }
+    }
     @media (max-width: 1100px) {
-        .kpier { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-        .kpi { grid-column: span 2; }
-        .kpi:nth-child(-n+2) { grid-column: span 3; }
+        .kpier { flex-wrap: wrap; }
+        .kpi { flex: 1 1 calc((100% - 2 * var(--gap)) / 3); }
+        .kpier[data-antall="4"] .kpi { flex-basis: calc((100% - var(--gap)) / 2); }
     }
     @media (max-width: 860px) {
         .login { grid-template-columns: minmax(0, 1fr); margin-top: 1.25rem; }
         .login__kunst { display: none; }
         .om { grid-template-columns: minmax(0, 1fr); }
+        .lister { grid-template-columns: minmax(0, 1fr); }
+        .panel__innhold { min-height: 0; }
     }
     @media (max-width: 640px) {
         .top__tag, .top__epost { display: none; }
         .top__bar { padding-left: 16px; }
-        .dash__topp { align-items: stretch; flex-direction: column; }
-        .perioder { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-        .perioder button { padding: 0 6px; }
-        .perioder .lang { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-        .perioder .kortform { display: inline; }
-        .kpier { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .kpi, .kpi:nth-child(-n+2) { grid-column: span 1; min-height: 0; padding: 16px; }
-        .kpi--hoved { grid-column: 1 / -1 !important; }
-        .kpi__verdi { font-size: 1.9rem; }
+        .verktoy { gap: 6px; }
+        .verktoy__gruppe { flex-wrap: nowrap; width: 100%; }
+        .verktoy__gruppe .velger { flex: 1; }
+        .verktoy__gruppe .velger select { width: 100%; }
+        .verktoy__gruppe[data-sml-gruppe] { flex-wrap: wrap; }
+        .verktoy__gruppe .bryter { flex: 1 1 100%; }
+        .verktoy__gruppe .bryter button { flex: 1; }
+        .verktoy__hoyre { margin-left: 0; }
+        .verktoy__hoyre .btn { flex: 1; }
+        .verktoy__status { text-align: left; }
+        .datoer__felt { flex: 1 1 8rem; }
+        .datoer__felt .inndata { width: 100%; min-width: 0; }
+        .kpi { flex-basis: calc((100% - var(--gap)) / 2) !important; min-height: 0; padding: 16px; }
+        .kpi__verdi { font-size: 1.75rem; }
+        .kpi__verdi.lang { font-size: 1.375rem; }   /* lange verdier («1 min 57 s», «1 413 kr») kuttes ellers på smal skjerm */
+        .kpi__verdi.lengre { font-size: 1.125rem; }
+        .fane { padding: 0 12px; }
+        .kol--ekstra { display: none; }
+        .kol, .kol--bred { width: var(--bs, var(--b, 4.25rem)); }
+        .liste__hode .lang { display: none; }
+        .liste__hode .kortform { display: inline; }
+        .tabell td:first-child, .tabell th:first-child { position: sticky; left: 0; z-index: 1; background: var(--c-white); }
+        .tabell thead th:first-child { z-index: 3; }
+        .tabell .rad__tekst { white-space: normal; overflow-wrap: anywhere; }
+        .fane .lang { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        .fane .kortform { display: inline; }
+        .dialog { width: calc(100% - 16px); max-height: calc(100dvh - 16px); }
+        .dialog__topp { padding: 16px 8px 0 16px; }
+        .dialog__kropp { padding: 12px 16px 20px; }
+        .taster dt { width: 5.5rem; }
+        .tabell td:first-child { min-width: 9.5rem; }
+    }
+    @media (max-width: 400px) {
+        .liste .rad__lenke { display: none; }      /* lenken står i «Vis alle»; navnet trenger plassen */
+        .frad__topp { flex-direction: column; align-items: stretch; }
+        .frad__topp .velger select { width: 100%; }
+    }
+    @media (max-width: 360px) {
+        .kpi__verdi { white-space: normal; overflow-wrap: anywhere; text-overflow: clip; }
+    }
+    @media (hover: none) {
+        .pst { display: none; }
+        .rad__lenke { opacity: 1; }
     }
     @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after { transition: none !important; }
+        *, *::before, *::after { transition: none !important; animation: none !important; }
     }
     </style>
 </head>
@@ -319,9 +596,9 @@
             <div class="login__panel">
                 <h2>Se hvordan nettsiden deres gjør det</h2>
                 <ul class="punkter">
-                    <li>Hvor mange som besøker siden, dag for dag</li>
-                    <li>Hvor de kommer fra, og hvilke sider de leser</li>
-                    <li>Hvilke land og enheter de bruker</li>
+                    <li>Besøk og sidevisninger for alle perioder, også nå i sanntid</li>
+                    <li>Hvor de kommer fra, hvilke sider de leser og hvor i verden de er</li>
+                    <li>Sammenlign med før, filtrer på det dere lurer på, og last ned tallene</li>
                     <li>Uten cookies hos de besøkende, og lagret i EU</li>
                 </ul>
                 <!-- Pikselgraf i samme stil som resten av siden: lavendel skygge bak, hvite piksler foran -->
@@ -335,119 +612,226 @@
         <!-- ── DASHBORDET ─────────────────────────────────────────────── -->
         <section class="dash" data-vis="dash" aria-labelledby="dash-tittel" hidden>
             <div class="dash__topp">
-                <div>
-                    <p class="etikett">Statistikk for</p>
+                <p class="etikett">Statistikk for</p>
+                <div class="dash__navn">
                     <h1 id="dash-tittel" tabindex="-1" data-nettsted></h1>
-                    <p class="dash__meta" data-meta></p>
+                    <button class="naa" type="button" data-naa title="Se sanntid (R)" hidden>
+                        <span class="naa__prikk" aria-hidden="true"></span><span data-naa-tekst></span>
+                    </button>
                 </div>
-                <div class="perioder" role="group" aria-label="Velg periode">
-                    <button type="button" data-periode="idag" aria-pressed="false">I dag</button>
-                    <button type="button" data-periode="7d" aria-pressed="false">7 dager</button>
-                    <button type="button" data-periode="30d" aria-pressed="true">30 dager</button>
-                    <button type="button" data-periode="12m" aria-pressed="false"><span class="lang">12 måneder</span><span class="kortform" aria-hidden="true">12 mnd.</span></button>
+                <p class="dash__meta" data-meta></p>
+            </div>
+
+            <!-- Periode, sammenligning, filter og nedlasting -->
+            <div class="verktoy">
+                <div class="verktoy__gruppe">
+                    <span class="velger">
+                        <label class="sr-only" for="periode-velger">Periode</label>
+                        <select id="periode-velger" data-periode-velger data-hurtigmeny>
+                            <option value="" hidden data-periode-gjeldende></option>
+                            <optgroup label="Dag">
+                                <option value="dag">I dag (D)</option>
+                                <option value="igar">I går (E)</option>
+                                <option value="sanntid">Sanntid (R)</option>
+                            </optgroup>
+                            <optgroup label="Siste dager">
+                                <option value="24t">Siste 24 timer (H)</option>
+                                <option value="7d">Siste 7 dager (W)</option>
+                                <option value="28d">Siste 28 dager (F)</option>
+                                <option value="30d">Siste 30 dager (T)</option>
+                                <option value="91d">Siste 91 dager (N)</option>
+                            </optgroup>
+                            <optgroup label="Måneder">
+                                <option value="mnd">Denne måneden (M)</option>
+                                <option value="forrige_mnd">Forrige måned (P)</option>
+                                <option value="6mnd">Siste 6 måneder (S)</option>
+                                <option value="12mnd">Siste 12 måneder (L)</option>
+                            </optgroup>
+                            <optgroup label="Lengre">
+                                <option value="aar">I år (Y)</option>
+                                <option value="alt">All tid (A)</option>
+                                <option value="egen">Velg datoer… (C)</option>
+                            </optgroup>
+                        </select>
+                    </span>
+                    <button class="ikonknapp" type="button" data-forrige aria-label="Forrige periode" title="Forrige periode (←)">
+                        <svg viewBox="0 0 4 7" aria-hidden="true"><path d="M3 0h1v1H3zM2 1h1v1H2zM1 2h1v1H1zM0 3h1v1H0zM1 4h1v1H1zM2 5h1v1H2zM3 6h1v1H3z"/></svg>
+                    </button>
+                    <button class="ikonknapp" type="button" data-neste aria-label="Neste periode" title="Neste periode (→)">
+                        <svg viewBox="0 0 4 7" aria-hidden="true"><path d="M0 0h1v1H0zM1 1h1v1H1zM2 2h1v1H2zM3 3h1v1H3zM2 4h1v1H2zM1 5h1v1H1zM0 6h1v1H0z"/></svg>
+                    </button>
                 </div>
+                <div class="verktoy__gruppe" data-sml-gruppe>
+                    <label for="sml-velger">Sammenlign</label>
+                    <span class="velger">
+                        <select id="sml-velger" data-sml-velger data-hurtigmeny title="Sammenlign (X)">
+                            <option value="av">Ingen</option>
+                            <option value="forrige">Forrige periode</option>
+                            <option value="aar">Samme periode i fjor</option>
+                            <option value="egen">Velg periode…</option>
+                        </select>
+                    </span>
+                    <div class="bryter" role="group" aria-label="Datoer i sammenligningen" data-ukedag hidden>
+                        <button type="button" aria-pressed="true" data-ukedag-verdi="1">Samme ukedag</button>
+                        <button type="button" aria-pressed="false" data-ukedag-verdi="0">Nøyaktig dato</button>
+                    </div>
+                </div>
+                <div class="verktoy__gruppe verktoy__hoyre">
+                    <button class="btn btn--ghost btn--liten" type="button" aria-haspopup="dialog" title="Filtrer (/)" data-filtrer>
+                        <svg viewBox="0 0 7 7" aria-hidden="true"><path d="M0 0h7v1H0zM1 1h5v1H1zM2 2h3v1H2zM3 3h1v4H3z"/></svg>Filtrer
+                    </button>
+                    <a class="btn btn--ghost btn--liten" href="/api/kunde/eksport" download data-last-ned>
+                        <svg viewBox="0 0 7 7" aria-hidden="true"><path d="M3 0h1v4H3zM1 2h1v1H1zM5 2h1v1H5zM2 3h1v1H2zM4 3h1v1H4zM0 6h7v1H0z"/></svg>Last ned
+                    </a>
+                </div>
+            </div>
+            <p class="verktoy__status" role="status" data-eksport-status></p>
+
+            <!-- Egne datoer for perioden eller sammenligningen -->
+            <form class="datoer" novalidate data-datoer hidden>
+                <p class="datoer__tittel" data-datoer-tittel>Velg datoer</p>
+                <div class="datoer__felt">
+                    <label for="dato-fra">Fra</label>
+                    <input class="inndata" id="dato-fra" type="date" required data-dato-fra>
+                </div>
+                <div class="datoer__felt">
+                    <label for="dato-til">Til</label>
+                    <input class="inndata" id="dato-til" type="date" required data-dato-til>
+                </div>
+                <button class="btn btn--liten" type="submit">Vis</button>
+                <button class="btn btn--ghost btn--liten" type="button" data-datoer-avbryt>Avbryt</button>
+                <p class="datoer__feil" role="alert" data-datoer-feil></p>
+            </form>
+
+            <div class="filtre" data-filtre hidden>
+                <h2 class="sr-only">Filtre</h2>
+                <ul class="filtre__liste" data-filterliste></ul>
+                <button class="lenkeknapp" type="button" data-fjern-alle>Fjern alle</button>
             </div>
 
             <div class="varsel" role="alert" data-varsel hidden>
                 <p data-varsel-tekst></p>
                 <button class="btn btn--ghost btn--liten" type="button" data-prov-igjen>Prøv igjen</button>
             </div>
+            <p class="sr-only" role="status" data-status></p>
 
             <h2 class="sr-only">Nøkkeltall</h2>
-            <div class="kpier">
-                <div class="kpi kpi--hoved">
-                    <p class="kpi__navn">Besøkende</p>
-                    <p class="kpi__hjelp">Personer som har vært innom</p>
-                    <p class="kpi__verdi" data-kpi="visitors">–</p>
-                    <p class="kpi__endring" data-endring="visitors"></p>
-                </div>
-                <div class="kpi">
-                    <p class="kpi__navn">Sidevisninger</p>
-                    <p class="kpi__hjelp">Sider som er åpnet</p>
-                    <p class="kpi__verdi" data-kpi="pageviews">–</p>
-                    <p class="kpi__endring" data-endring="pageviews"></p>
-                </div>
-                <div class="kpi">
-                    <p class="kpi__navn">Besøk</p>
-                    <p class="kpi__hjelp">Samme person kan komme flere ganger</p>
-                    <p class="kpi__verdi" data-kpi="visits">–</p>
-                    <p class="kpi__endring" data-endring="visits"></p>
-                </div>
-                <div class="kpi">
-                    <p class="kpi__navn">Besøkstid</p>
-                    <p class="kpi__hjelp">Hvor lenge et besøk varer i snitt</p>
-                    <p class="kpi__verdi" data-kpi="visit_duration">–</p>
-                    <p class="kpi__endring" data-endring="visit_duration"></p>
-                </div>
-                <div class="kpi">
-                    <p class="kpi__navn">Fluktfrekvens</p>
-                    <p class="kpi__hjelp">Andel som bare så én side</p>
-                    <p class="kpi__verdi" data-kpi="bounce_rate">–</p>
-                    <p class="kpi__endring" data-endring="bounce_rate"></p>
-                </div>
-            </div>
+            <div class="kpier" data-kpier></div>
+            <p class="merknad" data-kpi-merknad hidden></p>
+            <div class="delfeil delfeil--hvit" data-kpi-feil hidden></div>
 
-            <section class="kort kort--graf" aria-labelledby="graf-tittel">
+            <section class="kort kort--graf" aria-labelledby="graf-tittel" data-graf-kort>
                 <div class="kort__topp">
-                    <h2 id="graf-tittel" data-graf-tittel>Besøkende per dag</h2>
-                    <p class="kort__info" data-graf-maks></p>
+                    <h2 id="graf-tittel" data-graf-tittel>Unike besøkende</h2>
+                    <div class="kort__valg">
+                        <p class="kort__info" data-graf-maks></p>
+                        <span class="velger" data-intervall-boks hidden>
+                            <label class="sr-only" for="intervall-velger">Inndeling i grafen</label>
+                            <select id="intervall-velger" title="Inndeling (I)" data-intervall data-hurtigmeny></select>
+                        </span>
+                    </div>
                 </div>
-                <div class="graf" tabindex="0" role="group" aria-label="Graf. Bruk piltastene for å se tallene for hver søyle." aria-describedby="graf-tips" data-graf>
-                    <div class="graf__tips" id="graf-tips" role="status" data-graf-tips hidden></div>
+                <p class="graf__forklaring" data-graf-forklaring hidden></p>
+                <div class="graf" tabindex="0" role="group" aria-label="Graf. Bruk piltastene for å se tallene for hver søyle, og Enter for å åpne en dag eller måned." aria-describedby="graf-tips" data-graf>
+                    <div class="tips" id="graf-tips" role="status" data-graf-tips hidden></div>
                 </div>
+                <p class="tom graf__tom" data-graf-tom hidden>Ingen tall akkurat nå.</p>
                 <div class="graf__akse" aria-hidden="true" data-graf-akse></div>
+                <div class="delfeil" data-graf-feil hidden></div>
+                <p class="merknad" data-graf-merknad hidden></p>
                 <div class="sr-only">
                     <table>
-                        <caption data-tabell-tittel>Besøkende</caption>
-                        <thead><tr><th scope="col">Tid</th><th scope="col">Besøkende</th><th scope="col">Sidevisninger</th></tr></thead>
+                        <caption data-tabell-tittel>Grafen</caption>
+                        <thead><tr data-tabell-hode></tr></thead>
                         <tbody data-tabell></tbody>
                     </table>
                 </div>
             </section>
 
-            <div class="lister">
-                <section class="kort" aria-labelledby="kilder-tittel">
-                    <h2 id="kilder-tittel">Hvor de kommer fra</h2>
-                    <div class="liste__hode" aria-hidden="true"><span>Kilde</span><span>Besøkende</span></div>
-                    <ol class="liste" data-liste="kilder"></ol>
-                    <p class="tom" data-tom="kilder" hidden>Ingen besøk i perioden.</p>
-                </section>
-                <section class="kort" aria-labelledby="sider-tittel">
-                    <h2 id="sider-tittel">Mest besøkte sider</h2>
-                    <div class="liste__hode" aria-hidden="true"><span>Side</span><span>Besøkende</span></div>
-                    <ol class="liste" data-liste="sider"></ol>
-                    <p class="tom" data-tom="sider" hidden>Ingen besøk i perioden.</p>
-                </section>
-                <section class="kort" aria-labelledby="land-tittel">
-                    <h2 id="land-tittel">Land</h2>
-                    <div class="liste__hode" aria-hidden="true"><span>Land</span><span>Besøkende</span></div>
-                    <ol class="liste" data-liste="land"></ol>
-                    <p class="tom" data-tom="land" hidden>Ingen besøk i perioden.</p>
-                </section>
-                <section class="kort" aria-labelledby="enheter-tittel">
-                    <h2 id="enheter-tittel">Enheter</h2>
-                    <div class="liste__hode" aria-hidden="true"><span>Enhet</span><span>Besøkende</span></div>
-                    <ol class="liste" data-liste="enheter"></ol>
-                    <p class="tom" data-tom="enheter" hidden>Ingen besøk i perioden.</p>
-                </section>
-                <section class="kort" aria-labelledby="mal-tittel">
-                    <h2 id="mal-tittel">Handlinger</h2>
-                    <div class="liste__hode" aria-hidden="true"><span>Hva de gjorde</span><span>Antall</span></div>
-                    <ol class="liste" data-liste="mal"></ol>
-                    <p class="tom" data-tom="mal" hidden>Ingen handlinger telt i perioden. Vil dere telle for eksempel klikk på «Bestill» eller «Ring oss»? Si fra, så setter vi det opp.</p>
-                </section>
-            </div>
+            <!-- Fem paneler med faner, bygget av kunde.js -->
+            <div class="lister" data-paneler></div>
 
             <div class="om">
                 <div>
                     <h2>Om tallene</h2>
                     <p>Tallene kommer fra Plausible, som teller besøk uten cookies og lagrer alt i EU. Ingen enkeltpersoner kan kjennes igjen. Den samme personen telles som ny besøkende hver dag, og noen som blokkerer reklame, blir ikke telt. Tallene kan derfor avvike litt fra andre verktøy.</p>
+                    <p>Endringen under hvert tall er mot perioden rett før, med samme ukedager, slik Plausible regner den. Velger dere en sammenligning, vises endringen i tallene øverst og i grafen, ikke for hver rad i listene. Importerte tall er alltid med der Plausible kan bruke dem.</p>
+                    <p>Noe av det Plausible kan vise, finnes ikke i API-et vi henter tallene fra, og er derfor ikke med her: trakter, brukerreiser, Google-søkeord, notater i grafen, lagrede segmenter, minuttgraf (i sanntid og for i dag), ikoner for nettlesere og kilder, og valget om å skjule importerte tall.</p>
+                    <details class="taster">
+                        <summary>Hurtigtaster</summary>
+                        <dl data-taster-liste>
+                            <div><dt>D · E · R</dt><dd>I dag, i går, sanntid</dd></div>
+                            <div><dt>H · W · F · T · N</dt><dd>Siste 24 timer, 7, 28, 30 og 91 dager</dd></div>
+                            <div><dt>M · P</dt><dd>Denne og forrige måned</dd></div>
+                            <div><dt>Y · S · L · A</dt><dd>I år, siste 6 og 12 måneder, all tid</dd></div>
+                            <div><dt>C</dt><dd>Velg datoer</dd></div>
+                            <div><dt>X</dt><dd>Sammenligning av eller på</dd></div>
+                            <div><dt>← · →</dt><dd>Forrige og neste dag, måned eller år</dd></div>
+                            <div><dt>I</dt><dd>Bytt inndeling i grafen</dd></div>
+                            <div><dt>/</dt><dd>Filtrer, eller søk i en hel liste</dd></div>
+                            <div><dt>Esc</dt><dd>Lukk vinduet, eller fjern alle filtre</dd></div>
+                        </dl>
+                        <button class="lenkeknapp" type="button" data-taster>Slå av hurtigtastene</button>
+                    </details>
                 </div>
                 <div>
                     <h2>Spørsmål?</h2>
                     <p>Skriv til <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>, så hjelper vi dere å forstå tallene.</p>
                 </div>
             </div>
+
+            <!-- «Vis alle»: hele listen med flere tall, søk og sortering -->
+            <dialog class="dialog dialog--detaljer" aria-labelledby="detaljer-tittel" data-detaljer>
+                <div class="dialog__topp">
+                    <div>
+                        <h2 id="detaljer-tittel" data-detaljer-tittel></h2>
+                        <p class="dialog__under" data-detaljer-under></p>
+                    </div>
+                    <button class="ikonknapp dialog__lukk" type="button" aria-label="Lukk" data-lukk>×</button>
+                </div>
+                <div class="dialog__kropp">
+                    <div class="dialog__sok" data-detaljer-sokboks>
+                        <label class="sr-only" for="detaljer-sok">Søk i listen</label>
+                        <input class="inndata" id="detaljer-sok" type="search" placeholder="Søk (trykk /)" autocomplete="off" spellcheck="false" maxlength="100" data-detaljer-sok>
+                        <p class="dialog__info" role="status" data-detaljer-info></p>
+                    </div>
+                    <div class="tabell-vindu">
+                        <div class="tabell-ramme" data-tabell-ramme>
+                            <table class="tabell">
+                                <caption class="sr-only" data-detaljer-tekst></caption>
+                                <thead><tr data-detaljer-hode></tr></thead>
+                                <tbody data-detaljer-rader></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p class="tom" data-detaljer-tom hidden>Ingen data i perioden.</p>
+                    <div class="delfeil" data-detaljer-feil hidden></div>
+                    <div class="dialog__knapper">
+                        <button class="btn btn--ghost btn--liten" type="button" data-detaljer-flere hidden>Vis flere</button>
+                    </div>
+                </div>
+            </dialog>
+
+            <!-- Filtrer: velg gruppe, så rader med «er / er ikke / inneholder» og verdier -->
+            <dialog class="dialog dialog--smal" aria-labelledby="filter-tittel" data-filterdialog>
+                <div class="dialog__topp">
+                    <div>
+                        <h2 id="filter-tittel" data-filter-tittel>Filtrer</h2>
+                        <p class="dialog__under" data-filter-under></p>
+                    </div>
+                    <button class="ikonknapp dialog__lukk" type="button" aria-label="Lukk" data-lukk>×</button>
+                </div>
+                <form class="dialog__kropp" novalidate data-filterskjema>
+                    <div class="grupper" data-filter-grupper></div>
+                    <div data-filter-rader></div>
+                    <p class="frad__feil" role="alert" data-filter-feil></p>
+                    <div class="dialog__knapper" data-filter-knapper>
+                        <button class="lenkeknapp" type="button" data-filter-tilbake>Andre filtre</button>
+                        <button class="btn btn--ghost btn--liten" type="button" data-filter-avbryt>Avbryt</button>
+                        <button class="btn btn--liten" type="submit">Bruk filter</button>
+                    </div>
+                </form>
+            </dialog>
         </section>
 
     </div>
@@ -463,490 +847,6 @@
     </div>
 </footer>
 
-<script>
-(function () {
-    'use strict';
-
-    var API = '/api/kunde';
-    var LAGER_MS = 5 * 60 * 1000;     // samme som på serveren
-
-    var $ = function (s) { return document.querySelector(s); };
-    var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
-
-    var vis = { laster: $('[data-vis="laster"]'), login: $('[data-vis="login"]'), dash: $('[data-vis="dash"]') };
-    var skjema = $('[data-skjema]');
-    var felt = { epost: $('#epost'), passord: $('#passord') };
-    var knapp = $('[data-knapp]');
-    var feilTekst = $('[data-feil]');
-    var graf = $('[data-graf]');
-    var tips = $('[data-graf-tips]');
-
-    var PERIODER = { idag: 'I dag', '7d': 'Siste 7 dager', '30d': 'Siste 30 dager', '12m': 'Siste 12 måneder' };
-    var TITLER = { hour: 'Besøkende per time', day: 'Besøkende per dag', month: 'Besøkende per måned' };
-
-    var periode = '30d';
-    var lager = {};          // periode → { data, tid }. Tømmes ved utlogging.
-    var naaData = null;
-    var henting = 0;
-    var aktiv = -1;          // valgt søyle i grafen
-
-    // ── Formatering ─────────────────────────────────────────────────────
-    var NF = new Intl.NumberFormat('nb-NO');
-    var fmt = function (o) { return new Intl.DateTimeFormat('nb-NO', Object.assign({ timeZone: 'UTC' }, o)); };
-    var fKort = fmt({ day: 'numeric', month: 'short' });
-    var fMedAar = fmt({ day: 'numeric', month: 'short', year: 'numeric' });
-    var fLang = fmt({ weekday: 'long', day: 'numeric', month: 'long' });
-    var fMnd = fmt({ month: 'short', year: 'numeric' });
-    var fMndLang = fmt({ month: 'long', year: 'numeric' });
-    var fKlokke = new Intl.DateTimeFormat('nb-NO', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo' });
-    var landnavn = null;
-    try { landnavn = new Intl.DisplayNames(['nb'], { type: 'region' }); } catch (e) { /* eldre nettlesere: landkoden vises */ }
-
-    function dato(s) {
-        var d = s.slice(0, 10).split('-').map(Number);
-        return new Date(Date.UTC(d[0], d[1] - 1, d[2] || 1));
-    }
-    var stor = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
-    var heltall = function (n) { return NF.format(Math.round(n)); };
-    var prosent = function (n) { return NF.format(Math.round(n)) + ' %'; };
-    function varighet(s) {
-        s = Math.round(s);
-        if (s < 60) return s + ' s';
-        var t = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
-        return t ? t + ' t ' + m + ' min' : m + ' min ' + (s % 60) + ' s';
-    }
-    function spenn(fra, til) {
-        var a = dato(fra), b = dato(til);
-        if (fra === til) return fMedAar.format(a);
-        return (a.getUTCFullYear() !== b.getUTCFullYear() ? fMedAar : fKort).format(a) + '–' + fMedAar.format(b);
-    }
-    function kortEtikett(t, inndeling) {
-        if (inndeling === 'hour') return 'kl. ' + t.slice(11, 13);
-        if (inndeling === 'month') return fMnd.format(dato(t));
-        return fKort.format(dato(t));
-    }
-    function langEtikett(t, inndeling) {
-        if (inndeling === 'hour') { var h = Number(t.slice(11, 13)); return 'Kl. ' + String(h).padStart(2, '0') + '–' + String((h + 1) % 24).padStart(2, '0'); }
-        if (inndeling === 'month') return stor(fMndLang.format(dato(t)));
-        return stor(fLang.format(dato(t)));
-    }
-
-    var KILDER = { 'Direct / None': 'Direkte (adresse eller bokmerke)' };
-    var ENHETER = { Desktop: 'PC', Laptop: 'Bærbar PC', Tablet: 'Nettbrett', Mobile: 'Mobil' };
-    var MAL = {
-        'Outbound Link: Click': 'Klikk på lenker til andre nettsider',
-        'File Download': 'Nedlastede filer',
-        'Form: Submission': 'Utfylte skjema',
-        'Cloaked Link: Click': 'Klikk på skjulte lenker',
-        '404': 'Besøk på sider som ikke finnes (404)'
-    };
-    var oversett = function (tabell, n) { return Object.prototype.hasOwnProperty.call(tabell, n) ? tabell[n] : null; };
-    var kilde = function (n) { return oversett(KILDER, n) || n || 'Ukjent'; };
-    var enhet = function (n) { return oversett(ENHETER, n) || 'Ukjent'; };
-    var mal = function (n) { return oversett(MAL, n) || n || 'Ukjent'; };
-    var side = function (n) { return n === '/' ? '/ (forsiden)' : n; };
-    function land(kode) {
-        if (!/^[A-Z]{2}$/.test(kode || '') || kode === 'ZZ' || kode === 'XX') return 'Ukjent';
-        try {
-            var navn = landnavn && landnavn.of(kode);
-            return navn && navn !== kode ? navn : 'Ukjent';
-        } catch (e) { return 'Ukjent'; }
-    }
-
-    // ── Server ──────────────────────────────────────────────────────────
-    function api(sti, valg) {
-        valg = valg || {};
-        var hoder = { Accept: 'application/json' };
-        if (valg.body) hoder['Content-Type'] = 'application/json';
-        return fetch(API + sti, { method: valg.method || 'GET', headers: hoder, body: valg.body, credentials: 'same-origin', cache: 'no-store' })
-            .then(function (res) {
-                return res.json().catch(function () { return {}; }).then(function (data) { return { status: res.status, data: data || {} }; });
-            });
-    }
-
-    // ── Visninger ───────────────────────────────────────────────────────
-    function visDel(navn) {
-        Object.keys(vis).forEach(function (k) { vis[k].hidden = k !== navn; });
-        $('[data-bruker]').hidden = navn !== 'dash';
-    }
-
-    function visLogin(melding) {
-        henting++;               // svar som er underveis fra forrige innlogging, kastes
-        lager = {};
-        periode = '30d';
-        nullstill();
-        vis.dash.removeAttribute('aria-busy');
-        $('[data-varsel]').hidden = true;
-        felt.passord.type = 'password';
-        $('[data-vis-passord]').textContent = 'Vis';
-        $('[data-vis-passord]').setAttribute('aria-pressed', 'false');
-        document.title = 'Kundeportal · DOTDEV';
-        visDel('login');
-        settFeil(melding || '');
-        if (melding) $('#login-tittel').focus();
-    }
-
-    function visDash(meg, flyttFokus) {
-        $('[data-nettsted]').textContent = meg.nettsted;
-        $('[data-epost]').textContent = meg.epost || '';
-        document.title = 'Statistikk for ' + meg.nettsted + ' · DOTDEV';
-        visDel('dash');
-        var fraAdresse = new URLSearchParams(location.search).get('periode');
-        if (fraAdresse && Object.prototype.hasOwnProperty.call(PERIODER, fraAdresse)) periode = fraAdresse;
-        last(periode);
-        if (flyttFokus) $('#dash-tittel').focus();
-    }
-
-    // ── Innlogging ──────────────────────────────────────────────────────
-    function settFeil(tekst, ugyldig) {
-        feilTekst.textContent = tekst;
-        [felt.epost, felt.passord].forEach(function (f) { f.removeAttribute('aria-invalid'); });
-        if (ugyldig) { ugyldig.setAttribute('aria-invalid', 'true'); ugyldig.focus(); }
-    }
-
-    skjema.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var epost = felt.epost.value.trim();
-        var passord = felt.passord.value;
-        if (!epost) return settFeil('Skriv inn e-posten.', felt.epost);
-        if (!passord) return settFeil('Skriv inn passordet.', felt.passord);
-        settFeil('');
-        knapp.disabled = true;
-        knapp.textContent = 'Logger inn …';
-        api('/logginn', { method: 'POST', body: JSON.stringify({ epost: epost, passord: passord }) })
-            .then(function (svar) {
-                if (svar.status === 200) {
-                    felt.passord.value = '';
-                    visDash(svar.data, true);
-                } else {
-                    settFeil(svar.data.feil || (svar.status === 429 ? 'For mange forsøk. Vent litt og prøv igjen.' : 'Noe gikk galt. Prøv igjen.'), svar.status === 401 ? felt.passord : null);
-                }
-            })
-            .catch(function () { settFeil('Fikk ikke kontakt. Sjekk nettet og prøv igjen.'); })
-            .then(function () { knapp.disabled = false; knapp.textContent = 'Logg inn'; });
-    });
-
-    $('[data-vis-passord]').addEventListener('click', function () {
-        var synlig = felt.passord.type === 'password';
-        felt.passord.type = synlig ? 'text' : 'password';
-        this.textContent = synlig ? 'Skjul' : 'Vis';
-        this.setAttribute('aria-pressed', String(synlig));
-    });
-
-    $('[data-loggut]').addEventListener('click', function () {
-        var knappUt = this;
-        knappUt.disabled = true;
-        api('/loggut', { method: 'POST' })
-            .then(function (svar) { return svar.status === 200; }, function () { return false; })
-            .then(function (ok) {
-                knappUt.disabled = false;
-                if (!ok) return visVarsel('Fikk ikke logget ut. Sjekk nettet og prøv igjen.', true);
-                history.replaceState(null, '', location.pathname);
-                visLogin('');
-                felt.epost.focus();
-            });
-    });
-
-    // ── Tallene ─────────────────────────────────────────────────────────
-    function last(p) {
-        periode = p;
-        $$('[data-periode]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.periode === p)); });
-        var adresse = new URL(location.href);
-        if (p === '30d') adresse.searchParams.delete('periode'); else adresse.searchParams.set('periode', p);
-        history.replaceState(null, '', adresse.pathname + adresse.search);
-
-        var nr = ++henting;
-        $('[data-varsel]').hidden = true;
-        vis.dash.removeAttribute('aria-busy');
-        var treff = lager[p];
-        if (treff && Date.now() - treff.tid < LAGER_MS) return tegn(treff.data);
-
-        vis.dash.setAttribute('aria-busy', 'true');
-        api('/tall?periode=' + encodeURIComponent(p))
-            .then(function (svar) {
-                if (nr !== henting) return;
-                if (svar.status === 401) return visLogin('Du er logget ut. Logg inn igjen.');
-                if (svar.status === 429 && !svar.data.feil) return visVarsel('Mange forespørsler på kort tid. Vent et minutt og prøv igjen.');
-                if (svar.status !== 200) return visVarsel(svar.data.feil || 'Fikk ikke hentet tallene. Prøv igjen om litt.');
-                lager[p] = { data: svar.data, tid: Date.now() };
-                tegn(svar.data);
-            })
-            .catch(function () { if (nr === henting) visVarsel('Fikk ikke kontakt. Sjekk nettet og prøv igjen.'); })
-            .then(function () { if (nr === henting) vis.dash.removeAttribute('aria-busy'); });
-    }
-
-    // Tømmer dashbordet, så det aldri står igjen tall fra en annen periode eller innlogging
-    function nullstill() {
-        naaData = null;
-        g = null;
-        aktiv = -1;
-        tips.hidden = true;
-        $('[data-meta]').textContent = '';
-        KPI.forEach(function (k) {
-            $('[data-kpi="' + k.id + '"]').textContent = '–';
-            $('[data-endring="' + k.id + '"]').replaceChildren();
-        });
-        var svg = graf.querySelector('svg');
-        if (svg) svg.remove();
-        ['[data-graf-maks]', '[data-graf-akse]', '[data-tabell]'].forEach(function (s) { $(s).replaceChildren(); });
-        ['kilder', 'sider', 'land', 'enheter', 'mal'].forEach(function (n) {
-            var ol = $('[data-liste="' + n + '"]');
-            ol.replaceChildren();
-            ol.previousElementSibling.hidden = true;
-            $('[data-tom="' + n + '"]').hidden = true;
-        });
-    }
-
-    // behold = true: tallene står (brukes når utloggingen feiler)
-    function visVarsel(tekst, behold) {
-        if (!behold) nullstill();
-        $('[data-varsel-tekst]').textContent = tekst;
-        $('[data-varsel]').hidden = false;
-    }
-
-    $$('[data-periode]').forEach(function (b) {
-        b.addEventListener('click', function () { if (b.dataset.periode !== periode || !lager[periode]) last(b.dataset.periode); });
-    });
-    $('[data-prov-igjen]').addEventListener('click', function () { last(periode); });
-
-    var KPI = [
-        { id: 'visitors', vis: heltall },
-        { id: 'pageviews', vis: heltall },
-        { id: 'visits', vis: heltall },
-        { id: 'visit_duration', vis: varighet },
-        { id: 'bounce_rate', vis: prosent, lavtErBra: true, poeng: true }
-    ];
-
-    function endring(el, naa, for_, def) {
-        el.replaceChildren();
-        if (for_ === null || for_ === undefined || for_ === 0) return;
-        var diff, tekst;
-        if (def.poeng) {
-            diff = Math.round(naa) - Math.round(for_);
-            tekst = Math.abs(diff) + ' %-poeng';
-        } else {
-            diff = Math.round((naa - for_) / for_ * 100);
-            tekst = NF.format(Math.abs(diff)) + ' %';
-        }
-        var span = document.createElement('span');
-        if (diff === 0) {
-            span.textContent = 'Uendret';
-        } else {
-            var opp = diff > 0;
-            span.className = opp !== Boolean(def.lavtErBra) ? 'bra' : 'darlig';
-            // Pilen er pynt; skjermlesere får «Opp»/«Ned» i stedet
-            var pil = document.createElement('span');
-            var ord = document.createElement('span');
-            pil.setAttribute('aria-hidden', 'true');
-            pil.textContent = opp ? '▲ ' : '▼ ';
-            ord.className = 'sr-only';
-            ord.textContent = opp ? 'Opp ' : 'Ned ';
-            span.append(pil, ord, document.createTextNode(tekst));
-        }
-        var hva = document.createElement('span');
-        hva.textContent = 'fra forrige periode';
-        el.append(span, hva);
-    }
-
-    function tegn(d) {
-        naaData = d;
-        var meta = spenn(d.fra, d.til) + ' · Oppdatert kl. ' + fKlokke.format(new Date(d.oppdatert));
-        meta += d.forrige ? ' · Sammenlignet med ' + spenn(d.forrigeFra, d.forrigeTil) : '';
-        $('[data-meta]').textContent = meta;
-
-        // Sammenlign bare når begge periodene har besøk (en ny nettside har ingen tall fra før)
-        var sammenlign = Boolean(d.forrige && d.forrige.visits > 0 && d.tall.visits > 0);
-        KPI.forEach(function (k) {
-            $('[data-kpi="' + k.id + '"]').textContent = k.vis(d.tall[k.id]);
-            endring($('[data-endring="' + k.id + '"]'), d.tall[k.id], sammenlign ? d.forrige[k.id] : null, k);
-        });
-        if (d.forrige && d.forrige.visits === 0) {
-            var ingen = document.createElement('span');
-            ingen.textContent = 'Ingen besøk i perioden før';
-            $('[data-endring="visitors"]').append(ingen);
-        }
-
-        $('[data-graf-tittel]').textContent = TITLER[d.inndeling] || TITLER.day;
-        $('[data-tabell-tittel]').textContent = (TITLER[d.inndeling] || TITLER.day) + ', ' + spenn(d.fra, d.til);
-        var rader = $('[data-tabell]');
-        rader.replaceChildren();
-        d.graf.forEach(function (p) {
-            var tr = document.createElement('tr');
-            [langEtikett(p.t, d.inndeling), heltall(p.besokende), heltall(p.visninger)].forEach(function (v, i) {
-                var c = document.createElement(i ? 'td' : 'th');
-                if (!i) c.scope = 'row';
-                c.textContent = v;
-                tr.append(c);
-            });
-            rader.append(tr);
-        });
-        skjulSoyle();
-        tegnGraf();
-
-        var total = d.tall.visitors;
-        fyll('kilder', d.kilder, function (r) { return kilde(r.navn); }, 'besokende', total);
-        fyll('sider', d.sider, function (r) { return side(r.navn); }, 'besokende', total);
-        fyll('land', d.land, function (r) { return land(r.navn); }, 'besokende', total);
-        fyll('enheter', d.enheter, function (r) { return enhet(r.navn); }, 'besokende', total);
-        fyll('mal', d.mal, function (r) { return mal(r.navn); }, 'antall', 0);
-    }
-
-    // Lister: tekstene kommer fra statistikken og settes alltid inn som tekst.
-    function fyll(navn, rader, etikett, felt_, total) {
-        var ol = $('[data-liste="' + navn + '"]');
-        rader = rader.slice().sort(function (a, b) { return b[felt_] - a[felt_]; });
-        ol.replaceChildren();
-        ol.previousElementSibling.hidden = !rader.length;
-        $('[data-tom="' + navn + '"]').hidden = rader.length > 0;
-        var maks = Math.max.apply(null, rader.map(function (r) { return r[felt_]; }).concat(1));
-        var deler = total > 0 ? total : maks;
-        rader.forEach(function (r) {
-            var li = document.createElement('li');
-            var a = document.createElement('span');
-            var b = document.createElement('span');
-            a.className = 'liste__navn';
-            a.textContent = etikett(r);
-            a.title = etikett(r);
-            b.className = 'liste__tall';
-            b.textContent = heltall(r[felt_]);
-            li.append(a, b);
-            li.style.setProperty('--andel', Math.min(1, r[felt_] / deler).toFixed(3));
-            ol.append(li);
-        });
-    }
-
-    // ── Pikselgrafen ────────────────────────────────────────────────────
-    // Et rutenett av piksler fra kant til kant. Hver søyle får like mange
-    // kolonner (bredere søyler når det er få av dem), med én tom kolonne
-    // mellom søylene. Pikslene er omtrent kvadratiske og ligger på hele
-    // skjermpiksler, så kantene blir skarpe.
-    var g = null;            // mål for sist tegnede graf
-
-    function tegnGraf() {
-        if (!naaData) return;
-        var punkter = naaData.graf;
-        var n = punkter.length;
-        var B = graf.clientWidth, H = graf.clientHeight;
-        if (!n || !B || !H) return;
-
-        var per = 1;         // kolonner per søyle, inkludert mellomrommet
-        for (var s = 12; s >= 5; s--) { per = Math.floor(B / s / n); if (per >= 3) break; }
-        per = Math.max(1, per);
-        var fylt = per > 1 ? per - 1 : 1;
-        var kol = per * n - (per > 1 ? 1 : 0);
-        var steg = B / kol;
-        var rader = Math.max(4, Math.round(H / steg));
-        var stegY = H / rader;
-        var hull = steg >= 8 ? 2 : 1;
-        var X = function (c) { return Math.round(c * steg); };
-        var Y = function (r) { return Math.round(r * stegY); };
-        var rute = function (c, r) {
-            var x = X(c), y = Y(rader - 1 - r);
-            return 'M' + x + ' ' + y + 'h' + (X(c + 1) - x - hull) + 'v' + (Y(rader - r) - y - hull) + 'h' + (x - X(c + 1) + hull) + 'z';
-        };
-        var maks = Math.max.apply(null, punkter.map(function (p) { return p.besokende; }).concat(1));
-
-        var av = [], pa = [], senere = [];
-        for (var c = 0; c < kol; c++) {
-            // Timer som ikke har vært ennå i dag, får et lysere rutenett
-            var liste_ = (punkter[Math.floor(c / per)] || {}).senere ? senere : av;
-            for (var r = 0; r < rader; r++) liste_.push(rute(c, r));
-        }
-        punkter.forEach(function (p, i) {
-            var hoyde = p.besokende ? Math.max(1, Math.round(p.besokende / maks * rader)) : 0;
-            for (var c2 = 0; c2 < fylt; c2++) for (var r2 = 0; r2 < hoyde; r2++) pa.push(rute(i * per + c2, r2));
-        });
-
-        // Bygges med createElementNS (ikke innerHTML), så Trusted Types kan stå på for hele siden
-        var SVG = 'http://www.w3.org/2000/svg';
-        var lag = function (tag, attr) {
-            var el = document.createElementNS(SVG, tag);
-            Object.keys(attr).forEach(function (k) { el.setAttribute(k, attr[k]); });
-            return el;
-        };
-        var svg = lag('svg', { viewBox: '0 0 ' + B + ' ' + H, 'aria-hidden': 'true', focusable: 'false' });
-        svg.append(
-            lag('path', { 'class': 'av', d: av.join('') }),
-            lag('path', { 'class': 'senere', d: senere.join('') }),
-            lag('rect', { 'class': 'markor', 'data-markor': '', x: '0', y: '0', width: '0', height: String(H - hull) }),
-            lag('path', { 'class': 'pa', d: pa.join('') })
-        );
-        var gammel = graf.querySelector('svg');
-        if (gammel) gammel.replaceWith(svg); else graf.prepend(svg);
-
-        g = { n: n, per: per, fylt: fylt, steg: steg, X: X, hull: hull };
-        $('[data-graf-maks]').textContent = punkter.some(function (p) { return p.besokende; }) ? 'Høyeste: ' + heltall(maks) : 'Ingen besøk i perioden';
-
-        var akse = $('[data-graf-akse]');
-        akse.replaceChildren();
-        var valgte = n > 2 ? [0, Math.floor((n - 1) / 2), n - 1] : n === 2 ? [0, 1] : [0];
-        valgte.forEach(function (i) {
-            var span = document.createElement('span');
-            span.textContent = kortEtikett(punkter[i].t, naaData.inndeling);
-            akse.append(span);
-        });
-
-        if (aktiv >= 0) visSoyle(aktiv);
-    }
-
-    function visSoyle(i) {
-        if (!g || !naaData) return;
-        aktiv = Math.max(0, Math.min(g.n - 1, i));
-        var p = naaData.graf[aktiv];
-        var fra = g.X(aktiv * g.per), til = g.X(aktiv * g.per + g.fylt) - g.hull;
-        var markor = graf.querySelector('[data-markor]');
-        markor.setAttribute('x', fra - g.hull);
-        markor.setAttribute('width', til - fra + 2 * g.hull);
-        tips.replaceChildren();
-        var tittel = document.createElement('b');
-        tittel.textContent = langEtikett(p.t, naaData.inndeling);
-        tips.append(tittel, document.createTextNode(p.senere ? 'Ikke ennå' : heltall(p.besokende) + ' besøkende · ' + heltall(p.visninger) + ' sidevisninger'));
-        tips.hidden = false;
-        var halv = tips.offsetWidth / 2;
-        tips.style.left = Math.max(halv, Math.min(graf.clientWidth - halv, (fra + til) / 2)) + 'px';
-    }
-
-    function skjulSoyle() {
-        aktiv = -1;
-        tips.hidden = true;
-        var markor = graf.querySelector('[data-markor]');
-        if (markor) markor.setAttribute('width', 0);
-    }
-
-    function soyleVed(clientX) {
-        return Math.floor((clientX - graf.getBoundingClientRect().left) / (g.per * g.steg));
-    }
-
-    graf.addEventListener('pointermove', function (e) { if (g) visSoyle(soyleVed(e.clientX)); });
-    graf.addEventListener('pointerdown', function (e) { if (g) visSoyle(soyleVed(e.clientX)); });
-    graf.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse' && document.activeElement !== graf) skjulSoyle(); });
-    graf.addEventListener('blur', skjulSoyle);
-    graf.addEventListener('focus', function () { if (aktiv < 0 && g) visSoyle(g.n - 1); });
-    graf.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') return skjulSoyle();
-        if (!g) return;
-        var ny = { ArrowLeft: aktiv - 1, ArrowRight: aktiv + 1, Home: 0, End: g.n - 1 }[e.key];
-        if (ny === undefined) return;
-        e.preventDefault();
-        visSoyle(ny);
-    });
-
-    var venter = 0;
-    if ('ResizeObserver' in window) {
-        new ResizeObserver(function () {
-            cancelAnimationFrame(venter);
-            venter = requestAnimationFrame(tegnGraf);
-        }).observe(graf);
-    }
-
-    // ── Start ───────────────────────────────────────────────────────────
-    api('/meg')
-        .then(function (svar) {
-            if (svar.status === 200) return visDash(svar.data, false);
-            visLogin(svar.status === 401 ? '' : (svar.data.feil || 'Kundeportalen svarer ikke akkurat nå. Prøv igjen senere.'));
-        })
-        .catch(function () { visLogin('Fikk ikke kontakt. Sjekk nettet og last siden på nytt.'); });
-})();
-</script>
+<script src="/kunde.js" defer></script>
 </body>
 </html>
