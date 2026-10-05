@@ -191,8 +191,8 @@ const slettCookie = () => `${COOKIE}=; Path=${COOKIE_STI}; Max-Age=0; HttpOnly; 
 // /meg om hvem som er innlogget, og kan vise «Min side» i stedet for «Logg inn». Vanlige besøkende har
 // ikke flagget, så forsiden spør aldri portalen for dem. Det gir ingen tilgang: alt sjekkes mot COOKIE.
 const FLAGG = '__Secure-dd_innlogget';
-const lagFlagg = (sekunder = OKT_DAGER * 86400) => `${FLAGG}=1; Path=/; Max-Age=${Math.max(0, Math.floor(sekunder))}; Secure; SameSite=Lax`;
-const slettFlagg = () => `${FLAGG}=; Path=/; Max-Age=0; Secure; SameSite=Lax`;
+const lagFlagg = (sekunder = OKT_DAGER * 86400) => `${FLAGG}=1; Path=/; Max-Age=${Math.max(0, Math.floor(sekunder))}; Secure; SameSite=Strict`;
+const slettFlagg = () => `${FLAGG}=; Path=/; Max-Age=0; Secure; SameSite=Strict`;
 const harFlagg = (req) => (req.headers.get('cookie') || '').split(';').some((del) => del.trim().startsWith(FLAGG + '='));
 
 function lesCookies(req) {

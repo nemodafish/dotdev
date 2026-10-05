@@ -2545,16 +2545,30 @@ const I18N = {
     // «Min side» vises med en gang. Her sjekker vi i bakgrunnen at innloggingen fortsatt gjelder
     // (ellers tilbake til «Logg inn»; /meg fjerner da flagget) og henter bedriftsnavnet til title.
     // Uten flagget spør vi ikke portalen i det hele tatt.
-    if (root.classList.contains('innlogget')) {
+    let kundeNavn = '';
+    const minSideTittel = () => $$('[data-min-side]').forEach(a => {
+        if (kundeNavn) a.title = (LANG.en() ? 'Logged in as ' : 'Innlogget som ') + kundeNavn;
+        else a.removeAttribute('title');
+    });
+    const minSide = () => {
+        const inn = /(?:^|;\s*)__Secure-dd_innlogget=1(?:;|$)/.test(document.cookie);
+        root.classList.toggle('innlogget', inn);
+        if (!inn) { kundeNavn = ''; minSideTittel(); return; }
         fetch('/api/kunde/meg', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
             .then(res => (res.ok ? res.json() : null))
             .then(d => {
                 if (!d) return;                      // ukjent svar: la «Min side» stå, lenken virker uansett
-                if (d.innlogget !== true) { root.classList.remove('innlogget'); return; }
-                if (typeof d.navn === 'string' && d.navn) $$('[data-min-side]').forEach(a => { a.title = d.navn; });
+                if (d.innlogget !== true) { root.classList.remove('innlogget'); kundeNavn = ''; minSideTittel(); return; }
+                kundeNavn = typeof d.navn === 'string' ? d.navn : '';
+                minSideTittel();
             })
             .catch(() => {});                        // ingen svar: samme som over
-    }
+    };
+    minSide();
+    LANG.on(minSideTittel);
+    // Tilbake-knappen kan vise siden fra nettleserens hurtigbuffer uten å kjøre skriptet på nytt.
+    // Kunden kan ha logget inn eller ut i mellomtiden, så sjekk igjen.
+    addEventListener('pageshow', e => { if (e.persisted) minSide(); });
 
     /* ── 2. Meny (åpne/lukke, Esc, fokusfelle, scroll-lås) ──────── */
     const nav = $('[data-nav]');
