@@ -15,6 +15,11 @@
 //    (i sanntid listene annethvert minutt), ikke når kunden har vært borte en stund (et kvarter,
 //    i sanntid fem minutter), og ikke etter at serveren har sagt at kvoten er brukt opp.
 //  • Hurtigtastene kan slås av (WCAG 2.1.4); valget står i adressen (taster=0).
+//  • To visninger: den enkle (standard) med oppsummeringen i klartekst, fire tall, grafen og tre
+//    korte lister, og den detaljerte (visning=detaljert) med alt som i Plausible. Den enkle ber bare
+//    om det den viser (9 Plausible-kall første gang mot 11), og uten sammenligning, så svarene deles
+//    med den detaljerte. Oppsummeringen lages i nettleseren av tallene som allerede er hentet.
+//  • «Be om endring» lager en e-post (mailto:) eller en tekst å kopiere; ingenting sendes eller lagres.
 (function () {
     'use strict';
 
@@ -63,6 +68,299 @@
         return svg;
     }
 
+    // ── Oppsummeringen i klartekst ──────────────────────────────────────
+    // Ren kode: ingen DOM og ingenting fra resten av filen, så den kan testes for seg
+    // (test-oppsummering.mjs leser koden mellom merkene OPPSUMMERING-START og -SLUTT).
+    // KANALER, MAL og varighet() står her fordi både oppsummeringen og resten av siden bruker dem.
+    // OPPSUMMERING-START
+    var KANALER = {
+        'Direct': 'Direkte', 'Organic Search': 'Søk', 'Paid Search': 'Betalt søk', 'Organic Social': 'Sosiale medier',
+        'Paid Social': 'Betalt i sosiale medier', 'Email': 'E-post', 'Referral': 'Lenker fra andre nettsider',
+        'Affiliates': 'Partnerlenker', 'Display': 'Bannerannonser', 'Organic Video': 'Video', 'Paid Video': 'Betalt video',
+        'Organic Shopping': 'Shopping', 'Paid Shopping': 'Betalt shopping', 'Cross-network': 'På tvers av nettverk',
+        'SMS': 'SMS', 'Audio': 'Lyd', 'Mobile Push Notifications': 'Push-varsler', 'Paid Other': 'Annet betalt',
+        'AI Assistants': 'AI-assistenter'
+    };
+    var MAL = {
+        'Outbound Link: Click': 'Klikk på lenker til andre nettsider',
+        'File Download': 'Nedlastede filer',
+        'Form: Submission': 'Utfylte skjema',
+        'Cloaked Link: Click': 'Klikk på skjulte lenker',
+        '404': 'Besøk på sider som ikke finnes (404)'
+    };
+    function varighet(s) {
+        s = Math.round(s);
+        if (s < 60) return s + ' s';
+        var t = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+        return t ? t + ' t ' + m + ' min' : m + ' min ' + (s % 60) + ' s';
+    }
+
+    // lagOppsummering(inn) → en liste med 0–4 korte setninger på norsk. Bare tall dashbordet allerede
+    // har hentet, aldri noe nytt fra Plausible. inn:
+    //   periode   periode-objektet fra API-et (key, fra, til, idag, levende, sml, endring_mot)
+    //   kontekst  'standard' | 'side' | 'mal' | 'sanntid' (som tallene øverst)
+    //   filtre    [{ dim, op, antall, verdier, tekst }], tekst = det som står i filterknappen
+    //   topp, kanaler, sider, mal   delene fra API-et, eller null når de hentes eller feilet
+    //   malTyper  { målnavn: 'event' | 'page' | 'scroll' } (scrollmål telles som unike)
+    // En del som mangler, gir bare færre setninger, aldri gale tall. Tom liste = ingenting å si ennå.
+    var lagOppsummering = (function () {
+        var eier = function (o, k) { return Boolean(o) && Object.prototype.hasOwnProperty.call(o, k); };
+        var NF = new Intl.NumberFormat('nb-NO');
+        var tall = function (n) { return NF.format(Math.round(n)); };
+        var PST = String.fromCharCode(160) + '%';
+        var DAG = 86400000;
+        var f = function (o) { return new Intl.DateTimeFormat('nb-NO', Object.assign({ timeZone: 'UTC' }, o)); };
+        var fKort = f({ day: 'numeric', month: 'short' }), fKortAar = f({ day: 'numeric', month: 'short', year: 'numeric' });
+        var fLangAar = f({ day: 'numeric', month: 'long', year: 'numeric' });
+        var fUkedag = f({ weekday: 'long', day: 'numeric', month: 'long' }), fUkedagAar = f({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        var fMnd = f({ month: 'long' });
+        var ms = function (d) { return Date.parse(String(d).slice(0, 10) + 'T00:00:00Z'); };
+        var dato = function (d) { return new Date(ms(d)); };
+        var stor = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+        var liten = function (s) { return s.charAt(0).toLowerCase() + s.slice(1); };
+        var erTall = function (v) { return typeof v === 'number' && isFinite(v); };
+        // Lange navn (sider, mål, filtre) kortes av, så setningene holder seg korte. Navnene kommer fra
+        // besøkene (sider) eller adressen (filtre): kontrolltegn og retningstegn tas bort, så et
+        // retningstegn (U+202E) i et sidenavn ikke snur resten av oppsummeringen.
+        var USYNLIG = /[\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069\u2028\u2029]/g;
+        function kort(s, n) {
+            var t = Array.from(String(s).replace(USYNLIG, ''));
+            return t.length > n ? t.slice(0, n - 1).join('') + '…' : t.join('');
+        }
+        var ganger = function (n) { return tall(n) + (n === 1 ? ' gang' : ' ganger'); };
+        // Kanalene slik de står i en setning: «Flest kom fra søk (43 %).» [før andelen, etter andelen]
+        var KANAL_FRASE = {
+            'Organic Search': ['fra søkemotorer som Google'], 'Direct': ['direkte', ', ved å skrive adressen eller bruke et bokmerke'],
+            'Paid Search': ['fra søkeannonser'], 'Organic Social': ['fra sosiale medier'],
+            'Paid Social': ['fra annonser i sosiale medier'], 'Email': ['fra e-post'], 'Referral': ['fra lenker på andre nettsider'],
+            'Affiliates': ['fra partnerlenker'], 'Display': ['fra bannerannonser'], 'Organic Video': ['fra video'],
+            'Paid Video': ['fra videoannonser'], 'Organic Shopping': ['fra shoppingsider'], 'Paid Shopping': ['fra shoppingannonser'],
+            'Cross-network': ['fra annonser på flere nettverk'], 'SMS': ['fra SMS'], 'Audio': ['fra lydannonser'],
+            'Mobile Push Notifications': ['fra push-varsler'], 'Paid Other': ['fra andre annonser'],
+            'AI Assistants': ['fra AI-assistenter som ChatGPT']
+        };
+
+        // «4.–10. okt.», «28. sep.–10. okt.», «20. des. 2025–5. jan. 2026» (året bare når det ikke er i år)
+        function spenn(fra, til, idag) {
+            var a = dato(fra), b = dato(til);
+            var medAar = til.slice(0, 4) !== String(idag).slice(0, 4);
+            var slutt = (medAar ? fKortAar : fKort).format(b);
+            if (fra === til) return slutt;
+            if (fra.slice(0, 7) === til.slice(0, 7)) return a.getUTCDate() + '.–' + slutt;
+            if (fra.slice(0, 4) === til.slice(0, 4)) return fKort.format(a) + '–' + slutt;
+            return fKortAar.format(a) + '–' + fKortAar.format(b);
+        }
+        // Perioden inni en setning: { tekst: 'de siste 28 dagene', levende (pågår nå), saLangt, alt }
+        function periodeFrase(p) {
+            var idag = p.idag || p.til;
+            var iAar = function (d) { return d.slice(0, 4) === idag.slice(0, 4); };
+            switch (p.key) {
+                case 'sanntid': return { tekst: 'de siste 30 minuttene', levende: true };
+                case 'dag':
+                    if (p.fra === idag) return { tekst: 'i dag', levende: true, saLangt: true };
+                    if (ms(idag) - ms(p.fra) === DAG) return { tekst: 'i går' };
+                    return { tekst: (iAar(p.fra) ? fUkedag : fUkedagAar).format(dato(p.fra)) };
+                case '24t': return { tekst: 'de siste 24 timene', levende: true };
+                case '7d': case '28d': case '30d': case '91d': return { tekst: 'de siste ' + parseInt(p.key, 10) + ' dagene' };
+                case 'mnd':
+                    if (p.fra.slice(0, 7) === idag.slice(0, 7)) return { tekst: 'denne måneden', levende: true, saLangt: true };
+                    return { tekst: 'i ' + fMnd.format(dato(p.fra)) + (iAar(p.fra) ? '' : ' ' + p.fra.slice(0, 4)) };
+                case 'aar':
+                    if (iAar(p.fra)) return { tekst: 'i år', levende: true, saLangt: true };
+                    return { tekst: 'i ' + p.fra.slice(0, 4) };
+                case '6mnd': case '12mnd': return { tekst: 'de siste ' + parseInt(p.key, 10) + ' månedene' };
+                case 'alt': return { tekst: 'totalt', levende: true, alt: true };
+                default: return { tekst: 'i perioden ' + spenn(p.fra, p.til, idag), levende: p.til === idag };
+            }
+        }
+        // Det endringen er regnet mot (samme som under tallene øverst): { enn: 'perioden før', i: 'i perioden før' }
+        function smlFrase(p) {
+            var s = p.sml;
+            if (s && s.modus === 'aar') return { enn: 'samme periode i fjor', i: 'samme periode i fjor' };
+            if (s && s.modus === 'egen' && s.fra && s.til) {
+                var t = 'perioden ' + spenn(s.fra, s.til, p.idag || p.til);
+                return { enn: t, i: 'i ' + t };
+            }
+            var e = p.endring_mot;
+            var dager = e && e.fra ? Math.round((ms(p.fra) - ms(e.fra)) / DAG) : 0;
+            var begge = function (t) { return { enn: t, i: t }; };
+            if (p.key === 'dag' && p.fra === p.idag) {
+                if (dager === 7) return begge('samme tid forrige uke');
+                if (dager === 1) return begge('samme tid i går');
+            } else if (p.key === 'dag') {
+                if (dager === 7) return begge('samme dag uka før');
+                if (dager === 1) return begge('dagen før');
+            } else if (p.key === '24t') {
+                if (dager === 7) return begge('samme tid uka før');
+                if (dager === 1) return begge('de 24 timene før');
+            }
+            return { enn: 'perioden før', i: 'i perioden før' };
+        }
+        // «, 9 % færre enn perioden før» (tom når det ikke finnes noen sammenligning)
+        function endringLedd(m, sf) {
+            if (!erTall(m.forrige) || !erTall(m.endring)) return '';
+            if (m.forrige === 0) return ', mot ingen ' + sf.i;
+            if (m.endring === 0) return ', ' + (m.verdi === m.forrige ? 'like mange som ' : 'omtrent like mange som ') + sf.enn;
+            return ', ' + NF.format(Math.abs(m.endring)) + PST + (m.endring > 0 ? ' flere enn ' : ' færre enn ') + sf.enn;
+        }
+        // Besøkende. Med målfilter: besøkende som nådde målet (mal = { verb, rest, perf }, se under).
+        // sted: 'nettsiden', eller 'siden'/'sidene' med filter på én side eller noen sider.
+        function besokSetning(m, p, pf, sf, mal, sted) {
+            if (m.verdi > 0) {
+                var n = tall(m.verdi) + ' besøkende';
+                if (pf.alt) {
+                    var fra = !p.fra ? '' : sted === 'nettsiden' ? ' siden ' + fLangAar.format(dato(p.fra))
+                        : ' fra ' + fLangAar.format(dato(p.fra)) + ' til nå';     // ikke «siden har … siden»
+                    return (mal ? 'Totalt har ' + n + ' ' + mal.perf : 'Totalt har ' + sted + ' hatt ' + n) + fra + '.';
+                }
+                var kropp = mal
+                    ? (pf.levende ? 'har ' + n + ' ' + mal.perf : mal.verb + ' ' + n + ' ' + mal.rest)
+                    : (pf.levende ? 'har ' + sted + ' hatt ' + n : 'hadde ' + sted + ' ' + n);
+                return stor(pf.tekst) + ' ' + kropp + (pf.saLangt ? ' så langt' : '') + endringLedd(m, sf) + '.';
+            }
+            var ingen = mal ? (pf.levende ? 'Ingen har ' + mal.perf : 'Ingen ' + mal.verb + ' ' + mal.rest)
+                : pf.levende ? 'Ingen har besøkt ' + sted : 'Ingen besøkte ' + sted;
+            var mot = erTall(m.forrige) && m.forrige > 0 && erTall(m.endring) ? ', mot ' + tall(m.forrige) + ' ' + sf.i : '';
+            return ingen + (pf.alt ? '' : ' ' + pf.tekst) + (pf.saLangt || pf.alt ? ' ennå' : '') + mot + '.';
+        }
+        // Største kanal. Står to kanaler likt, sies ingenting (ingen er «flest»).
+        function kanalSetning(liste, pf, medPeriode, sanntid, utenAndel) {
+            var r = liste.rader || [];
+            if (!r.length || !(r[0].verdier && r[0].verdier.visitors > 0)) return null;
+            if (r[1] && r[1].verdier && r[1].verdier.visitors === r[0].verdier.visitors) return null;
+            if (typeof r[0].navn !== 'string' || !r[0].navn || r[0].navn === '(not set)') return null;   // ukjent kanal: ingenting å si
+            var frase = eier(KANAL_FRASE, r[0].navn) ? KANAL_FRASE[r[0].navn]
+                : ['fra «' + kort(eier(KANALER, r[0].navn) ? KANALER[r[0].navn] : r[0].navn, 40) + '»'];
+            var alle = r.length === 1 && (liste.totalt_rader || 1) === 1;
+            var hvem = alle ? 'alle' : 'flest';
+            var hale = frase[1] || '';
+            if (sanntid) return 'Av dem som er inne nå, kom ' + hvem + ' ' + frase[0] + hale + '.';
+            var pst = r[0].verdier.percentage;
+            var andel = !alle && !utenAndel && erTall(pst) ? ' (' + NF.format(Math.round(pst)) + PST + ')' : '';
+            return (medPeriode ? stor(pf.tekst) + ' kom ' + hvem : stor(hvem) + ' kom') + ' ' + frase[0] + andel + hale + '.';
+        }
+        // Mest besøkte side (forsiden heter «forsiden»). Står to sider likt, sies ingenting.
+        function sideSetning(liste, pf, medPeriode, sanntid) {
+            var r = liste.rader || [];
+            if (!r.length || !(r[0].verdier && r[0].verdier.visitors > 0)) return null;
+            if (r[1] && r[1].verdier && r[1].verdier.visitors === r[0].verdier.visitors) return null;
+            var forside = r[0].navn === '/';
+            var navn = forside ? 'forsiden' : kort(r[0].navn, 48);
+            if (sanntid) return 'Mest besøkt akkurat nå er ' + navn + '.';
+            var antall = forside ? '' : ' (' + tall(r[0].verdier.visitors) + ' besøkende)';
+            var verb = pf.levende ? 'er' : 'var';
+            return medPeriode ? stor(pf.tekst) + ' ' + verb + ' ' + navn + ' mest besøkt' + antall + '.'
+                : 'Mest besøkt ' + verb + ' ' + navn + antall + '.';
+        }
+        // Målet som ble nådd flest ganger (404 er ikke noe å feire, så det telles ikke).
+        // I sanntid står den rett etter besøkende (harBesok), som sier hvilket tidsrom det gjelder.
+        function malSetning(liste, pf, medPeriode, sanntid, typer, harBesok) {
+            var beste = null, n = 0;
+            (liste.rader || []).forEach(function (r) {
+                if (!r || r.navn === '404') return;
+                var v = r.verdier || {};
+                var antall = (eier(typer, r.navn) && typer[r.navn] === 'scroll') || !erTall(v.events) ? v.visitors : v.events;
+                if (erTall(antall) && antall > n) { beste = r; n = antall; }
+            });
+            if (!beste) return null;
+            var navn = '«' + kort(eier(MAL, beste.navn) ? MAL[beste.navn] : beste.navn, 50) + '»';
+            if (sanntid) return (harBesok ? 'I samme tidsrom' : 'De siste 30 minuttene') + ' ble målet ' + navn + ' nådd ' + ganger(n) + '.';
+            return medPeriode ? stor(pf.tekst) + ' ble målet ' + navn + ' nådd ' + ganger(n) + '.'
+                : 'Målet ' + navn + ' ble nådd ' + ganger(n) + '.';
+        }
+        // Én tydelig endring i besøkstid eller i andelen som går etter én side (minst 20 %, og nok besøk)
+        function merkbarSetning(finn, sf) {
+            var bes = finn('visitors');
+            if (!bes || !(bes.verdi >= 25) || !(bes.forrige >= 25)) return null;
+            var forslag = [];
+            var tid = finn('visit_duration');
+            if (tid && tid.verdi > 0 && tid.forrige > 0 && erTall(tid.endring) && Math.abs(tid.endring) >= 20) {
+                forslag.push({ styrke: Math.abs(tid.endring) / 100, tekst: 'Besøkene varte i snitt ' + varighet(tid.verdi) + ', ' +
+                    NF.format(Math.abs(tid.endring)) + PST + (tid.endring > 0 ? ' lenger' : ' kortere') + ' enn ' + sf.enn + '.' });
+            }
+            var flukt = finn('bounce_rate');
+            if (flukt && erTall(flukt.verdi) && flukt.forrige > 0 && erTall(flukt.endring)) {
+                var rel = (flukt.verdi - flukt.forrige) / flukt.forrige;
+                if (Math.abs(rel) >= 0.2 && Math.abs(flukt.verdi - flukt.forrige) >= 5) {
+                    forslag.push({ styrke: Math.abs(rel), tekst: (rel > 0 ? 'Flere' : 'Færre') + ' forlot nettsiden etter bare én side: ' +
+                        tall(flukt.verdi) + PST + ', mot ' + tall(flukt.forrige) + PST + ' ' + sf.i + '.' });
+                }
+            }
+            forslag.sort(function (a, b) { return b.styrke - a.styrke; });
+            return forslag.length ? forslag[0].tekst : null;
+        }
+        // «Med filteret «Kanal er Søk»: » foran den første setningen som gjelder filtrene
+        function filterForan(filtre) {
+            var t = filtre.map(function (x) { return '«' + kort(x.tekst, 60) + '»'; });
+            if (t.length === 1) return 'Med filteret ' + t[0] + ': ';
+            if (t.length > 3) return 'Med ' + t.length + ' filtre: ';
+            return 'Med filtrene ' + t.slice(0, -1).join(', ') + ' og ' + t[t.length - 1] + ': ';
+        }
+
+        return function (inn) {
+            inn = inn || {};
+            var p = inn.periode;
+            if (!p || typeof p.key !== 'string' || typeof p.fra !== 'string' || typeof p.til !== 'string') return [];
+            var filtre = Array.isArray(inn.filtre) ? inn.filtre : [];
+            var sanntid = p.key === 'sanntid';
+            var malFiltre = filtre.filter(function (x) { return x.dim === 'mal' && x.op !== 'is_not'; });
+            var bare404 = malFiltre.length === 1 && malFiltre[0].op === 'is' && Array.isArray(malFiltre[0].verdier) &&
+                malFiltre[0].verdier.length === 1 && malFiltre[0].verdier[0] === '404';
+            var malMaal = malFiltre.length > 1 || malFiltre.some(function (x) { return x.op === 'contains' || x.antall > 1; }) ? 'et av målene' : 'målet';
+            // Med målfilter: «… nådde 13 besøkende målet», og for 404 «… kom 24 besøkende til en side som ikke finnes»
+            var malOrd = !malFiltre.length ? null
+                : bare404 ? { verb: 'kom', rest: 'til en side som ikke finnes', perf: 'kommet til en side som ikke finnes' }
+                : { verb: 'nådde', rest: malMaal, perf: 'nådd ' + malMaal };
+            // Filter på én side: «siden», på flere (eller «inneholder»): «sidene»
+            var sideFiltre = filtre.filter(function (x) { return x.dim === 'side'; });
+            var sted = sideFiltre.length !== 1 || /not/.test(sideFiltre[0].op) ? 'nettsiden'
+                : sideFiltre[0].op === 'is' && sideFiltre[0].antall === 1 ? 'siden' : 'sidene';
+            var harDim = function (dims, op) { return filtre.some(function (x) { return dims.indexOf(x.dim) >= 0 && (!op || x.op === op); }); };
+            var pf = periodeFrase(p), sf = smlFrase(p);
+            var metrikker = inn.topp && Array.isArray(inn.topp.metrikker) ? inn.topp.metrikker : [];
+            var finn = function (k) { return metrikker.filter(function (m) { return m && m.key === k; })[0]; };
+            var typer = inn.malTyper || {};
+            // Kandidatene: nr = rekkefølgen i teksten, pri = hva som får plass når det blir mer enn fire.
+            // fast = setningen gjelder ikke filtrene (sanntidstallet), periode = setningen sier hvilken periode det er.
+            var deler = [];
+            var legg = function (nr, pri, lag, ekstra) {
+                if (lag(false) === null) return;
+                deler.push(Object.assign({ nr: nr, pri: pri, lag: lag }, ekstra || {}));
+            };
+            var naa = finn('naa');
+            if (sanntid && naa && erTall(naa.verdi) && !filtre.length) {
+                legg(0, 1, function () { return naa.verdi > 0 ? 'Akkurat nå er ' + tall(naa.verdi) + ' inne på nettsiden.' : 'Akkurat nå er ingen inne på nettsiden.'; }, { fast: true });
+            }
+            var bes = finn('visitors');
+            if (bes && erTall(bes.verdi)) legg(1, sanntid ? 2 : 1, function () { return besokSetning(bes, p, pf, sf, malOrd, sted); }, { periode: true });
+            // Kanalen sier lite når filteret allerede står på en kanal eller kilde
+            if (inn.kanaler && !harDim(['kanal', 'kilde', 'henvisning'])) {
+                legg(2, sanntid ? 5 : 3, function (mp) { return kanalSetning(inn.kanaler, pf, mp, sanntid, Boolean(malOrd)); });
+            }
+            // Med målfilter er listen «Konverteringssider», og med «Side er …» står svaret i filteret
+            if (inn.sider && !malOrd && !harDim(['side'], 'is')) {
+                legg(3, sanntid ? 3 : 4, function (mp) { return sideSetning(inn.sider, pf, mp, sanntid); });
+            }
+            // I sanntid kommer målet rett etter besøkende («I samme tidsrom ble målet … nådd»)
+            if (inn.mal && !malOrd) legg(sanntid ? 1.5 : 4, sanntid ? 4 : 2, function (mp, hb) { return malSetning(inn.mal, pf, mp, sanntid, typer, hb); });
+            if (!sanntid && !malOrd && inn.kontekst === 'standard') legg(5, 5, function () { return merkbarSetning(finn, sf); });
+
+            deler.sort(function (a, b) { return a.pri - b.pri; });
+            deler = deler.slice(0, 4).sort(function (a, b) { return a.nr - b.nr; });
+            // Uten tallet for besøkende sier den første setningen hvilken periode det gjelder
+            var harBesok = deler.some(function (d) { return d.periode; });
+            var medPeriode = !sanntid && !harBesok;
+            var forste = -1;
+            var ut = deler.map(function (d, i) {
+                if (forste < 0 && !d.fast) forste = i;
+                return d.lag(medPeriode && forste === i, harBesok);
+            });
+            if (filtre.length && forste >= 0) ut[forste] = filterForan(filtre) + liten(ut[forste]);
+            return ut;
+        };
+    })();
+    // OPPSUMMERING-SLUTT
+
     // ── Formatering ─────────────────────────────────────────────────────
     var NF = new Intl.NumberFormat('nb-NO');
     var NF1 = new Intl.NumberFormat('nb-NO', { maximumFractionDigits: 1 });
@@ -70,12 +368,6 @@
     var NF2F = new Intl.NumberFormat('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     var PST = String.fromCharCode(160) + '%';   // hardt mellomrom, så «%» aldri havner alene på en linje
     var heltall = function (n) { return NF.format(Math.round(n)); };
-    function varighet(s) {
-        s = Math.round(s);
-        if (s < 60) return s + ' s';
-        var t = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
-        return t ? t + ' t ' + m + ' min' : m + ' min ' + (s % 60) + ' s';
-    }
     function penger(n, valuta) {
         var hel = Math.round(n) === n;
         try {
@@ -184,22 +476,8 @@
     }
 
     // ── Norske navn ─────────────────────────────────────────────────────
-    var KANALER = {
-        'Direct': 'Direkte', 'Organic Search': 'Søk', 'Paid Search': 'Betalt søk', 'Organic Social': 'Sosiale medier',
-        'Paid Social': 'Betalt i sosiale medier', 'Email': 'E-post', 'Referral': 'Lenker fra andre nettsider',
-        'Affiliates': 'Partnerlenker', 'Display': 'Bannerannonser', 'Organic Video': 'Video', 'Paid Video': 'Betalt video',
-        'Organic Shopping': 'Shopping', 'Paid Shopping': 'Betalt shopping', 'Cross-network': 'På tvers av nettverk',
-        'SMS': 'SMS', 'Audio': 'Lyd', 'Mobile Push Notifications': 'Push-varsler', 'Paid Other': 'Annet betalt',
-        'AI Assistants': 'AI-assistenter'
-    };
+    // (KANALER og MAL står i oppsummeringsblokken under, fordi oppsummeringen også bruker dem)
     var ENHETER = { Desktop: 'PC', Laptop: 'Bærbar PC', Tablet: 'Nettbrett', Mobile: 'Mobil' };
-    var MAL = {
-        'Outbound Link: Click': 'Klikk på lenker til andre nettsider',
-        'File Download': 'Nedlastede filer',
-        'Form: Submission': 'Utfylte skjema',
-        'Cloaked Link: Click': 'Klikk på skjulte lenker',
-        '404': 'Besøk på sider som ikke finnes (404)'
-    };
     // Mål med egen egenskapsliste i Plausible (når kunden filtrerer på akkurat det målet)
     var SPESIALMAL = {
         '404': { nokkel: 'path', etikett: '404-sider' },
@@ -417,7 +695,8 @@
     }
     function grafMetrikk() {
         var k = kontekst();
-        if (k === 'sanntid' || METRIKKER[k].indexOf(S.graf) < 0) return 'visitors';
+        // Den enkle visningen viser alltid besøkende (tallene øverst er ikke knapper der)
+        if (k === 'sanntid' || enkel() || METRIKKER[k].indexOf(S.graf) < 0) return 'visitors';
         // Tall uten verdi står ikke øverst (som i Plausible); da viser grafen besøkende
         var topp = lager.get(nokkel(grunnlag(), 'topp'));
         if (topp && topp.verdi.metrikker && !topp.verdi.metrikker.some(function (x) { return x.key === S.graf; })) return 'visitors';
@@ -498,7 +777,7 @@
             gyldige = FASTE_INTERVALLER[p].map(function (i) { return navn[i]; });
             standard = navn[FASTE_STANDARD[p] || FASTE_INTERVALLER[p][0]];
         }
-        if (S.sml === 'egen' && p !== 'alt' && S.smlFra) {
+        if (smlI(S) === 'egen' && p !== 'alt' && S.smlFra) {
             var sg = egneIntervaller(ms(S.smlFra), ms(S.smlTil));
             if (maksGrov(sg) > maksGrov(gyldige)) gyldige = sg;
             if (sg.indexOf(standard) < 0) standard = egenStandard(ms(S.smlFra), ms(S.smlTil));
@@ -525,9 +804,14 @@
             sml: 'av', smlFra: null, smlTil: null, ukedag: '1',
             filtre: [], etiketter: {}, graf: 'visitors', intervall: null,
             fane: { kilder: null, utm: null, sider: null, url: false, sted: null, enheter: null, handlinger: null, egenskap: null },
-            detaljer: null, filterGruppe: null
+            detaljer: null, filterGruppe: null,
+            // 'enkel' (standard) eller 'detaljert' (visning=detaljert i adressen); endring: «Be om endring» er åpent
+            visning: 'enkel', endring: false
         };
     }
+    var enkel = function () { return S.visning !== 'detaljert'; };
+    // Sammenligningen gjelder bare den detaljerte visningen (valget står i adressen til kunden går tilbake dit)
+    var smlI = function (s) { return s.visning === 'detaljert' ? s.sml : 'av'; };
     var S = nyTilstand();
     // Hurtigtastene kan slås av. Valget gjelder resten av besøket på siden og står i adressen.
     var tasterPa = new URLSearchParams(location.search).get('taster') !== '0';
@@ -613,6 +897,8 @@
         }
         var gr = sp.get('filter');
         if (gr === 'velg' || GRUPPER.some(function (x) { return x.id === gr && gruppeTilgjengelig(x); })) s.filterGruppe = gr;
+        if (sp.get('visning') === 'detaljert') s.visning = 'detaljert';
+        s.endring = sp.get('endring') === '1' && !s.detaljer && !s.filterGruppe;
         normaliser(s);
         return s;
     }
@@ -647,6 +933,8 @@
             if (s.detaljer.sorter) sp.set('sortering', s.detaljer.sorter);
         }
         if (s.filterGruppe) sp.set('filter', s.filterGruppe);
+        if (s.endring) sp.set('endring', '1');
+        if (s.visning === 'detaljert') sp.set('visning', 'detaljert');
         if (!tasterPa) sp.set('taster', '0');
         var q = sp.toString();
         return location.pathname + (q ? '?' + q : '');
@@ -659,8 +947,10 @@
         if (s.dato && harDato(s.periode)) sp.set('dato', s.dato);
         if (s.periode === 'egen') { sp.set('fra', s.fra); sp.set('til', s.til); }
         if (harSml(s.periode)) {
-            if (s.sml !== 'av') sp.set('sml', s.sml);
-            if (s.sml === 'egen') { sp.set('sml_fra', s.smlFra); sp.set('sml_til', s.smlTil); }
+            // Den enkle visningen ber om det samme som den detaljerte uten sammenligning, så svarene deles
+            var sml = smlI(s);
+            if (sml !== 'av') sp.set('sml', sml);
+            if (sml === 'egen') { sp.set('sml_fra', s.smlFra); sp.set('sml_til', s.smlTil); }
             if (s.ukedag === '0') sp.set('ukedag', '0');
         }
         (filtre || s.filtre).forEach(function (f) { sp.append('f', filterParam(f)); });
@@ -760,15 +1050,20 @@
         });
     }
 
-    // Delene som vises nå: tallene øverst, grafen, én liste per panel og «besøkende nå»
+    // Delene som vises nå: tallene øverst, grafen, listene og «besøkende nå». Den enkle visningen har
+    // tre korte lister (kanaler, sider og målene, om nettstedet har mål), den detaljerte én per panel.
     function synligeDeler(grunn) {
         var d = ['topp'];
         var g = grafDel(grunn);
         if (g) d.push(g);
-        PANELER.forEach(function (p) {
-            var v = panelValg(p);
-            if (v && v.rapport && !(v.fane === 'kart' && kart.status !== 'ok')) d.push('liste:' + v.rapport);
-        });
+        if (enkel()) {
+            enkleKort().forEach(function (k) { d.push('liste:' + k.rapport); });
+        } else {
+            PANELER.forEach(function (p) {
+                var v = panelValg(p);
+                if (v && v.rapport && !(v.fane === 'kart' && kart.status !== 'ok')) d.push('liste:' + v.rapport);
+            });
+        }
         if (naaSynlig()) d.push('naa');
         return d;
     }
@@ -781,7 +1076,8 @@
     function grafIntervall(grunn) {
         var info = intervallInfo(grunn);
         if (!info || !info.liste.length) return null;
-        return info.liste.indexOf(S.intervall) >= 0 ? S.intervall : info.standard;
+        // Den enkle visningen har ikke valget, og bruker alltid standardinndelingen
+        return !enkel() && info.liste.indexOf(S.intervall) >= 0 ? S.intervall : info.standard;
     }
     function grafDel(grunn) {
         if (S.periode === 'sanntid') return null;
@@ -801,7 +1097,18 @@
         var lover = hentDeler(grunn, deler, tving);
         if (!stille) tegnData();
         lover.then(function (svar) {
-            if (nr !== visningNr || !innlogget) return;
+            if (!innlogget) return;
+            if (nr !== visningNr) {
+                // En nyere henting startet mens denne var underveis (f.eks. da kartet var lastet etter et
+                // bytte til den detaljerte visningen). Den ber ikke om delene herfra, så de tegnes nå,
+                // også når de feilet (ellers blir «Henter tall …» stående).
+                if (!svar.antall) return;
+                if (svar.status === 401) return visLogin('Du er logget ut. Logg inn igjen.');
+                if (grunn !== grunnlag()) return;
+                tegnData();
+                if (svar.status === 429 || svar.status === 503) planleggEtter(svar);
+                return;
+            }
             if (svar.status === 401) return visLogin('Du er logget ut. Logg inn igjen.');
             if (svar.status === 400) return ugyldigVisning(svar.data.feil, deler, grunn);
             if (svar.status !== 200 && svar.antall > 1 && !stille) {
@@ -860,7 +1167,8 @@
         oppsett = null; altStart = null; nettsted = '';
         S = nyTilstand();
         clearTimeout(tidtaker); tidtaker = 0;
-        [D.el, F.el].forEach(function (d) { if (d.open) d.close(); });
+        [D.el, F.el, E.el].forEach(function (d) { if (d.open) d.close(); });
+        tomEndring();               // teksten i «Be om endring» skal ikke stå igjen til neste innlogging
         nullstill();
         $('[data-varsel]').hidden = true;
         felt.passord.type = 'password';
@@ -878,11 +1186,15 @@
         $('[data-nettsted]').textContent = meg.nettsted;
         $('[data-epost]').textContent = meg.epost || '';
         document.title = 'Statistikk for ' + meg.nettsted + ' · DOTDEV';
+        var raa = new URLSearchParams(location.search);
+        var detaljert = raa.get('visning') === 'detaljert';
+        // Riktig visning fra første stund, så det som bare hører til den andre, aldri blinker forbi
+        vis.dash.setAttribute('data-visning', detaljert ? 'detaljert' : 'enkel');
         visDel('dash');
         if (flyttFokus) $('#dash-tittel').focus();
-        var raaSted = new URLSearchParams(location.search).get('sted');
-        // Kartet hentes bare når kartfanen vises (standardfanen i «Hvor de er»)
-        var kartLover = !raaSted || raaSted === 'kart' ? lastKart() : Promise.resolve();
+        var raaSted = raa.get('sted');
+        // Kartet hentes bare når kartfanen vises (standardfanen i «Hvor de er», bare i den detaljerte visningen)
+        var kartLover = detaljert && (!raaSted || raaSted === 'kart') ? lastKart() : Promise.resolve();
         var oppsettLover = hentOppsett();
         Promise.all([oppsettLover, kartLover]).then(function (r) {
             if (!innlogget) return;
@@ -934,6 +1246,14 @@
     function visning() {
         if (!innlogget || !oppsett) return;
         lukkDatoer(true);
+        // Til den detaljerte visningen med kartfanen (fra den enkle, der kartet ikke trengs): tegn med en
+        // gang, men vent på kartfila (liten, fra dotdev.no) før tallene hentes, så alt kommer i én forespørsel
+        if (!enkel() && kart.status === 'ukjent' && (S.fane.sted || 'kart') === 'kart') {
+            lastKart().then(function () { if (innlogget) visning(); });
+            tegnData();
+            synkDialoger();
+            return;
+        }
         last();
         synkDialoger();
     }
@@ -1030,6 +1350,10 @@
         if (svg) svg.remove();
         ['[data-graf-maks]', '[data-graf-akse]', '[data-tabell]', '[data-tabell-hode]'].forEach(function (s) { $(s).replaceChildren(); });
         PANELER.forEach(function (p) { if (p.el) { p.el.liste.replaceChildren(); p.vist = null; p.vistX = null; } });
+        ENKLE_KORT.forEach(function (k) { if (k.el) { k.el.liste.replaceChildren(); k.vist = null; } });
+        $('[data-oppsummering]').hidden = true;
+        $('[data-oppsummering-tekst]').textContent = '';
+        oppsummeringVist = null;
     }
 
     // ── Perioden ────────────────────────────────────────────────────────
@@ -1205,7 +1529,31 @@
         var iv = grafIntervall(grunnlag());
         if (iv) sp.set('intervall', iv);
         lastNed.href = API + '/eksport?' + sp.toString();
+
+        // Enkel / detaljert: én lenke i verktøylinja (og én nederst i den enkle), med adressen til den andre
+        vis.dash.setAttribute('data-visning', S.visning);
+        var annen = adresseFra(Object.assign({}, S, { visning: enkel() ? 'detaljert' : 'enkel', detaljer: null, filterGruppe: null, endring: false }));
+        var bytt = $('[data-visning-bytt]');
+        bytt.href = annen;
+        bytt.title = enkel() ? 'Alle tallene, med kart, filtre, sammenligning og nedlasting' : 'Bare det viktigste';
+        $('[data-visning-tekst]').textContent = enkel() ? 'Vis alle detaljer' : 'Enkel visning';
+        $('[data-ikon-detaljert]', bytt).toggleAttribute('hidden', !enkel());
+        $('[data-ikon-enkel]', bytt).toggleAttribute('hidden', enkel());
+        $('[data-visning-lenke]').href = annen;
     }
+    function byttVisning(ny, e) {
+        // Ctrl/Cmd/Shift-klikk og midtklikk åpner adressen i en ny fane, som en vanlig lenke
+        if (e && (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button > 0)) return false;
+        if (e) e.preventDefault();
+        naviger(function (s) { s.visning = ny; }, { push: true });
+        $('[data-status]').textContent = ny === 'enkel' ? 'Viser den enkle visningen.' : 'Viser alle detaljene.';
+        return true;
+    }
+    $('[data-visning-bytt]').addEventListener('click', function (e) { byttVisning(enkel() ? 'detaljert' : 'enkel', e); });
+    // Lenken nederst forsvinner i den detaljerte visningen; fokus går til lenken øverst (som da heter «Enkel visning»)
+    $('[data-visning-lenke]').addEventListener('click', function (e) {
+        if (byttVisning('detaljert', e)) $('[data-visning-bytt]').focus({ preventScroll: true });
+    });
 
     function tegnMeta(grunn) {
         var p = perioder.get(grunn);
@@ -1260,17 +1608,20 @@
                 // fra adressen ved tilbake/fram og når et vindu lukkes, mens pillene kan stå
                 naviger(function (s) { s.filtre = s.filtre.filter(function (x) { return !(x.op === f.op && x.dim === f.dim); }); }, { push: true });
                 var neste = $$('.pille__tekst')[Math.min(i, S.filtre.length - 1)];
-                (neste || $('[data-filtrer]')).focus();
+                (neste || filterFokus()).focus();
             });
             li.append(rediger, fjern);
             ul.append(li);
         });
         $('[data-fjern-alle]').hidden = S.filtre.length < 2;
     }
+    // Hvor fokus går når en filterknapp forsvinner: «Filtrer», som ikke finnes i den enkle visningen. Der
+    // går det til perioden, ikke til «Vis alle detaljer» (så et trykk til ikke bytter visning).
+    var filterFokus = function () { return enkel() ? $('#periode-velger') : $('[data-filtrer]'); };
     function fjernAlleFiltre() {
         if (!S.filtre.length) return;
         naviger(function (s) { s.filtre = []; }, { push: true });
-        $('[data-filtrer]').focus();
+        filterFokus().focus();
     }
     $('[data-fjern-alle]').addEventListener('click', fjernAlleFiltre);
 
@@ -1310,14 +1661,17 @@
         if (feil && !x && !varselVises()) visDelfeil(feilBoks, feil, function () { delfeil.delete(k); hentOgTegn(grunn, ['topp']); });
         var ktx = kontekst();
         var data = x ? x.verdi : null;
-        if (!data && !feil && kpiVist && kpiVist.ktx === ktx) return;     // det gamle står (dempet) til det nye kommer
+        var malX = enkel() && konverteringerVises() ? lager.get(nokkel(grunn, 'liste:mal')) : null;
+        // Det gamle står (dempet) til det nye kommer
+        if (!data && !feil && kpiVist && kpiVist.ktx === ktx && kpiVist.vis === S.visning) return;
         var p = perioder.get(grunn);
         var valgt = grafMetrikk();
-        if (x && kpiVist && kpiVist.x === x && kpiVist.p === p && kpiVist.valgt === valgt && kpiVist.ktx === ktx) return;
+        if (x && kpiVist && kpiVist.x === x && kpiVist.p === p && kpiVist.valgt === valgt && kpiVist.ktx === ktx && kpiVist.vis === S.visning && kpiVist.malX === malX) return;
         var fokus = document.activeElement && boks.contains(document.activeElement) ? document.activeElement.getAttribute('data-kpi') : null;
-        var metrikker = data ? data.metrikker : METRIKKER[ktx].filter(function (m) { return ktx !== 'mal' || (m !== 'total_revenue' && m !== 'average_revenue') || oppsett.inntekt; })
-            .map(function (m) { return { key: m, etikett: metrikkNavn(m), verdi: null, forrige: null, endring: null }; });
-        kpiVist = { ktx: ktx, x: x, p: p, valgt: valgt };
+        var metrikker = enkel() ? enkleTall(ktx, data, malX ? malX.verdi : null)
+            : data ? data.metrikker : METRIKKER[ktx].filter(function (m) { return ktx !== 'mal' || (m !== 'total_revenue' && m !== 'average_revenue') || oppsett.inntekt; })
+                .map(function (m) { return { key: m, etikett: metrikkNavn(m), verdi: null, forrige: null, endring: null }; });
+        kpiVist = { ktx: ktx, x: x, p: p, valgt: valgt, vis: S.visning, malX: malX };
         var merknadMetrikk = {};
         var generelle = [];
         (data && data.merknader || []).forEach(function (m) {
@@ -1327,7 +1681,7 @@
         boks.setAttribute('data-antall', String(metrikker.length));
         boks.replaceChildren();
         metrikker.forEach(function (m) {
-            var graferbar = ktx !== 'sanntid' && m.key !== 'naa';
+            var graferbar = !enkel() && ktx !== 'sanntid' && m.key !== 'naa';
             var el = graferbar ? knapp('kpi') : lag('div', 'kpi');
             el.setAttribute('data-kpi', m.key);
             if (graferbar) {
@@ -1345,7 +1699,11 @@
             el.title = tittel + (graferbar ? '\nTrykk for å vise dette i grafen.' : '');
             el.append(navn, verdi);
             if (ktx === 'sanntid') { el.append(lag('span', 'kpi__endring')); }
-            else if (p && p.sml) {
+            else if (m.forklaring) {
+                // Konverteringene (alle mål til sammen) har ingen endring; forklaringen står der i stedet
+                el.append(lag('span', 'kpi__endring', m.forklaring));
+                el.title = m.etikett + ': ' + verdiLang(m.key, m.verdi) + '\n' + m.tittel;
+            } else if (p && p.sml) {
                 // Sammenligning: endringen, så begge periodene med hvert sitt tall
                 var e = lag('span', 'kpi__endring');
                 e.append(endringEl(m.key, m.endring));
@@ -1371,6 +1729,61 @@
         merk.textContent = tekster.join(' ');
         merk.hidden = !tekster.length;
     }
+    // Den enkle visningen: fire faste tall (sanntid: de tre som finnes). Det fjerde er konverteringene når
+    // nettstedet har mål, ellers fluktfrekvensen. Med målfilter er alle tallene konverteringstall.
+    var ENKLE_TALL = {
+        standard: ['visitors', 'pageviews', 'visit_duration'],
+        side: ['visitors', 'pageviews', 'time_on_page'],
+        mal: ['visitors', 'events', 'conversion_rate', 'total_revenue']
+    };
+    var ENKLE_NAVN = { pageviews: 'Sidevisninger', events: 'Konverteringer' };
+    // Målene som telles som handlinger i den enkle visningen: alle unntatt 404 (besøk på sider som ikke finnes)
+    var ekteMal = function () { return oppsett ? oppsett.mal.filter(function (m) { return m.navn !== '404'; }) : []; };
+    // Summen av målene er bare sikker når hele mållisten (med 404) får plass i den korte listen (9 rader)
+    var konverteringerVises = function () { return Boolean(oppsett) && !oppsett.malUkjent && ekteMal().length > 0 && oppsett.mal.length <= 9; };
+    function enkleTall(ktx, data, malListe) {
+        var alle = data && Array.isArray(data.metrikker) ? data.metrikker : [];
+        var finn = function (k) { return alle.filter(function (m) { return m.key === k; })[0]; };
+        var tom = function (k) { return { key: k, etikett: ENKLE_NAVN[k] || metrikkNavn(k), verdi: null, forrige: null, endring: null }; };
+        if (ktx === 'sanntid') return data ? alle : METRIKKER.sanntid.map(tom);
+        var ut = [];
+        ENKLE_TALL[ktx].forEach(function (k) {
+            if (k === 'total_revenue' && !oppsett.inntekt) return;
+            var m = finn(k);
+            if (!m && data) return;            // tall uten verdi står ikke øverst (som i Plausible)
+            ut.push(m ? Object.assign({}, m, ktx !== 'mal' && ENKLE_NAVN[k] ? { etikett: ENKLE_NAVN[k] } : {}) : tom(k));
+        });
+        if (ktx !== 'mal') {
+            if (konverteringerVises()) ut.push(konverteringsTall(malListe));
+            else {
+                // Uten besøk er fluktfrekvensen ikke 0 %, den finnes ikke: «–» (nye nettsider får dette tallet)
+                var flukt = finn('bounce_rate'), bes = finn('visitors');
+                ut.push(!flukt ? tom('bounce_rate') : bes && bes.verdi === 0 ? Object.assign({}, flukt, { verdi: null, forrige: null, endring: null }) : flukt);
+            }
+        }
+        return ut.slice(0, 4);
+    }
+    // Hvor mange ganger et mål ble nådd, alle målene til sammen (scrollmål telles som unike, som i
+    // Plausible). Besøk på sider som ikke finnes (404) er ikke noe å telle som en konvertering.
+    function konverteringsTall(liste) {
+        var sum = null;
+        if (liste && !liste.flere) {
+            sum = 0;
+            (liste.rader || []).forEach(function (r) {
+                if (r.navn === '404') return;
+                var v = r.verdier || {};
+                var n = malType(r.navn) === 'scroll' || typeof v.events !== 'number' ? v.visitors : v.events;
+                if (typeof n === 'number') sum += n;
+            });
+        }
+        var har404 = oppsett.mal.some(function (m) { return m.navn === '404'; });
+        return {
+            key: 'konverteringer', etikett: 'Konverteringer', verdi: sum, forrige: null, endring: null,
+            forklaring: 'alle mål til sammen',
+            tittel: 'Hvor mange ganger et mål ble nådd, alle målene til sammen' + (har404 ? ' (uten besøk på sider som ikke finnes).' : '.')
+        };
+    }
+
     // Samme tekst bare én gang (to inntektstall gir ellers samme merknad to ganger)
     function unike(liste) { return liste.filter(function (x, i) { return liste.indexOf(x) === i; }); }
 
@@ -1413,7 +1826,7 @@
         var boks = $('[data-intervall-boks]');
         velger.replaceChildren();
         (info ? info.liste : []).forEach(function (i) { velger.add(new Option(INTERVALL_NAVN[i], i, false, i === iv)); });
-        boks.hidden = !info || info.liste.length < 2;
+        boks.hidden = enkel() || !info || info.liste.length < 2;
 
         var del = grafDel(grunn);
         var k = del && nokkel(grunn, del);
@@ -2123,6 +2536,165 @@
         return rad;
     }
 
+    // ── Den enkle visningen: korte lister ───────────────────────────────
+    // De fem øverste i hver liste, uten faner. Radene er ikke knapper her: ett trykk skulle da både
+    // legge til et filter og bytte til den detaljerte visningen, og det er lett å bli forvirret av.
+    // Filtrene, «Vis alle» og resten av listene finnes i «Vis alle detaljer».
+    var ENKLE_KORT = [
+        { id: 'kanaler', tittel: 'Hvor de kommer fra', rapport: 'kanaler' },
+        { id: 'sider', tittel: 'Mest besøkte sider', rapport: 'sider' },
+        { id: 'mal', tittel: 'Handlinger', rapport: 'mal' }
+    ];
+    var ENKLE_RADER = 5;
+    // Kortene som vises (og hentes): mål bare når nettstedet har andre mål enn 404
+    function enkleKort() {
+        return ENKLE_KORT.filter(function (k) { return k.id !== 'mal' || ekteMal().length > 0; });
+    }
+    function byggEnkleLister() {
+        var rot = $('[data-enkle-lister]');
+        ENKLE_KORT.forEach(function (k) {
+            var sek = lag('section', 'kort enkelkort');
+            sek.setAttribute('data-enkel', k.id);
+            var h2 = lag('h2', null, k.tittel);
+            h2.id = 'enkel-' + k.id;
+            sek.setAttribute('aria-labelledby', h2.id);
+            var el = { sek: sek, h2: h2, hode: lag('div', 'liste__hode'), liste: lag('ol', 'liste'), henter: lag('p', 'henter', 'Henter tall …'),
+                tom: lag('p', 'tom', 'Ingen data i perioden.'), feil: lag('div', 'delfeil'), merknad: lag('p', 'merknad') };
+            el.hode.setAttribute('aria-hidden', 'true');
+            [el.henter, el.tom, el.feil, el.merknad].forEach(function (z) { z.hidden = true; });
+            sek.append(h2, el.hode, el.liste, el.henter, el.tom, el.feil, el.merknad);
+            k.el = el;
+            rot.append(sek);
+        });
+    }
+    function tegnEnkleLister(grunn) {
+        ENKLE_KORT.forEach(function (k) { tegnEnkeltKort(k, grunn); });
+    }
+    function tegnEnkeltKort(k, grunn) {
+        var el = k.el;
+        if (k.id === 'mal' && !ekteMal().length) {
+            // Ingen mål (eller bare 404): ingen kort. Kunne ikke målene hentes, står det det, med «Prøv igjen».
+            el.sek.hidden = !oppsett.malUkjent;
+            [el.hode, el.liste, el.henter, el.tom, el.merknad].forEach(function (z) { z.hidden = true; });
+            if (oppsett.malUkjent) visDelfeil(el.feil, 'Fikk ikke hentet målene akkurat nå.', provOppsettIgjen);
+            k.vist = null;
+            return;
+        }
+        el.sek.hidden = false;
+        el.h2.textContent = k.id === 'sider' && kontekst() === 'mal' ? 'Konverteringssider' : k.tittel;
+        var del = 'liste:' + k.rapport;
+        var nk = nokkel(grunn, del);
+        var x = lager.get(nk);
+        var feil = delfeil.get(nk);
+        var laster = venter.has(nk);
+        el.sek.setAttribute('aria-busy', String(laster));
+        el.feil.hidden = !feil || Boolean(x) || varselVises();
+        if (feil && !x && !varselVises()) visDelfeil(el.feil, feil, function () { delfeil.delete(nk); hentOgTegn(grunn, [del]); });
+        if (x) {
+            if (k.vist !== x) { tegnKortListe(k, x.verdi); k.vist = x; }
+            el.henter.hidden = true;
+            var mt = (x.verdi.merknader || []).map(function (z) { return z.tekst; });
+            // Sanntid: listene gjelder de siste 5 minuttene, målene de siste 30 (som i Plausible)
+            if (S.periode === 'sanntid') mt.unshift(k.id === 'mal' ? 'Siste 30 minutter.' : 'Siste 5 minutter.');
+            mt = unike(mt);
+            el.merknad.textContent = mt.join(' ');
+            el.merknad.hidden = !mt.length;
+            return;
+        }
+        // Ikke hentet ennå: den forrige listen står dempet til den nye kommer; ellers «Henter tall …»
+        if (!k.vist || feil) {
+            k.vist = null;
+            el.liste.replaceChildren();
+            [el.hode, el.liste, el.tom, el.merknad].forEach(function (z) { z.hidden = true; });
+            el.henter.hidden = !laster;
+            // Feilet listen mens varselet øverst forklarer det: en rolig linje i stedet for et tomt kort
+            if (feil && el.feil.hidden) { el.tom.textContent = 'Ingen tall akkurat nå.'; el.tom.hidden = false; }
+        }
+    }
+    function tegnKortListe(k, data) {
+        var el = k.el;
+        // Ett tall per rad: besøkende (sanntid: «nå», med målfilter: konverteringer); for mål antall ganger
+        var kol = k.id === 'mal' ? { etikett: 'Antall', lang: 'Antall ganger' }
+            : (data.kolonner || []).filter(function (c) { return c.key === 'visitors'; })[0] || { etikett: 'Besøkende' };
+        var verdi = function (r) {
+            var v = r.verdier || {};
+            if (k.id !== 'mal') return v.visitors;
+            return malType(r.navn) === 'scroll' || typeof v.events !== 'number' ? v.visitors : v.events;
+        };
+        var rader = data.rader || [];
+        if (k.id === 'mal') {
+            // Som konverteringstallet over: uten 404 (med mindre et målfilter er valgt, da står listen som filteret
+            // gir), og sortert etter antallet som vises (API-et sorterer målene etter unike besøkende)
+            var medFilter = S.filtre.some(function (f) { return f.dim === 'mal'; });
+            rader = rader.filter(function (r) { return medFilter || r.navn !== '404'; })
+                .map(function (r, i) { return { r: r, i: i }; })
+                .sort(function (a, b) { return ((verdi(b.r) || 0) - (verdi(a.r) || 0)) || a.i - b.i; })
+                .map(function (x) { return x.r; });
+        }
+        rader = rader.slice(0, ENKLE_RADER);
+        var maks = Math.max.apply(null, rader.map(function (r) { return verdi(r) || 0; }).concat([1]));
+        var lengst = Math.max.apply(null, rader.map(function (r) { return verdiTekst('visitors', verdi(r)).length; }).concat([1]));
+        var bredde = Math.max(3.5, kol.etikett.length * 0.45 + 0.4, lengst * 0.58 + 0.4).toFixed(2) + 'rem';
+        var kolHode = lag('span', 'kol', kol.etikett);
+        kolHode.style.setProperty('--b', bredde);
+        el.hode.replaceChildren(lag('span', null, forsteKolonne(k.rapport)), kolHode);
+        el.liste.replaceChildren();
+        el.hode.hidden = el.liste.hidden = !rader.length;
+        el.tom.textContent = 'Ingen data i perioden.';
+        el.tom.hidden = rader.length > 0;
+        rader.forEach(function (r) {
+            var pst = r.verdier && r.verdier.percentage;
+            var andel = k.id !== 'mal' && typeof pst === 'number' ? pst / 100 : (verdi(r) || 0) / maks;
+            var navnTekst = radNavn(k.rapport, r);
+            var li = lag('li', 'rad rad--fast');
+            var navn = lag('span', 'rad__navn');
+            navn.style.setProperty('--andel', Math.max(0, Math.min(1, andel || 0)).toFixed(3));
+            navn.title = navnTekst;
+            navn.append(lag('span', 'rad__tekst', navnTekst));
+            var tall = lag('span', 'kol');
+            tall.style.setProperty('--b', bredde);
+            tall.append(lag('span', 'sr-only', (kol.lang || kol.etikett) + ': '), document.createTextNode(verdiTekst('visitors', verdi(r))));
+            li.append(navn, tall);
+            el.liste.append(li);
+        });
+    }
+
+    // ── Oppsummeringen ──────────────────────────────────────────────────
+    // Lages av delene som allerede er hentet for visningen (samme nøkler som kortene, så tallene
+    // alltid er de samme som i kortene). Mens nye tall hentes, står den forrige teksten dempet.
+    var oppsummeringVist = null;
+    function tegnOppsummering(grunn) {
+        var kort = $('[data-oppsummering]'), el = $('[data-oppsummering-tekst]');
+        var del = function (d) { var x = lager.get(nokkel(grunn, d)); return x ? x.verdi : null; };
+        var malTyper = {};
+        oppsett.mal.forEach(function (m) { malTyper[m.navn] = m.type; });
+        var setninger = lagOppsummering({
+            periode: perioder.get(grunn),
+            kontekst: kontekst(),
+            filtre: S.filtre.map(function (f) { return { dim: f.dim, op: f.op, antall: f.verdier.length, verdier: f.verdier.slice(), tekst: filterTekst(f) }; }),
+            topp: del('topp'), kanaler: del('liste:kanaler'), sider: del('liste:sider'),
+            mal: oppsett.mal.length ? del('liste:mal') : null,
+            malTyper: malTyper
+        });
+        var laster = synligeDeler(grunn).some(function (d) { return d !== 'naa' && venter.has(nokkel(grunn, d)); });
+        kort.setAttribute('aria-busy', String(laster));
+        var tekst = setninger.join(' ');
+        if (!tekst) {
+            // Ingenting å si ennå: det forrige står dempet, eller en rolig linje første gang.
+            // Feilet alt (varselet øverst sier det), skjules kortet.
+            if (laster && oppsummeringVist) return;
+            kort.hidden = !laster;
+            el.classList.add('henter');
+            el.textContent = 'Henter tallene …';
+            oppsummeringVist = null;
+            return;
+        }
+        el.classList.remove('henter');
+        if (el.textContent !== tekst) el.textContent = tekst;
+        kort.hidden = false;
+        oppsummeringVist = tekst;
+    }
+
     // ── Kartet ──────────────────────────────────────────────────────────
     // /kunde-kart.json: { "viewBox": "0 0 B H", "land": { "NO": "M…z", … } } med ISO-koder.
     // Hentes bare når kartfanen vises. Mangler filen, skjules fanen og «Land» vises i stedet.
@@ -2406,21 +2978,21 @@
     var tilbakeTid = 0;
     function lukketDialog(felt) {
         if (!S[felt] || tilbakeTid) return;
-        var navn = felt === 'detaljer' ? 'detaljer' : 'filter';
+        var navn = felt === 'detaljer' ? 'detaljer' : felt === 'endring' ? 'endring' : 'filter';
         if (history.state && history.state.dialog === navn) {
             tilbakeTid = setTimeout(function () { tilbakeTid = 0; }, 1500);   // i tilfelle popstate aldri kommer
             history.back();
         } else {
-            naviger(function (s) { s[felt] = null; }, { lukk: true, bareDialog: true });
+            naviger(function (s) { s[felt] = felt === 'endring' ? false : null; }, { lukk: true, bareDialog: true });
         }
     }
     function lukkVindu(d) {
         if (d.open) d.close();
-        lukketDialog(d === D.el ? 'detaljer' : 'filterGruppe');
+        lukketDialog(d === D.el ? 'detaljer' : d === E.el ? 'endring' : 'filterGruppe');
     }
     D.el.addEventListener('close', function () { clearTimeout(sokTid); D.q = null; lukketDialog('detaljer'); });
     $$('[data-lukk]').forEach(function (b) { b.addEventListener('click', function () { lukkVindu(b.closest('dialog')); }); });
-    [D.el, $('[data-filterdialog]')].forEach(function (d) {
+    [D.el, $('[data-filterdialog]'), $('[data-endring]')].forEach(function (d) {
         // Esc: lukk selv, så adressen oppdateres med en gang
         d.addEventListener('cancel', function (e) { e.preventDefault(); lukkVindu(d); });
         // Klikk på bakgrunnen utenfor vinduet lukker det
@@ -2431,6 +3003,7 @@
         if (!innlogget) return;
         synkDetaljer();
         synkFilter();
+        synkEndring();
     }
 
     // ── Filtervinduet ───────────────────────────────────────────────────
@@ -2732,7 +3305,7 @@
             Object.keys(etiketter).forEach(function (k) { s.etiketter[k] = etiketter[k]; });
             s.filterGruppe = null;
         }, { lukk: true });
-        $('[data-filtrer]').focus();
+        filterFokus().focus();
     });
     $('[data-filter-avbryt]').addEventListener('click', function () { lukkVindu(F.el); });
     $('[data-filter-tilbake]').addEventListener('click', function () {
@@ -2741,6 +3314,174 @@
         if (forste) forste.focus();
     });
     F.el.addEventListener('close', function () { F.gruppe = null; lukketDialog('filterGruppe'); });
+
+    // ── «Be om endring» ─────────────────────────────────────────────────
+    // Et lite skjema som lager en ferdig e-post til oss (en mailto:-lenke) eller en tekst å kopiere.
+    // Ingenting sendes til serveren og ingenting lagres: teksten står bare i skjemaet mens siden er
+    // åpen (lukkes vinduet ved et uhell, står den der fortsatt), og skjemaet tømmes ved utlogging.
+    var EPOST = 'kontakt@dotdev.no';
+    var MAKS_MAILTO = 1800;         // lengre mailto-lenker kuttes eller avvises av enkelte e-postprogrammer
+    var MAKS_BESKRIVELSE = 1500;
+    var E = {
+        el: $('[data-endring]'), skjema: $('[data-endring-skjema]'), type: $('[data-endring-type]'), side: $('[data-endring-side]'),
+        sider: $('[data-endring-sider]'), tekst: $('[data-endring-beskrivelse]'), teller: $('[data-endring-teller]'),
+        haster: $('[data-endring-haster]'), feil: $('[data-endring-feil]'), epost: $('[data-endring-epost]'),
+        kopier: $('[data-endring-kopier]'), status: $('[data-endring-status]'), kopi: $('[data-endring-kopi]')
+    };
+    var KONTROLLTEGN_ALLE = new RegExp(KONTROLLTEGN.source, 'g');
+    function apneEndring() {
+        if (E.el.open) return;
+        naviger(function (s) { s.endring = true; }, { push: true, dialog: 'endring', bareDialog: true });
+    }
+    $('[data-endring-apne]').addEventListener('click', apneEndring);
+    function synkEndring() {
+        if (!S.endring) { if (E.el.open) E.el.close(); return; }
+        if (E.el.open) return;
+        $('[data-endring-nettsted]').textContent = nettsted || 'nettsiden';
+        fyllSideforslag();
+        visEndringStatus('');
+        oppdaterEndring();
+        E.el.showModal();
+        E.type.focus();
+    }
+    // Forslag til «Hvilken side?»: de mest besøkte sidene, hvis listen allerede er hentet
+    function fyllSideforslag() {
+        var x = lager.get(nokkel(grunnlag(), 'liste:sider'));
+        if (!x) lager.forEach(function (v, k) { if (!x && /\|liste:sider$/.test(k)) x = v; });
+        var forslag = [];
+        (x ? x.verdi.rader || [] : []).forEach(function (r) {
+            var n = typeof r.navn === 'string' ? radNavn('sider', r) : '';
+            if (n && n.length <= 120 && !KONTROLLTEGN.test(n) && forslag.indexOf(n) < 0) forslag.push(n);
+        });
+        E.sider.replaceChildren();
+        forslag.forEach(function (n) {
+            var o = document.createElement('option');
+            o.value = n;
+            E.sider.append(o);
+        });
+    }
+    // Ensomme surrogater (encodeURIComponent kaster URIError på dem) blir U+FFFD. De kommer fra et
+    // tillegg eller autoutfylling, ikke fra vanlig skriving.
+    var helTekst = function (s) {
+        return s.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g, function (c) { return c.length === 2 ? c : '\ufffd'; });
+    };
+    function endringFelter() {
+        return {
+            type: E.type.value,
+            side: helTekst(E.side.value).replace(KONTROLLTEGN_ALLE, ' ').trim().slice(0, 120),
+            haster: E.haster.value,
+            // Linjeskift og tab blir stående; andre kontrolltegn (f.eks. NUL) hører ikke hjemme i en e-post
+            beskrivelse: helTekst(E.tekst.value).replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim()
+        };
+    }
+    var endringEmne = function () { return 'Endringsønske: ' + (nettsted || 'nettsiden'); };
+    function endringKropp(f, beskrivelse) {
+        return ['Nettsted: ' + (nettsted || 'ukjent'), 'Hva gjelder det: ' + f.type, 'Hvilken side: ' + (f.side || 'ikke oppgitt'),
+            'Hvor haster det: ' + f.haster, '', 'Beskrivelse:', beskrivelse, '', 'Sendt fra kundeportalen'].join('\n');
+    }
+    // mailto-lenken (linjeskift som CRLF, slik RFC 6068 vil ha dem). Blir den for lang, kortes
+    // beskrivelsen av, og kunden får beskjed om å lime inn hele teksten fra «Kopier teksten» i stedet.
+    function endringMailto(f) {
+        var lagUrl = function (b) {
+            return 'mailto:' + EPOST + '?subject=' + encodeURIComponent(endringEmne()) + '&body=' + encodeURIComponent(endringKropp(f, b).replace(/\n/g, '\r\n'));
+        };
+        var url = lagUrl(f.beskrivelse);
+        if (url.length <= MAKS_MAILTO) return { url: url, kortet: false };
+        var hale = '…\n\n[Teksten er kortet ned. Lim inn hele teksten fra «Kopier teksten» i stedet for denne e-postteksten.]';
+        var tegn = Array.from(f.beskrivelse), lo = 0, hi = tegn.length;
+        while (lo < hi) {
+            var midt = Math.ceil((lo + hi) / 2);
+            if (lagUrl(tegn.slice(0, midt).join('') + hale).length <= MAKS_MAILTO) lo = midt; else hi = midt - 1;
+        }
+        return { url: lagUrl(tegn.slice(0, lo).join('') + hale), kortet: true };
+    }
+    function visEndringStatus(tekst, klasse) {
+        var k = 'endring__status' + (klasse ? ' ' + klasse : '');
+        if (E.status.textContent === tekst && E.status.className === k) return;
+        E.status.textContent = tekst;
+        E.status.className = k;
+    }
+    // Telleren, lenken og beskjeden om at e-posten blir kortet ned, holdes oppdatert mens kunden skriver
+    function oppdaterEndring() {
+        var n = E.tekst.value.length;
+        E.teller.textContent = heltall(n) + ' av ' + heltall(MAKS_BESKRIVELSE) + ' tegn';
+        E.teller.classList.toggle('nesten', n > MAKS_BESKRIVELSE - 100);
+        var m = endringMailto(endringFelter());
+        E.epost.href = m.url;
+        var lang = 'Teksten er for lang til å komme med i e-posten. Trykk «Kopier teksten» og lim den inn i stedet for det som står i e-posten.';
+        if (m.kortet) visEndringStatus(lang, 'info');
+        else if (E.status.textContent === lang) visEndringStatus('');
+    }
+    // Gir feltene, eller null (med feilmelding og fokus i beskrivelsen) når beskrivelsen mangler
+    function sjekkEndring() {
+        var f = endringFelter();
+        var feil = !f.beskrivelse ? 'Skriv hva dere vil ha endret.'
+            : f.beskrivelse.length > MAKS_BESKRIVELSE ? 'Beskrivelsen kan være høyst ' + heltall(MAKS_BESKRIVELSE) + ' tegn.' : '';
+        E.feil.textContent = feil;
+        if (!feil) { E.tekst.removeAttribute('aria-invalid'); return f; }
+        E.tekst.setAttribute('aria-invalid', 'true');
+        // Hele feltet med etiketten («Beskriv endringen») inn i bildet, ikke bare tekstfeltet (smal skjerm)
+        E.tekst.parentNode.scrollIntoView({ block: 'nearest' });
+        E.tekst.focus({ preventScroll: true });
+        return null;
+    }
+    E.skjema.addEventListener('input', function (e) {
+        if (e.target === E.kopi) return;
+        if (E.feil.textContent && E.tekst.value.trim()) { E.feil.textContent = ''; E.tekst.removeAttribute('aria-invalid'); }
+        // Den kopierte teksten er ikke lenger den samme
+        E.kopi.hidden = true;
+        if (/kopiert|er merket/.test(E.status.textContent)) visEndringStatus('');
+        oppdaterEndring();
+    });
+    E.skjema.addEventListener('change', oppdaterEndring);
+    // Enter i sidefeltet skal ikke sende noe (skjemaet har ingen adresse); det er knappene som gjør jobben
+    E.skjema.addEventListener('submit', function (e) { e.preventDefault(); });
+    E.epost.addEventListener('click', function (e) {
+        var f = sjekkEndring();
+        if (!f) { e.preventDefault(); return; }
+        E.epost.href = endringMailto(f).url;
+        if (!/kortet ned|lang/.test(E.status.textContent)) {
+            visEndringStatus('E-postprogrammet åpnes med teksten. Skjer ingenting, bruk «Kopier teksten» og send den til ' + EPOST + '.', 'info');
+        }
+    });
+    E.kopier.addEventListener('click', function () {
+        var f = sjekkEndring();
+        if (!f) return;
+        var tekst = 'Til: ' + EPOST + '\nEmne: ' + endringEmne() + '\n\n' + endringKropp(f, f.beskrivelse);
+        var ferdig = function () { visEndringStatus('Teksten er kopiert. Lim den inn i en e-post til ' + EPOST + '.'); };
+        // Reserve uten utklippstavle-API: teksten vises i et felt i vinduet og merkes, så den kan kopieres
+        var reserve = function () {
+            E.kopi.value = tekst;
+            E.kopi.hidden = false;
+            E.kopi.focus();
+            E.kopi.select();
+            var ok = false;
+            try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+            if (ok) { E.kopi.hidden = true; E.kopier.focus(); ferdig(); }
+            else visEndringStatus('Teksten under er merket. Kopier den med Ctrl+C (Cmd+C på Mac), eller hold fingeren på teksten og velg Kopier.', 'info');
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(tekst).then(function () { E.kopi.hidden = true; ferdig(); }, reserve);
+        } else {
+            reserve();
+        }
+    });
+    E.el.addEventListener('close', function () {
+        lukketDialog('endring');
+        // Åpnet fra adressen (ingen knapp hadde fokus før): nettleseren har ikke noe å gi fokuset tilbake
+        // til, og det står igjen i det skjulte skjemaet. Da går det til «Be om endring».
+        var a = document.activeElement;
+        if (innlogget && (!a || a === document.body || E.el.contains(a))) $('[data-endring-apne]').focus();
+    });
+    function tomEndring() {
+        E.skjema.reset();
+        E.kopi.hidden = true;
+        E.feil.textContent = '';
+        E.tekst.removeAttribute('aria-invalid');
+        E.sider.replaceChildren();
+        visEndringStatus('');
+        oppdaterEndring();
+    }
 
     // ── Nedlasting (ZIP med CSV-filer, som «Export stats» i Plausible) ──
     // Hentes med fetch og lagres med en midlertidig lenke, så en feil (f.eks. «vent litt») vises
@@ -2796,9 +3537,13 @@
         tegnFiltre();
         tegnMeta(grunn);
         tegnNaa();
+        // Oppsummeringen bare i den enkle visningen: den detaljerte henter listene etter fanene som er valgt,
+        // så der ville teksten blitt kortere eller lengre etter hvilke faner som står åpne
+        if (enkel()) tegnOppsummering(grunn);
         tegnKpi(grunn);
         tegnGrafkort(grunn);
-        tegnPaneler(grunn);
+        if (enkel()) tegnEnkleLister(grunn);
+        else tegnPaneler(grunn);
     }
 
     // ── Hurtigtaster (som i Plausible) ──────────────────────────────────
@@ -2811,12 +3556,13 @@
         // piltaster, Esc, Enter og mellomrom virker som vanlig i menyen.
         var meny = Boolean(t && t.tagName === 'SELECT' && t.hasAttribute('data-hurtigmeny'));
         var iFelt = t && !meny && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName));
-        var vindu = D.el.open || F.el.open;
+        var vindu = D.el.open || F.el.open || E.el.open;
         if (meny && (e.key.length !== 1 || e.key === ' ')) return;
         if (e.key === '/') {
             if (iFelt) return;
             if (D.el.open) { if (!D.sok.hidden) { e.preventDefault(); D.sok.focus(); } return; }
-            if (!vindu) { e.preventDefault(); apneFilter(); }
+            // Filtrer finnes bare i den detaljerte visningen
+            if (!vindu && !enkel()) { e.preventDefault(); apneFilter(); }
             return;
         }
         if (iFelt || vindu) return;
@@ -2836,12 +3582,13 @@
             velgPeriode(TASTER[k]);
             return;
         }
-        if (k === 'x' && harSml(S.periode)) {
+        // Sammenligning og inndeling finnes bare i den detaljerte visningen
+        if (k === 'x' && harSml(S.periode) && !enkel()) {
             e.preventDefault();
             naviger(function (s) { s.sml = s.sml === 'av' ? 'forrige' : 'av'; }, { push: true });
             return;
         }
-        if (k === 'i' && S.periode !== 'sanntid') {
+        if (k === 'i' && S.periode !== 'sanntid' && !enkel()) {
             var info = intervallInfo(grunnlag());
             var iv = grafIntervall(grunnlag());
             if (!info || info.liste.length < 2) return;
@@ -2944,6 +3691,7 @@
     // Årstallet i bunnteksten, som på forsiden (2026 står i HTML-en som reserve)
     document.querySelectorAll('[data-year]').forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
     byggPaneler();
+    byggEnkleLister();
     // /meg svarer 200 { innlogget: false } når ingen er logget inn (ikke 401, så innloggingssiden
     // ikke får en rød feil i konsollen ved hvert besøk). 401 godtas fortsatt som «ikke innlogget».
     api('/meg')

@@ -3,11 +3,13 @@
 ═══════════════════════════════════════════════════════════════════════════
   DOTDEV · KUNDEPORTALEN (dotdev.no/kunde)
 ═══════════════════════════════════════════════════════════════════════════
-  Kunder logger inn her og ser besøksstatistikken for nettsiden sin, med de
-  samme tallene som i Plausible: tallene øverst med endring, grafen, kilder,
-  sider, land og byer, enheter, mål og egenskaper. Kunden kan velge periode
-  (også sanntid og egne datoer), sammenligne, filtrere, se hele listene og
-  laste ned tallene.
+  Kunder logger inn her og ser besøksstatistikken for nettsiden sin. Først
+  kommer den enkle visningen: en kort oppsummering i klartekst, fire tall,
+  grafen og de fem øverste kildene, sidene og målene. «Vis alle detaljer»
+  (visning=detaljert) gir de samme tallene som i Plausible: tallene øverst med
+  endring, grafen, kilder, sider, land og byer, enheter, mål og egenskaper,
+  med valg av periode (også sanntid og egne datoer), sammenligning, filtre,
+  hele listene og nedlasting. «Be om endring» lager en e-post til oss.
 
   • Denne filen er skallet og utseendet. Koden ligger i kunde.js, og tallene
     kommer fra serverfunksjonen netlify/functions/kunde-api.mjs (/api/kunde/…),
@@ -85,7 +87,7 @@
         -webkit-font-smoothing: antialiased;
     }
     a { color: inherit; text-underline-offset: 3px; }
-    button, input, select { font: inherit; color: inherit; }
+    button, input, select, textarea { font: inherit; color: inherit; }
     button { cursor: pointer; }
     [hidden] { display: none !important; }
     :focus-visible { outline: 2px solid var(--c-blue); outline-offset: 3px; border-radius: 4px; }
@@ -205,6 +207,9 @@
     /* ── Dashbordet: toppen ───────────────────────────────────────────── */
     .dash { padding-block: clamp(1.75rem, 3.5vw, 3rem) clamp(3rem, 6vw, 5rem); }
     .dash__topp { margin-bottom: 20px; }
+    .dash__hode { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 24px; }
+    .dash__id { min-width: 0; }
+    .dash__endring { flex: none; margin-bottom: 4px; }
     .dash__navn { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; margin-top: .25rem; }
     .dash h1 { min-width: 0; font-family: var(--f-title); font-size: clamp(2.2rem, 4.4vw, 3.6rem); font-weight: 590; letter-spacing: -.045em; line-height: 1.02; overflow-wrap: anywhere; }
     .dash h1:focus { outline: none; }
@@ -247,6 +252,20 @@
     .pille__fjern:hover { color: var(--c-blue); }
 
     .varsel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: var(--gap); padding: 16px 16px 16px 20px; border-radius: var(--r); background: var(--c-white); box-shadow: inset 4px 0 0 var(--c-error), var(--shadow); }
+
+    /* ── Enkel og detaljert visning (data-visning på dashbordet, styrt av kunde.js) ── */
+    .dash[data-visning="enkel"] .bare-detaljert, .dash[data-visning="detaljert"] .bare-enkel { display: none !important; }
+
+    /* ── Oppsummeringen i klartekst ─────────────────────────────────────── */
+    .sammendrag { margin-top: var(--gap); }
+    .kort .sammendrag__tittel { color: var(--c-blue); font-size: .9375rem; font-weight: 500; letter-spacing: 0; }
+    .sammendrag__tekst {
+        max-width: 70ch; margin-top: .45rem;
+        font-family: var(--f-title); font-size: clamp(1.125rem, 1.45vw, 1.3125rem); font-weight: 500; letter-spacing: -.02em; line-height: 1.45;
+        text-wrap: pretty;
+    }
+    .sammendrag__tekst.henter { margin-top: .45rem; padding: 0; font-family: var(--f-body); font-size: .9375rem; font-weight: 400; letter-spacing: 0; }
+    .sammendrag[aria-busy="true"] .sammendrag__tekst { opacity: .5; transition: opacity .2s; }
 
     /* ── Tallene øverst: én knapp per tall, valgt tall vises i grafen ── */
     .kpier { display: flex; gap: var(--gap); margin-top: var(--gap); }
@@ -380,6 +399,19 @@
     .pst { opacity: 0; transition: opacity .2s; }
     .panel:hover .pst, .panel:focus-within .pst { opacity: 1; }
 
+    /* De korte listene i den enkle visningen: like brede kort ved siden av hverandre, rader uten klikk */
+    .lister--enkel { grid-template-columns: none; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; }
+    .enkelkort { display: flex; flex-direction: column; }
+    .enkelkort .liste__hode { margin-top: 14px; }
+    .rad--fast:hover { background: transparent; }
+    .rad--fast .rad__navn { min-height: 40px; }
+    .enkel-mer {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px;
+        margin-top: var(--gap); padding: 14px 14px 14px 20px; border-radius: var(--r);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-ink) 14%, transparent); color: var(--c-muted); font-size: .9375rem;
+    }
+    .enkel-mer p { flex: 1 1 20rem; }
+
     /* Kartet går fra kant til kant i kortet og står midt i høyden ved siden av et høyere kort */
     .kart { position: relative; margin-top: 16px; }
     .panel__innhold > .kart { display: flex; flex: 1; flex-direction: column; justify-content: center; }
@@ -453,6 +485,30 @@
     .frad__feil { color: var(--c-error); font-size: .875rem; }
     .frad__feil:empty { display: none; }
 
+    /* «Be om endring» */
+    .endring__felt { display: grid; gap: 6px; margin-top: 16px; }
+    .endring__under { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+    .endring__under .endring__teller { margin-left: auto; }
+    .endring__felt:first-child { margin-top: 0; }
+    .endring__felt label { font-size: .9375rem; font-weight: 500; }
+    .endring__valgfritt { color: var(--c-muted); font-weight: 400; }
+    .velger--full { display: flex; }
+    .velger--full select { width: 100%; }
+    /* Samme kant som tekstfeltene (3,4:1 mot hvitt), så alle feltene i skjemaet synes like godt */
+    .endring .velger--hvit select { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-ink) 52%, transparent); }
+    .endring .velger--hvit select:focus { box-shadow: inset 0 0 0 1px var(--c-blue), 0 0 0 3px color-mix(in srgb, var(--c-blue) 18%, transparent); outline: none; }
+    .inndata--tekst { height: auto; min-height: 8.5rem; padding: 10px 12px; line-height: 1.5; resize: vertical; }
+    .endring__teller { color: var(--c-muted); font-size: .8125rem; font-variant-numeric: tabular-nums; text-align: right; }
+    .endring__teller.nesten { color: var(--c-error); }
+    .endring__status { margin-top: 12px; color: var(--c-good); font-size: .9375rem; }
+    .endring__status:empty { display: none; }
+    .endring__status.info { color: var(--c-muted); }
+    .endring__kopi { min-height: 7rem; margin-top: 10px; }
+    /* 16 px i alle feltene i skjemaet, så iPhone ikke zoomer inn når et felt får fokus */
+    .endring .velger select, .endring__kopi { font-size: 1rem; }
+    .endring__notis { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--c-line); color: var(--c-muted); font-size: .875rem; }
+    .endring__notis a { color: var(--c-ink); }
+
     /* ── Om tallene ───────────────────────────────────────────────────── */
     .om { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px 40px; margin-top: clamp(2rem, 4vw, 3rem); padding-top: 1.5rem; border-top: 1px solid var(--c-line); color: var(--c-muted); font-size: .9375rem; }
     .om h2 { margin-bottom: .35rem; color: var(--c-ink); font-family: var(--f-title); font-size: 1rem; font-weight: 600; }
@@ -489,9 +545,15 @@
         .login__kunst { display: none; }
         .om { grid-template-columns: minmax(0, 1fr); }
         .lister { grid-template-columns: minmax(0, 1fr); }
+        .lister--enkel { grid-auto-flow: row; }
         .panel__innhold { min-height: 0; }
     }
     @media (max-width: 640px) {
+        /* Datoene rett under navnet, «Be om endring» etter dem */
+        .dash__topp { display: flex; flex-direction: column; }
+        .dash__hode { display: contents; }
+        .dash__meta { order: 1; }
+        .dash__endring { order: 2; align-self: flex-start; margin: 14px 0 0; }
         .top__tag, .top__epost { display: none; }
         .top__bar { padding-left: 16px; }
         .verktoy { gap: 6px; }
@@ -501,8 +563,9 @@
         .verktoy__gruppe[data-sml-gruppe] { flex-wrap: wrap; }
         .verktoy__gruppe .bryter { flex: 1 1 100%; }
         .verktoy__gruppe .bryter button { flex: 1; }
-        .verktoy__hoyre { margin-left: 0; }
+        .verktoy__hoyre { flex-wrap: wrap; margin-left: 0; }
         .verktoy__hoyre .btn { flex: 1; }
+        .verktoy__hoyre [data-visning-bytt] { flex-basis: 100%; }   /* egen linje; Filtrer og Last ned deler neste */
         .verktoy__status { text-align: left; }
         .datoer__felt { flex: 1 1 8rem; }
         .datoer__felt .inndata { width: 100%; min-width: 0; }
@@ -525,6 +588,9 @@
         .dialog__kropp { padding: 12px 16px 20px; }
         .taster dt { width: 5.5rem; }
         .tabell td:first-child { min-width: 9.5rem; }
+        .endring__knapper .btn { flex: 1 1 auto; }
+        .enkel-mer { padding: 16px; }
+        .enkel-mer .btn { flex: 1 1 auto; }
     }
     @media (max-width: 400px) {
         .liste .rad__lenke { display: none; }      /* lenken står i «Vis alle»; navnet trenger plassen */
@@ -613,18 +679,27 @@
         <!-- ── DASHBORDET ─────────────────────────────────────────────── -->
         <section class="dash" data-vis="dash" aria-labelledby="dash-tittel" hidden>
             <div class="dash__topp">
-                <p class="etikett">Statistikk for</p>
-                <div class="dash__navn">
-                    <!-- Teksten i overskrifter og tabellhoder under er reserve: kunde.js bytter den ut før dashbordet vises -->
-                    <h1 id="dash-tittel" tabindex="-1" data-nettsted>Nettsiden deres</h1>
-                    <button class="naa" type="button" data-naa title="Se sanntid (R)" hidden>
-                        <span class="naa__prikk" aria-hidden="true"></span><span data-naa-tekst></span>
+                <div class="dash__hode">
+                    <div class="dash__id">
+                        <p class="etikett">Statistikk for</p>
+                        <div class="dash__navn">
+                            <!-- Teksten i overskrifter og tabellhoder under er reserve: kunde.js bytter den ut før dashbordet vises -->
+                            <h1 id="dash-tittel" tabindex="-1" data-nettsted>Nettsiden deres</h1>
+                            <button class="naa" type="button" data-naa title="Se sanntid (R)" hidden>
+                                <span class="naa__prikk" aria-hidden="true"></span><span data-naa-tekst></span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Lager en e-post til oss med kundens eget e-postprogram. Ingenting sendes eller lagres her. -->
+                    <button class="btn btn--ghost btn--liten dash__endring" type="button" aria-haspopup="dialog" data-endring-apne>
+                        <svg viewBox="0 0 7 7" aria-hidden="true"><path d="M0 0h7v5H3v1H2v1H1V5H0zM1 1v3h5V1z"/></svg>Be om endring
                     </button>
                 </div>
                 <p class="dash__meta" data-meta></p>
             </div>
 
-            <!-- Periode, sammenligning, filter og nedlasting -->
+            <!-- Periode, sammenligning, filter og nedlasting. Den enkle visningen (standard) viser bare
+                 perioden og «Vis alle detaljer»; det som bare hører til den detaljerte, har klassen bare-detaljert. -->
             <div class="verktoy">
                 <div class="verktoy__gruppe">
                     <span class="velger">
@@ -665,7 +740,7 @@
                         <svg viewBox="0 0 4 7" aria-hidden="true"><path d="M0 0h1v1H0zM1 1h1v1H1zM2 2h1v1H2zM3 3h1v1H3zM2 4h1v1H2zM1 5h1v1H1zM0 6h1v1H0z"/></svg>
                     </button>
                 </div>
-                <div class="verktoy__gruppe" data-sml-gruppe>
+                <div class="verktoy__gruppe bare-detaljert" data-sml-gruppe>
                     <label for="sml-velger">Sammenlign</label>
                     <span class="velger">
                         <select id="sml-velger" data-sml-velger data-hurtigmeny title="Sammenlign (X)">
@@ -681,15 +756,21 @@
                     </div>
                 </div>
                 <div class="verktoy__gruppe verktoy__hoyre">
-                    <button class="btn btn--ghost btn--liten" type="button" aria-haspopup="dialog" title="Filtrer (/)" data-filtrer>
+                    <!-- Bytter mellom enkel og detaljert visning (visning=detaljert i adressen). kunde.js setter teksten og adressen. -->
+                    <a class="btn btn--ghost btn--liten" href="?visning=detaljert" data-visning-bytt>
+                        <svg viewBox="0 0 7 7" aria-hidden="true" data-ikon-detaljert><path d="M0 0h3v3H0zM4 0h3v3H4zM0 4h3v3H0zM4 4h3v3H4z"/></svg>
+                        <svg viewBox="0 0 7 7" aria-hidden="true" data-ikon-enkel hidden><path d="M0 0h7v3H0zM0 4h7v3H0z"/></svg>
+                        <span data-visning-tekst>Vis alle detaljer</span>
+                    </a>
+                    <button class="btn btn--ghost btn--liten bare-detaljert" type="button" aria-haspopup="dialog" title="Filtrer (/)" data-filtrer>
                         <svg viewBox="0 0 7 7" aria-hidden="true"><path d="M0 0h7v1H0zM1 1h5v1H1zM2 2h3v1H2zM3 3h1v4H3z"/></svg>Filtrer
                     </button>
-                    <a class="btn btn--ghost btn--liten" href="/api/kunde/eksport" download data-last-ned>
+                    <a class="btn btn--ghost btn--liten bare-detaljert" href="/api/kunde/eksport" download data-last-ned>
                         <svg viewBox="0 0 7 7" aria-hidden="true"><path d="M3 0h1v4H3zM1 2h1v1H1zM5 2h1v1H5zM2 3h1v1H2zM4 3h1v1H4zM0 6h7v1H0z"/></svg>Last ned
                     </a>
                 </div>
             </div>
-            <p class="verktoy__status" role="status" data-eksport-status></p>
+            <p class="verktoy__status bare-detaljert" role="status" data-eksport-status></p>
 
             <!-- Egne datoer for perioden eller sammenligningen -->
             <form class="datoer" novalidate data-datoer hidden>
@@ -718,6 +799,13 @@
                 <button class="btn btn--ghost btn--liten" type="button" data-prov-igjen>Prøv igjen</button>
             </div>
             <p class="sr-only" role="status" data-status></p>
+
+            <!-- Oppsummeringen i klartekst (bare i den enkle visningen): 2–4 setninger som kunde.js lager av tallene
+                 som allerede er hentet -->
+            <section class="kort sammendrag bare-enkel" aria-labelledby="sammendrag-tittel" data-oppsummering hidden>
+                <h2 class="sammendrag__tittel" id="sammendrag-tittel">Kort fortalt</h2>
+                <p class="sammendrag__tekst" data-oppsummering-tekst></p>
+            </section>
 
             <h2 class="sr-only">Nøkkeltall</h2>
             <div class="kpier" data-kpier></div>
@@ -752,13 +840,21 @@
                 </div>
             </section>
 
-            <!-- Fem paneler med faner, bygget av kunde.js -->
-            <div class="lister" data-paneler></div>
+            <!-- Den enkle visningen: korte lister (de fem øverste), bygget av kunde.js -->
+            <div class="lister lister--enkel bare-enkel" data-enkle-lister></div>
+            <div class="enkel-mer bare-enkel">
+                <p>Kart, enheter, alle listene, filtre, sammenligning og nedlasting finner dere i den detaljerte visningen.</p>
+                <a class="btn btn--ghost btn--liten" href="?visning=detaljert" data-visning-lenke>Vis alle detaljer</a>
+            </div>
+
+            <!-- Den detaljerte visningen: fem paneler med faner, bygget av kunde.js -->
+            <div class="lister bare-detaljert" data-paneler></div>
 
             <div class="om">
                 <div>
                     <h2>Om tallene</h2>
                     <p>Tallene kommer fra Plausible, som teller besøk uten cookies og lagrer alt i EU. Ingen enkeltpersoner kan kjennes igjen. Den samme personen telles som ny besøkende hver dag, og noen som blokkerer reklame, blir ikke telt. Tallene kan derfor avvike litt fra andre verktøy.</p>
+                    <p>Den enkle visningen viser det viktigste. Under «Vis alle detaljer» finner dere resten: kart, enheter, hele listene, filtre, sammenligning og nedlasting. Konverteringer er alle målene til sammen, uten besøk på sider som ikke finnes.</p>
                     <p>Endringen under hvert tall er mot perioden rett før, med samme ukedager, slik Plausible regner den. Velger dere en sammenligning, vises endringen i tallene øverst og i grafen, ikke for hver rad i listene. Importerte tall er alltid med der Plausible kan bruke dem.</p>
                     <p>Noe av det Plausible kan vise, finnes ikke i API-et vi henter tallene fra, og er derfor ikke med her: trakter, brukerreiser, Google-søkeord, notater i grafen, lagrede segmenter, minuttgraf (i sanntid og for i dag), ikoner for nettlesere og kilder, og valget om å skjule importerte tall.</p>
                     <details class="taster">
@@ -769,10 +865,10 @@
                             <div><dt>M · P</dt><dd>Denne og forrige måned</dd></div>
                             <div><dt>Y · S · L · A</dt><dd>I år, siste 6 og 12 måneder, all tid</dd></div>
                             <div><dt>C</dt><dd>Velg datoer</dd></div>
-                            <div><dt>X</dt><dd>Sammenligning av eller på</dd></div>
                             <div><dt>← · →</dt><dd>Forrige og neste dag, måned eller år</dd></div>
-                            <div><dt>I</dt><dd>Bytt inndeling i grafen</dd></div>
-                            <div><dt>/</dt><dd>Filtrer, eller søk i en hel liste</dd></div>
+                            <div><dt>X</dt><dd>Sammenligning av eller på (detaljert visning)</dd></div>
+                            <div><dt>I</dt><dd>Bytt inndeling i grafen (detaljert visning)</dd></div>
+                            <div><dt>/</dt><dd>Filtrer, eller søk i en hel liste (detaljert visning)</dd></div>
                             <div><dt>Esc</dt><dd>Lukk vinduet, eller fjern alle filtre</dd></div>
                         </dl>
                         <button class="lenkeknapp" type="button" data-taster>Slå av hurtigtastene</button>
@@ -780,7 +876,7 @@
                 </div>
                 <div>
                     <h2>Spørsmål?</h2>
-                    <p>Skriv til <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>, så hjelper vi dere å forstå tallene.</p>
+                    <p>Skriv til <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>, så hjelper vi dere å forstå tallene. Vil dere endre noe på nettsiden, bruk «Be om endring» øverst.</p>
                 </div>
             </div>
 
@@ -834,6 +930,62 @@
                         <button class="btn btn--ghost btn--liten" type="button" data-filter-avbryt>Avbryt</button>
                         <button class="btn btn--liten" type="submit">Bruk filter</button>
                     </div>
+                </form>
+            </dialog>
+
+            <!-- «Be om endring»: skjemaet lager en ferdig e-post til kontakt@dotdev.no (mailto) eller en tekst å
+                 kopiere. Ingenting sendes til serveren, og ingenting lagres; teksten står bare i skjemaet til
+                 siden lukkes (og tømmes ved utlogging). -->
+            <dialog class="dialog dialog--smal" aria-labelledby="endring-tittel" aria-describedby="endring-under" data-endring>
+                <div class="dialog__topp">
+                    <div>
+                        <h2 id="endring-tittel">Be om endring</h2>
+                        <p class="dialog__under" id="endring-under">Fortell hva dere vil ha endret på <span data-endring-nettsted>nettsiden</span>. Vi lager en ferdig e-post til oss, som dere sender selv.</p>
+                    </div>
+                    <button class="ikonknapp dialog__lukk" type="button" aria-label="Lukk" data-lukk>×</button>
+                </div>
+                <form class="dialog__kropp endring" novalidate data-endring-skjema>
+                    <div class="endring__felt">
+                        <label for="endring-type">Hva gjelder det?</label>
+                        <span class="velger velger--hvit velger--full">
+                            <select id="endring-type" data-endring-type>
+                                <option>Tekst eller bilder</option>
+                                <option>Ny side eller funksjon</option>
+                                <option>Noe virker ikke</option>
+                                <option>Annet</option>
+                            </select>
+                        </span>
+                    </div>
+                    <div class="endring__felt">
+                        <label for="endring-side">Hvilken side? <span class="endring__valgfritt">(valgfritt)</span></label>
+                        <input class="inndata" id="endring-side" type="text" list="endring-sider" maxlength="120" autocomplete="off" spellcheck="false" placeholder="F.eks. forsiden eller /meny" data-endring-side>
+                        <datalist id="endring-sider" data-endring-sider></datalist>
+                    </div>
+                    <div class="endring__felt">
+                        <label for="endring-beskrivelse">Beskriv endringen</label>
+                        <textarea class="inndata inndata--tekst" id="endring-beskrivelse" rows="6" maxlength="1500" required aria-describedby="endring-feil endring-teller" data-endring-beskrivelse></textarea>
+                        <div class="endring__under">
+                            <p class="frad__feil" id="endring-feil" role="alert" data-endring-feil></p>
+                            <p class="endring__teller" id="endring-teller" data-endring-teller>0 av 1500 tegn</p>
+                        </div>
+                    </div>
+                    <div class="endring__felt">
+                        <label for="endring-haster">Hvor haster det?</label>
+                        <span class="velger velger--hvit velger--full">
+                            <select id="endring-haster" data-endring-haster>
+                                <option>Ikke så viktig</option>
+                                <option>I løpet av uka</option>
+                                <option>Haster</option>
+                            </select>
+                        </span>
+                    </div>
+                    <div class="dialog__knapper endring__knapper">
+                        <button class="btn btn--ghost btn--liten" type="button" data-endring-kopier>Kopier teksten</button>
+                        <a class="btn btn--liten" href="mailto:kontakt@dotdev.no" data-endring-epost>Åpne e-post</a>
+                    </div>
+                    <p class="endring__status" role="status" data-endring-status></p>
+                    <textarea class="inndata inndata--tekst endring__kopi" readonly aria-label="Teksten til e-posten" data-endring-kopi hidden></textarea>
+                    <p class="endring__notis">Eller send en e-post til <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a>.</p>
                 </form>
             </dialog>
         </section>
