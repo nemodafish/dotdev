@@ -19,7 +19,8 @@
 //    korte lister, og den detaljerte (visning=detaljert) med alt som i Plausible. Den enkle ber bare
 //    om det den viser (9 Plausible-kall første gang mot 11), og uten sammenligning, så svarene deles
 //    med den detaljerte. Oppsummeringen lages i nettleseren av tallene som allerede er hentet.
-//  • «Be om endring» lager en e-post (mailto:) eller en tekst å kopiere; ingenting sendes eller lagres.
+//  • Filtre legges til ved å trykke på en rad (eller et land i kartet), og vises som piller med ×.
+//    Andre filtre (er ikke, inneholder, flere verdier) kan stå i adressen (f=…) og vises på samme måte.
 (function () {
     'use strict';
 
@@ -554,48 +555,31 @@
     var ALLE_OPS = ['is', 'is_not', 'contains', 'contains_not'];
     var ER_OPS = ['is', 'is_not'];
     var OP_NAVN = { is: 'er', is_not: 'er ikke', contains: 'inneholder', contains_not: 'inneholder ikke' };
-    // Portalnavn → etikett, lovlige operatorer og listen forslagene hentes fra
+    // Portalnavn → etikett, lovlige operatorer og (for koder) hvordan verdien må se ut
     var DIMS = {
-        side: { etikett: 'Side', ops: ALLE_OPS, rapport: 'sider' },
-        inngang: { etikett: 'Inngangsside', ops: ALLE_OPS, rapport: 'inngang' },
-        utgang: { etikett: 'Utgangsside', ops: ALLE_OPS, rapport: 'utgang' },
-        vert: { etikett: 'Vertsnavn', ops: ALLE_OPS, rapport: 'sider_url' },
-        kilde: { etikett: 'Kilde', ops: ALLE_OPS, rapport: 'kilder' },
-        kanal: { etikett: 'Kanal', ops: ALLE_OPS, rapport: 'kanaler' },
-        henvisning: { etikett: 'Henvisning', ops: ALLE_OPS, rapport: 'henvisninger' },
-        utm_medium: { etikett: 'UTM-medium', ops: ALLE_OPS, rapport: 'utm_medium' },
-        utm_source: { etikett: 'UTM-kilde', ops: ALLE_OPS, rapport: 'utm_source' },
-        utm_campaign: { etikett: 'UTM-kampanje', ops: ALLE_OPS, rapport: 'utm_campaign' },
-        utm_term: { etikett: 'UTM-begrep', ops: ALLE_OPS, rapport: 'utm_term' },
-        utm_content: { etikett: 'UTM-innhold', ops: ALLE_OPS, rapport: 'utm_content' },
-        land: { etikett: 'Land', ops: ER_OPS, rapport: 'kart', monster: /^[A-Z]{2}$/ },
-        region: { etikett: 'Region', ops: ER_OPS, rapport: 'regioner', monster: /^[A-Z]{2}-[A-Z0-9]{1,3}$/ },
-        by: { etikett: 'By', ops: ER_OPS, rapport: 'byer', monster: /^[1-9]\d{0,9}$/ },
-        skjerm: { etikett: 'Skjermstørrelse', ops: ER_OPS, faste: ['Desktop', 'Laptop', 'Tablet', 'Mobile'] },
-        nettleser: { etikett: 'Nettleser', ops: ALLE_OPS, rapport: 'nettlesere' },
-        nettleserversjon: { etikett: 'Nettleserversjon', ops: ALLE_OPS, rapport: 'nettleserversjoner' },
-        os: { etikett: 'Operativsystem', ops: ALLE_OPS, rapport: 'os' },
-        osversjon: { etikett: 'Versjon av operativsystem', ops: ALLE_OPS, rapport: 'osversjoner' },
+        side: { etikett: 'Side', ops: ALLE_OPS },
+        inngang: { etikett: 'Inngangsside', ops: ALLE_OPS },
+        utgang: { etikett: 'Utgangsside', ops: ALLE_OPS },
+        vert: { etikett: 'Vertsnavn', ops: ALLE_OPS },
+        kilde: { etikett: 'Kilde', ops: ALLE_OPS },
+        kanal: { etikett: 'Kanal', ops: ALLE_OPS },
+        henvisning: { etikett: 'Henvisning', ops: ALLE_OPS },
+        utm_medium: { etikett: 'UTM-medium', ops: ALLE_OPS },
+        utm_source: { etikett: 'UTM-kilde', ops: ALLE_OPS },
+        utm_campaign: { etikett: 'UTM-kampanje', ops: ALLE_OPS },
+        utm_term: { etikett: 'UTM-begrep', ops: ALLE_OPS },
+        utm_content: { etikett: 'UTM-innhold', ops: ALLE_OPS },
+        land: { etikett: 'Land', ops: ER_OPS, monster: /^[A-Z]{2}$/ },
+        region: { etikett: 'Region', ops: ER_OPS, monster: /^[A-Z]{2}-[A-Z0-9]{1,3}$/ },
+        by: { etikett: 'By', ops: ER_OPS, monster: /^[1-9]\d{0,9}$/ },
+        skjerm: { etikett: 'Skjermstørrelse', ops: ER_OPS },
+        nettleser: { etikett: 'Nettleser', ops: ALLE_OPS },
+        nettleserversjon: { etikett: 'Nettleserversjon', ops: ALLE_OPS },
+        os: { etikett: 'Operativsystem', ops: ALLE_OPS },
+        osversjon: { etikett: 'Versjon av operativsystem', ops: ALLE_OPS },
         mal: { etikett: 'Mål', ops: ['is', 'is_not', 'contains'] }     // «er ikke» = has_not_done hos Plausible
     };
-    var GRUPPER = [
-        { id: 'side', etikett: 'Side', dims: ['side', 'inngang', 'utgang'] },
-        { id: 'vert', etikett: 'Vertsnavn', dims: ['vert'] },
-        { id: 'kilde', etikett: 'Kilde', dims: ['kilde', 'kanal', 'henvisning'] },
-        { id: 'utm', etikett: 'UTM', dims: ['utm_medium', 'utm_source', 'utm_campaign', 'utm_term', 'utm_content'] },
-        { id: 'sted', etikett: 'Sted', dims: ['land', 'region', 'by'] },
-        { id: 'skjerm', etikett: 'Skjermstørrelse', dims: ['skjerm'] },
-        { id: 'nettleser', etikett: 'Nettleser', dims: ['nettleser', 'nettleserversjon'] },
-        { id: 'os', etikett: 'Operativsystem', dims: ['os', 'osversjon'] },
-        { id: 'mal', etikett: 'Mål', dims: ['mal'] },
-        { id: 'egenskap', etikett: 'Egenskap', dims: [] }
-    ];
     var dimInfo = function (dim) { return erEgenskap(dim) ? { etikett: 'Egenskapen ' + dim.slice(9), ops: ALLE_OPS } : DIMS[dim]; };
-    function gruppeFor(dim) {
-        if (erEgenskap(dim)) return 'egenskap';
-        for (var i = 0; i < GRUPPER.length; i++) if (GRUPPER[i].dims.indexOf(dim) >= 0) return GRUPPER[i].id;
-        return null;
-    }
     // Verdien i et filter slik den vises (land og steder med navn, kanaler på norsk)
     function filterVerdiTekst(dim, v) {
         var e = S.etiketter[dim + '|' + v];
@@ -804,9 +788,8 @@
             sml: 'av', smlFra: null, smlTil: null, ukedag: '1',
             filtre: [], etiketter: {}, graf: 'visitors', intervall: null,
             fane: { kilder: null, utm: null, sider: null, url: false, sted: null, enheter: null, handlinger: null, egenskap: null },
-            detaljer: null, filterGruppe: null,
-            // 'enkel' (standard) eller 'detaljert' (visning=detaljert i adressen); endring: «Be om endring» er åpent
-            visning: 'enkel', endring: false
+            detaljer: null,
+            visning: 'enkel'    // 'enkel' (standard) eller 'detaljert' (visning=detaljert i adressen)
         };
     }
     var enkel = function () { return S.visning !== 'detaljert'; };
@@ -895,10 +878,7 @@
                 sorter: /^(navn|[a-z_]{1,30}):(asc|desc)$/.test(sorter || '') ? sorter : null
             };
         }
-        var gr = sp.get('filter');
-        if (gr === 'velg' || GRUPPER.some(function (x) { return x.id === gr && gruppeTilgjengelig(x); })) s.filterGruppe = gr;
         if (sp.get('visning') === 'detaljert') s.visning = 'detaljert';
-        s.endring = sp.get('endring') === '1' && !s.detaljer && !s.filterGruppe;
         normaliser(s);
         return s;
     }
@@ -932,8 +912,6 @@
             if (s.detaljer.sok) sp.set('sok', s.detaljer.sok);
             if (s.detaljer.sorter) sp.set('sortering', s.detaljer.sorter);
         }
-        if (s.filterGruppe) sp.set('filter', s.filterGruppe);
-        if (s.endring) sp.set('endring', '1');
         if (s.visning === 'detaljert') sp.set('visning', 'detaljert');
         if (!tasterPa) sp.set('taster', '0');
         var q = sp.toString();
@@ -1137,7 +1115,7 @@
         var erStandard = S.periode === standard.periode && !S.dato && S.sml === 'av' && !S.filtre.length;
         if (!erStandard) {
             naviger(function (s) {
-                s.periode = STANDARD_PERIODE; s.dato = null; s.sml = 'av'; s.ukedag = '1'; s.filtre = []; s.detaljer = null; s.filterGruppe = null;
+                s.periode = STANDARD_PERIODE; s.dato = null; s.sml = 'av'; s.ukedag = '1'; s.filtre = []; s.detaljer = null;
             });
         }
         visVarsel((melding ? melding + ' ' : '') + (erStandard ? 'Last siden på nytt.' : 'Du ser standardvisningen nå.'));
@@ -1167,8 +1145,7 @@
         oppsett = null; altStart = null; nettsted = '';
         S = nyTilstand();
         clearTimeout(tidtaker); tidtaker = 0;
-        [D.el, F.el, E.el].forEach(function (d) { if (d.open) d.close(); });
-        tomEndring();               // teksten i «Be om endring» skal ikke stå igjen til neste innlogging
+        if (D.el.open) D.el.close();
         nullstill();
         $('[data-varsel]').hidden = true;
         felt.passord.type = 'password';
@@ -1532,7 +1509,7 @@
 
         // Enkel / detaljert: én lenke i verktøylinja (og én nederst i den enkle), med adressen til den andre
         vis.dash.setAttribute('data-visning', S.visning);
-        var annen = adresseFra(Object.assign({}, S, { visning: enkel() ? 'detaljert' : 'enkel', detaljer: null, filterGruppe: null, endring: false }));
+        var annen = adresseFra(Object.assign({}, S, { visning: enkel() ? 'detaljert' : 'enkel', detaljer: null }));
         var bytt = $('[data-visning-bytt]');
         bytt.href = annen;
         bytt.title = enkel() ? 'Alle tallene, med kart, filtre, sammenligning og nedlasting' : 'Bare det viktigste';
@@ -1596,10 +1573,12 @@
         S.filtre.forEach(function (f, i) {
             var tekst = filterTekst(f);
             var li = lag('li', 'pille');
-            var rediger = knapp('pille__tekst', tekst);
-            rediger.title = 'Endre filteret: ' + tekst;
-            rediger.setAttribute('data-pille', String(i));
-            rediger.addEventListener('click', function () { apneFilter(gruppeFor(f.dim)); });
+            // Bare en etikett (ingen knapp): × fjerner filteret. tabindex=-1 så fokus kan settes hit når
+            // et filter legges til fra en rad (skjermlesere hører da filteret), men den er ikke med i Tab-rekkefølgen.
+            var etikett = lag('span', 'pille__tekst', tekst);
+            etikett.title = tekst;
+            etikett.tabIndex = -1;
+            etikett.setAttribute('data-pille', String(i));
             var fjern = knapp('pille__fjern', '×');
             fjern.setAttribute('aria-label', 'Fjern filteret: ' + tekst);
             fjern.title = 'Fjern filteret';
@@ -1607,21 +1586,20 @@
                 // Sammenlign på operator og dimensjon (unike), ikke på objektet: S bygges på nytt
                 // fra adressen ved tilbake/fram og når et vindu lukkes, mens pillene kan stå
                 naviger(function (s) { s.filtre = s.filtre.filter(function (x) { return !(x.op === f.op && x.dim === f.dim); }); }, { push: true });
-                var neste = $$('.pille__tekst')[Math.min(i, S.filtre.length - 1)];
-                (neste || filterFokus()).focus();
+                var neste = $$('.pille__fjern')[Math.min(i, S.filtre.length - 1)];
+                (neste || periodeVelger).focus();
             });
-            li.append(rediger, fjern);
+            li.append(etikett, fjern);
             ul.append(li);
         });
         $('[data-fjern-alle]').hidden = S.filtre.length < 2;
     }
-    // Hvor fokus går når en filterknapp forsvinner: «Filtrer», som ikke finnes i den enkle visningen. Der
-    // går det til perioden, ikke til «Vis alle detaljer» (så et trykk til ikke bytter visning).
-    var filterFokus = function () { return enkel() ? $('#periode-velger') : $('[data-filtrer]'); };
+    // Når det siste filteret forsvinner, går fokus til perioden, ikke til «Vis alle detaljer» / «Enkel
+    // visning» (så et trykk til ikke bytter visning)
     function fjernAlleFiltre() {
         if (!S.filtre.length) return;
         naviger(function (s) { s.filtre = []; }, { push: true });
-        filterFokus().focus();
+        periodeVelger.focus();
     }
     $('[data-fjern-alle]').addEventListener('click', fjernAlleFiltre);
 
@@ -2973,514 +2951,32 @@
         if (e.key === 'Escape' && D.sok.value) { e.preventDefault(); D.sok.value = ''; D.sok.dispatchEvent(new Event('input')); }
     });
 
-    // Lukket med Esc, ×, «Avbryt», bakgrunnen eller tilbake-knappen: adressen følger etter.
+    // Lukket med Esc, ×, bakgrunnen eller tilbake-knappen: adressen følger etter.
     // Vinduet ble åpnet som et eget steg i historikken, så det lukkes med «tilbake».
     var tilbakeTid = 0;
-    function lukketDialog(felt) {
-        if (!S[felt] || tilbakeTid) return;
-        var navn = felt === 'detaljer' ? 'detaljer' : felt === 'endring' ? 'endring' : 'filter';
-        if (history.state && history.state.dialog === navn) {
+    function lukketDialog() {
+        if (!S.detaljer || tilbakeTid) return;
+        if (history.state && history.state.dialog === 'detaljer') {
             tilbakeTid = setTimeout(function () { tilbakeTid = 0; }, 1500);   // i tilfelle popstate aldri kommer
             history.back();
         } else {
-            naviger(function (s) { s[felt] = felt === 'endring' ? false : null; }, { lukk: true, bareDialog: true });
+            naviger(function (s) { s.detaljer = null; }, { lukk: true, bareDialog: true });
         }
     }
-    function lukkVindu(d) {
-        if (d.open) d.close();
-        lukketDialog(d === D.el ? 'detaljer' : d === E.el ? 'endring' : 'filterGruppe');
+    function lukkVindu() {
+        if (D.el.open) D.el.close();
+        lukketDialog();
     }
-    D.el.addEventListener('close', function () { clearTimeout(sokTid); D.q = null; lukketDialog('detaljer'); });
-    $$('[data-lukk]').forEach(function (b) { b.addEventListener('click', function () { lukkVindu(b.closest('dialog')); }); });
-    [D.el, $('[data-filterdialog]'), $('[data-endring]')].forEach(function (d) {
-        // Esc: lukk selv, så adressen oppdateres med en gang
-        d.addEventListener('cancel', function (e) { e.preventDefault(); lukkVindu(d); });
-        // Klikk på bakgrunnen utenfor vinduet lukker det
-        d.addEventListener('click', function (e) { if (e.target === d) lukkVindu(d); });
-    });
+    D.el.addEventListener('close', function () { clearTimeout(sokTid); D.q = null; lukketDialog(); });
+    $('[data-lukk]', D.el).addEventListener('click', lukkVindu);
+    // Esc: lukk selv, så adressen oppdateres med en gang
+    D.el.addEventListener('cancel', function (e) { e.preventDefault(); lukkVindu(); });
+    // Klikk på bakgrunnen utenfor vinduet lukker det
+    D.el.addEventListener('click', function (e) { if (e.target === D.el) lukkVindu(); });
 
     function synkDialoger() {
         if (!innlogget) return;
         synkDetaljer();
-        synkFilter();
-        synkEndring();
-    }
-
-    // ── Filtervinduet ───────────────────────────────────────────────────
-    var F = {
-        el: $('[data-filterdialog]'), skjema: $('[data-filterskjema]'), grupper: $('[data-filter-grupper]'), rader: $('[data-filter-rader]'),
-        feil: $('[data-filter-feil]'), gruppe: null, forslag: {}, radNr: 0
-    };
-    function gruppeTilgjengelig(g) {
-        if (g.id === 'mal') return Boolean(oppsett && oppsett.mal.length);
-        if (g.id === 'egenskap') return egenskapsvalg().length > 0;
-        return true;
-    }
-    // Egenskapene i filtervinduet: nettstedets egne, pluss nøkler som allerede står i et filter
-    // (f.eks. url fra listen «Lenker ut»)
-    function egenskapsvalg() {
-        if (!oppsett) return [];
-        var liste = oppsett.egenskaper.slice();
-        S.filtre.forEach(function (f) { if (erEgenskap(f.dim) && liste.indexOf(f.dim.slice(9)) < 0) liste.push(f.dim.slice(9)); });
-        return liste;
-    }
-    function apneFilter(gruppe) {
-        if (F.el.open) return;
-        naviger(function (s) { s.filterGruppe = gruppe || 'velg'; }, { push: true, dialog: 'filter', bareDialog: true });
-    }
-    $('[data-filtrer]').addEventListener('click', function () { apneFilter(); });
-
-    function synkFilter() {
-        if (!S.filterGruppe) { if (F.el.open) F.el.close(); F.gruppe = null; return; }
-        if (F.gruppe !== S.filterGruppe || !F.el.open) byggFilter(S.filterGruppe);
-        if (!F.el.open) {
-            F.el.showModal();
-            var forste = $('.grupper button:not([hidden]), .frad select, .frad input', F.el);
-            if (forste) forste.focus();
-        }
-    }
-
-    function byggFilter(gruppeId) {
-        F.gruppe = gruppeId;
-        F.feil.textContent = '';
-        F.rader.replaceChildren();
-        F.grupper.replaceChildren();
-        var velg = gruppeId === 'velg';
-        F.grupper.hidden = !velg;
-        $('[data-filter-knapper]').hidden = velg;
-        $('[data-filter-under]').textContent = periodeEtikett();
-        if (velg) {
-            $('[data-filter-tittel]').textContent = 'Filtrer';
-            GRUPPER.forEach(function (g) {
-                if (!gruppeTilgjengelig(g)) return;
-                var b = knapp(null, g.etikett);
-                b.addEventListener('click', function () {
-                    naviger(function (s) { s.filterGruppe = g.id; }, { bareDialog: true });
-                    var forste = $('.frad select, .frad input', F.el);
-                    if (forste) forste.focus();
-                });
-                F.grupper.append(b);
-            });
-            return;
-        }
-        var g = GRUPPER.filter(function (x) { return x.id === gruppeId; })[0];
-        $('[data-filter-tittel]').textContent = 'Filtrer på ' + (g.id === 'utm' ? 'UTM' : g.etikett.toLowerCase());
-        if (g.id === 'egenskap') {
-            var eksisterende = S.filtre.filter(function (f) { return erEgenskap(f.dim); });
-            var forsteNokkel = egenskapsvalg()[0];
-            (eksisterende.length ? eksisterende : [null]).forEach(function (f) { F.rader.append(filterRad(f ? f.dim : 'egenskap:' + forsteNokkel, f)); });
-            var mer = knapp('lenkeknapp', 'Legg til en egenskap til');
-            mer.addEventListener('click', function () {
-                F.rader.insertBefore(filterRad('egenskap:' + forsteNokkel, null), mer);
-            });
-            F.rader.append(mer);
-        } else {
-            g.dims.forEach(function (dim) {
-                var eksisterende = S.filtre.filter(function (f) { return f.dim === dim; });
-                (eksisterende.length ? eksisterende : [null]).forEach(function (f) { F.rader.append(filterRad(dim, f)); });
-            });
-        }
-        hentForslag(g);
-    }
-
-    // Én rad: navn (eller egenskapsliste), operator, verdier med forslag, og «Legg til verdi»
-    function filterRad(dim, f) {
-        var nr = ++F.radNr;
-        var rad = lag('div', 'frad');
-        rad.setAttribute('data-dim', dim);
-        var topp = lag('div', 'frad__topp');
-        var opId = 'op-' + nr;
-        if (erEgenskap(dim)) {
-            var nokkelVelger = lagVelger('Egenskap', egenskapsvalg().map(function (e) { return [e, e]; }), function (v) {
-                rad.setAttribute('data-dim', 'egenskap:' + v);
-                oppdaterDatalist(rad);
-                hentForslag(null, [forslagDel('egenskap:' + v)]);
-            });
-            nokkelVelger.select.value = dim.slice(9);
-            nokkelVelger.classList.add('frad__navn');
-            topp.append(nokkelVelger);
-        } else {
-            // Synlig navn; operatorlisten har sitt eget navn («Land, hvordan») for skjermlesere
-            var navn = lag('span', 'frad__navn', DIMS[dim].etikett);
-            navn.setAttribute('aria-hidden', 'true');
-            topp.append(navn);
-        }
-        var info = dimInfo(dim);
-        var opBoks = lagVelger('Hvordan', info.ops.map(function (o) { return [o, OP_NAVN[o]]; }), function () {});
-        opBoks.select.id = opId;
-        $('label', opBoks).htmlFor = opId;
-        if (!erEgenskap(dim)) $('label', opBoks).textContent = DIMS[dim].etikett + ', hvordan';
-        opBoks.select.value = f ? f.op : 'is';
-        opBoks.select.setAttribute('data-op', '');
-        topp.append(opBoks);
-        rad.append(topp);
-        var verdier = lag('div', 'frad__verdier');
-        verdier.setAttribute('data-verdier', '');
-        rad.append(verdier);
-        var liste = document.createElement('datalist');
-        liste.id = 'forslag-' + nr;
-        rad.append(liste);
-        var feltNavn = (erEgenskap(dim) ? 'Egenskap' : DIMS[dim].etikett) + ', verdi';
-        (f ? f.verdier : ['']).forEach(function (v) { verdier.append(verdiFelt(rad, liste.id, visVerdi(dim, v), feltNavn)); });
-        rad.feltNavn = feltNavn;
-        var mer = knapp('lenkeknapp', 'Legg til verdi');
-        mer.title = 'Flere verdier betyr «eller»';
-        mer.addEventListener('click', function () {
-            var alle = $$('input', verdier);
-            if (alle.length >= 10) return;
-            var ny = verdiFelt(rad, liste.id, '', feltNavn);
-            verdier.append(ny);
-            $('input', ny).focus();
-        });
-        rad.append(mer);
-        rad.append(lag('p', 'frad__feil'));
-        oppdaterDatalist(rad);
-        return rad;
-    }
-    function verdiFelt(rad, listeId, verdi, feltNavn) {
-        var boks = lag('div', 'frad__verdi');
-        var inp = document.createElement('input');
-        inp.className = 'inndata';
-        inp.type = 'text';
-        inp.value = verdi;
-        inp.maxLength = 300;
-        inp.autocomplete = 'off';
-        inp.spellcheck = false;
-        inp.setAttribute('list', listeId);
-        inp.setAttribute('aria-label', feltNavn);
-        inp.setAttribute('data-verdi', '');
-        var fjern = knapp('ikonknapp', '×');
-        fjern.setAttribute('aria-label', 'Fjern verdien for ' + feltNavn.replace(/, verdi$/, '').toLowerCase());
-        fjern.addEventListener('click', function () {
-            var alle = $$('[data-verdi]', rad);
-            if (alle.length > 1) boks.remove(); else inp.value = '';
-            ($('[data-verdi]', rad) || inp).focus();
-        });
-        boks.append(inp, fjern);
-        return boks;
-    }
-    // Verdien slik den står i feltet: navn for land, regioner og byer (koden finnes igjen ved «Bruk filter»)
-    function visVerdi(dim, v) {
-        if (!v) return '';
-        if (dim === 'land') return land(v, v);
-        if (dim === 'region' || dim === 'by') return S.etiketter[dim + '|' + v] || v;
-        return v;
-    }
-
-    // Forslagene: kompakte lister for gruppen (uten filtrene i gruppen selv), én forespørsel
-    function forslagDel(dim) {
-        if (erEgenskap(dim)) return 'liste:egenskap:' + encodeURIComponent(dim.slice(9));
-        var info = DIMS[dim];
-        return info && info.rapport ? 'liste:' + info.rapport : null;
-    }
-    function forslagGrunn(gruppe) {
-        var dims = gruppe ? gruppe.dims : [];
-        var uten = S.filtre.filter(function (f) { return gruppe && gruppe.id === 'egenskap' ? !erEgenskap(f.dim) : dims.indexOf(f.dim) < 0; });
-        return apiParametre(S, uten).toString();
-    }
-    function hentForslag(gruppe, ekstra) {
-        var g = gruppe || GRUPPER.filter(function (x) { return x.id === F.gruppe; })[0];
-        if (!g) return;
-        var grunn = forslagGrunn(g);
-        var deler = ekstra || [];
-        if (!ekstra) {
-            $$('.frad', F.rader).forEach(function (rad) {
-                var d = forslagDel(rad.getAttribute('data-dim'));
-                if (d && deler.indexOf(d) < 0) deler.push(d);
-            });
-        }
-        F.grunn = grunn;
-        hentDeler(grunn, deler, false).then(function () {
-            if (!F.el.open || F.grunn !== grunn) return;
-            $$('.frad', F.rader).forEach(oppdaterDatalist);
-        });
-    }
-    // Forslag til én dimensjon: [{ verdi (i feltet), kode (i filteret), etikett }]
-    function forslagFor(dim) {
-        if (dim === 'mal') return oppsett.mal.map(function (m) { return { verdi: m.navn, kode: m.navn, etikett: oversett(MAL, m.navn) }; });
-        if (dim === 'skjerm') return DIMS.skjerm.faste.map(function (v) { return { verdi: v, kode: v, etikett: ENHETER[v] }; });
-        var del = forslagDel(dim);
-        var x = del && lager.get(nokkel(F.grunn || '', del));
-        if (!x) return [];
-        var rapport = del.slice(6);
-        var ut = [], sett = {};
-        (x.verdi.rader || []).forEach(function (r) {
-            var o;
-            if (dim === 'vert') {
-                var vert = r.navn.slice(0, r.navn.length - (r.filter ? r.filter.verdi.length : 0));
-                o = { verdi: vert, kode: vert };
-            } else if (dim === 'land' || dim === 'region' || dim === 'by') {
-                var navn = dim === 'land' ? land(r.kode, r.navn) : r.navn;
-                o = { verdi: navn, kode: r.filter.verdi, etikett: r.filter.verdi };
-            } else {
-                var vis = radNavn(rapport, r);
-                o = { verdi: r.filter ? r.filter.verdi : r.navn, kode: r.filter ? r.filter.verdi : r.navn, etikett: vis !== r.navn ? vis : null };
-            }
-            if (o.verdi && !sett[o.verdi]) { sett[o.verdi] = true; ut.push(o); }
-        });
-        return ut;
-    }
-    function oppdaterDatalist(rad) {
-        var dim = rad.getAttribute('data-dim');
-        var liste = $('datalist', rad);
-        F.forslag[dim] = forslagFor(dim);
-        liste.replaceChildren();
-        F.forslag[dim].forEach(function (o) {
-            var opt = document.createElement('option');
-            opt.value = o.verdi;
-            if (o.etikett) opt.label = o.etikett;
-            liste.append(opt);
-        });
-    }
-    // Feltverdien → verdien i filteret (navn på land/regioner/byer blir koder). null = ugyldig.
-    function filterVerdi(dim, tekst) {
-        var info = dimInfo(dim);
-        if (!info.monster) return tekst;
-        if (info.monster.test(tekst)) return tekst;
-        var liten = tekst.toLowerCase();
-        var treff = (F.forslag[dim] || []).filter(function (o) { return o.verdi.toLowerCase() === liten; })[0];
-        if (treff) return treff.kode;
-        var kjent = Object.keys(S.etiketter).filter(function (k) { return k.indexOf(dim + '|') === 0 && S.etiketter[k].toLowerCase() === liten; })[0];
-        if (kjent) return kjent.slice(dim.length + 1);
-        if (dim === 'land' && landnavn) {
-            // Alle landkoder, så kunden kan skrive «Island» selv om landet ikke er i forslagene
-            for (var a = 65; a <= 90; a++) for (var b = 65; b <= 90; b++) {
-                var kode = String.fromCharCode(a, b);
-                if (land(kode, '').toLowerCase() === liten) return kode;
-            }
-        }
-        if (dim === 'land' && /^[a-z]{2}$/.test(liten)) return liten.toUpperCase();
-        return null;
-    }
-
-    F.skjema.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var g = GRUPPER.filter(function (x) { return x.id === F.gruppe; })[0];
-        if (!g) return;
-        var nye = [], etiketter = {}, feil = null, galt = null;
-        $$('.frad', F.rader).forEach(function (rad) {
-            var dim = rad.getAttribute('data-dim');
-            var op = $('[data-op]', rad).value;
-            var radFeil = $('.frad__feil', rad);
-            radFeil.textContent = '';
-            var verdier = [];
-            $$('[data-verdi]', rad).forEach(function (inp) {
-                inp.removeAttribute('aria-invalid');
-                var tekst = inp.value.trim();
-                if (!tekst) return;
-                var v = filterVerdi(dim, tekst);
-                if (v === null || v.length > 300 || KONTROLLTEGN.test(v)) {
-                    radFeil.textContent = dim === 'land' ? 'Velg et land fra listen.' : 'Velg en verdi fra listen.';
-                    inp.setAttribute('aria-invalid', 'true');
-                    if (!galt) galt = inp;
-                    feil = feil || radFeil.textContent;
-                    return;
-                }
-                if (dim === 'mal' && op !== 'contains' && malNavn().indexOf(v) < 0) {
-                    radFeil.textContent = 'Velg et mål fra listen, eller velg «inneholder».';
-                    inp.setAttribute('aria-invalid', 'true');
-                    if (!galt) galt = inp;
-                    feil = feil || radFeil.textContent;
-                    return;
-                }
-                if ((dim === 'region' || dim === 'by') && v !== tekst) etiketter[dim + '|' + v] = tekst;
-                if (verdier.indexOf(v) < 0) verdier.push(v);
-            });
-            if (!verdier.length) return;
-            // Samme dimensjon og operator to ganger slås sammen (serveren godtar ikke dubletter)
-            var finnes = nye.filter(function (f) { return f.dim === dim && f.op === op; })[0];
-            if (finnes) verdier.forEach(function (v) { if (finnes.verdier.indexOf(v) < 0) finnes.verdier.push(v); });
-            else nye.push({ op: op, dim: dim, verdier: verdier });
-        });
-        nye.forEach(function (f) { if (f.verdier.length > 10) { f.verdier = f.verdier.slice(0, 10); } });
-        var beholdt = S.filtre.filter(function (f) { return g.id === 'egenskap' ? !erEgenskap(f.dim) : g.dims.indexOf(f.dim) < 0; });
-        if (!feil && beholdt.length + nye.length > MAKS_FILTRE) feil = 'Høyst ' + MAKS_FILTRE + ' filtre om gangen.';
-        if (feil) {
-            F.feil.textContent = feil;
-            if (galt) galt.focus();
-            return;
-        }
-        naviger(function (s) {
-            s.filtre = beholdt.concat(nye);
-            Object.keys(etiketter).forEach(function (k) { s.etiketter[k] = etiketter[k]; });
-            s.filterGruppe = null;
-        }, { lukk: true });
-        filterFokus().focus();
-    });
-    $('[data-filter-avbryt]').addEventListener('click', function () { lukkVindu(F.el); });
-    $('[data-filter-tilbake]').addEventListener('click', function () {
-        naviger(function (s) { s.filterGruppe = 'velg'; }, { bareDialog: true });
-        var forste = $('.grupper button', F.el);
-        if (forste) forste.focus();
-    });
-    F.el.addEventListener('close', function () { F.gruppe = null; lukketDialog('filterGruppe'); });
-
-    // ── «Be om endring» ─────────────────────────────────────────────────
-    // Et lite skjema som lager en ferdig e-post til oss (en mailto:-lenke) eller en tekst å kopiere.
-    // Ingenting sendes til serveren og ingenting lagres: teksten står bare i skjemaet mens siden er
-    // åpen (lukkes vinduet ved et uhell, står den der fortsatt), og skjemaet tømmes ved utlogging.
-    var EPOST = 'kontakt@dotdev.no';
-    var MAKS_MAILTO = 1800;         // lengre mailto-lenker kuttes eller avvises av enkelte e-postprogrammer
-    var MAKS_BESKRIVELSE = 1500;
-    var E = {
-        el: $('[data-endring]'), skjema: $('[data-endring-skjema]'), type: $('[data-endring-type]'), side: $('[data-endring-side]'),
-        sider: $('[data-endring-sider]'), tekst: $('[data-endring-beskrivelse]'), teller: $('[data-endring-teller]'),
-        haster: $('[data-endring-haster]'), feil: $('[data-endring-feil]'), epost: $('[data-endring-epost]'),
-        kopier: $('[data-endring-kopier]'), status: $('[data-endring-status]'), kopi: $('[data-endring-kopi]')
-    };
-    var KONTROLLTEGN_ALLE = new RegExp(KONTROLLTEGN.source, 'g');
-    function apneEndring() {
-        if (E.el.open) return;
-        naviger(function (s) { s.endring = true; }, { push: true, dialog: 'endring', bareDialog: true });
-    }
-    $('[data-endring-apne]').addEventListener('click', apneEndring);
-    function synkEndring() {
-        if (!S.endring) { if (E.el.open) E.el.close(); return; }
-        if (E.el.open) return;
-        $('[data-endring-nettsted]').textContent = nettsted || 'nettsiden';
-        fyllSideforslag();
-        visEndringStatus('');
-        oppdaterEndring();
-        E.el.showModal();
-        E.type.focus();
-    }
-    // Forslag til «Hvilken side?»: de mest besøkte sidene, hvis listen allerede er hentet
-    function fyllSideforslag() {
-        var x = lager.get(nokkel(grunnlag(), 'liste:sider'));
-        if (!x) lager.forEach(function (v, k) { if (!x && /\|liste:sider$/.test(k)) x = v; });
-        var forslag = [];
-        (x ? x.verdi.rader || [] : []).forEach(function (r) {
-            var n = typeof r.navn === 'string' ? radNavn('sider', r) : '';
-            if (n && n.length <= 120 && !KONTROLLTEGN.test(n) && forslag.indexOf(n) < 0) forslag.push(n);
-        });
-        E.sider.replaceChildren();
-        forslag.forEach(function (n) {
-            var o = document.createElement('option');
-            o.value = n;
-            E.sider.append(o);
-        });
-    }
-    // Ensomme surrogater (encodeURIComponent kaster URIError på dem) blir U+FFFD. De kommer fra et
-    // tillegg eller autoutfylling, ikke fra vanlig skriving.
-    var helTekst = function (s) {
-        return s.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g, function (c) { return c.length === 2 ? c : '\ufffd'; });
-    };
-    function endringFelter() {
-        return {
-            type: E.type.value,
-            side: helTekst(E.side.value).replace(KONTROLLTEGN_ALLE, ' ').trim().slice(0, 120),
-            haster: E.haster.value,
-            // Linjeskift og tab blir stående; andre kontrolltegn (f.eks. NUL) hører ikke hjemme i en e-post
-            beskrivelse: helTekst(E.tekst.value).replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim()
-        };
-    }
-    var endringEmne = function () { return 'Endringsønske: ' + (nettsted || 'nettsiden'); };
-    function endringKropp(f, beskrivelse) {
-        return ['Nettsted: ' + (nettsted || 'ukjent'), 'Hva gjelder det: ' + f.type, 'Hvilken side: ' + (f.side || 'ikke oppgitt'),
-            'Hvor haster det: ' + f.haster, '', 'Beskrivelse:', beskrivelse, '', 'Sendt fra kundeportalen'].join('\n');
-    }
-    // mailto-lenken (linjeskift som CRLF, slik RFC 6068 vil ha dem). Blir den for lang, kortes
-    // beskrivelsen av, og kunden får beskjed om å lime inn hele teksten fra «Kopier teksten» i stedet.
-    function endringMailto(f) {
-        var lagUrl = function (b) {
-            return 'mailto:' + EPOST + '?subject=' + encodeURIComponent(endringEmne()) + '&body=' + encodeURIComponent(endringKropp(f, b).replace(/\n/g, '\r\n'));
-        };
-        var url = lagUrl(f.beskrivelse);
-        if (url.length <= MAKS_MAILTO) return { url: url, kortet: false };
-        var hale = '…\n\n[Teksten er kortet ned. Lim inn hele teksten fra «Kopier teksten» i stedet for denne e-postteksten.]';
-        var tegn = Array.from(f.beskrivelse), lo = 0, hi = tegn.length;
-        while (lo < hi) {
-            var midt = Math.ceil((lo + hi) / 2);
-            if (lagUrl(tegn.slice(0, midt).join('') + hale).length <= MAKS_MAILTO) lo = midt; else hi = midt - 1;
-        }
-        return { url: lagUrl(tegn.slice(0, lo).join('') + hale), kortet: true };
-    }
-    function visEndringStatus(tekst, klasse) {
-        var k = 'endring__status' + (klasse ? ' ' + klasse : '');
-        if (E.status.textContent === tekst && E.status.className === k) return;
-        E.status.textContent = tekst;
-        E.status.className = k;
-    }
-    // Telleren, lenken og beskjeden om at e-posten blir kortet ned, holdes oppdatert mens kunden skriver
-    function oppdaterEndring() {
-        var n = E.tekst.value.length;
-        E.teller.textContent = heltall(n) + ' av ' + heltall(MAKS_BESKRIVELSE) + ' tegn';
-        E.teller.classList.toggle('nesten', n > MAKS_BESKRIVELSE - 100);
-        var m = endringMailto(endringFelter());
-        E.epost.href = m.url;
-        var lang = 'Teksten er for lang til å komme med i e-posten. Trykk «Kopier teksten» og lim den inn i stedet for det som står i e-posten.';
-        if (m.kortet) visEndringStatus(lang, 'info');
-        else if (E.status.textContent === lang) visEndringStatus('');
-    }
-    // Gir feltene, eller null (med feilmelding og fokus i beskrivelsen) når beskrivelsen mangler
-    function sjekkEndring() {
-        var f = endringFelter();
-        var feil = !f.beskrivelse ? 'Skriv hva dere vil ha endret.'
-            : f.beskrivelse.length > MAKS_BESKRIVELSE ? 'Beskrivelsen kan være høyst ' + heltall(MAKS_BESKRIVELSE) + ' tegn.' : '';
-        E.feil.textContent = feil;
-        if (!feil) { E.tekst.removeAttribute('aria-invalid'); return f; }
-        E.tekst.setAttribute('aria-invalid', 'true');
-        // Hele feltet med etiketten («Beskriv endringen») inn i bildet, ikke bare tekstfeltet (smal skjerm)
-        E.tekst.parentNode.scrollIntoView({ block: 'nearest' });
-        E.tekst.focus({ preventScroll: true });
-        return null;
-    }
-    E.skjema.addEventListener('input', function (e) {
-        if (e.target === E.kopi) return;
-        if (E.feil.textContent && E.tekst.value.trim()) { E.feil.textContent = ''; E.tekst.removeAttribute('aria-invalid'); }
-        // Den kopierte teksten er ikke lenger den samme
-        E.kopi.hidden = true;
-        if (/kopiert|er merket/.test(E.status.textContent)) visEndringStatus('');
-        oppdaterEndring();
-    });
-    E.skjema.addEventListener('change', oppdaterEndring);
-    // Enter i sidefeltet skal ikke sende noe (skjemaet har ingen adresse); det er knappene som gjør jobben
-    E.skjema.addEventListener('submit', function (e) { e.preventDefault(); });
-    E.epost.addEventListener('click', function (e) {
-        var f = sjekkEndring();
-        if (!f) { e.preventDefault(); return; }
-        E.epost.href = endringMailto(f).url;
-        if (!/kortet ned|lang/.test(E.status.textContent)) {
-            visEndringStatus('E-postprogrammet åpnes med teksten. Skjer ingenting, bruk «Kopier teksten» og send den til ' + EPOST + '.', 'info');
-        }
-    });
-    E.kopier.addEventListener('click', function () {
-        var f = sjekkEndring();
-        if (!f) return;
-        var tekst = 'Til: ' + EPOST + '\nEmne: ' + endringEmne() + '\n\n' + endringKropp(f, f.beskrivelse);
-        var ferdig = function () { visEndringStatus('Teksten er kopiert. Lim den inn i en e-post til ' + EPOST + '.'); };
-        // Reserve uten utklippstavle-API: teksten vises i et felt i vinduet og merkes, så den kan kopieres
-        var reserve = function () {
-            E.kopi.value = tekst;
-            E.kopi.hidden = false;
-            E.kopi.focus();
-            E.kopi.select();
-            var ok = false;
-            try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
-            if (ok) { E.kopi.hidden = true; E.kopier.focus(); ferdig(); }
-            else visEndringStatus('Teksten under er merket. Kopier den med Ctrl+C (Cmd+C på Mac), eller hold fingeren på teksten og velg Kopier.', 'info');
-        };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(tekst).then(function () { E.kopi.hidden = true; ferdig(); }, reserve);
-        } else {
-            reserve();
-        }
-    });
-    E.el.addEventListener('close', function () {
-        lukketDialog('endring');
-        // Åpnet fra adressen (ingen knapp hadde fokus før): nettleseren har ikke noe å gi fokuset tilbake
-        // til, og det står igjen i det skjulte skjemaet. Da går det til «Be om endring».
-        var a = document.activeElement;
-        if (innlogget && (!a || a === document.body || E.el.contains(a))) $('[data-endring-apne]').focus();
-    });
-    function tomEndring() {
-        E.skjema.reset();
-        E.kopi.hidden = true;
-        E.feil.textContent = '';
-        E.tekst.removeAttribute('aria-invalid');
-        E.sider.replaceChildren();
-        visEndringStatus('');
-        oppdaterEndring();
     }
 
     // ── Nedlasting (ZIP med CSV-filer, som «Export stats» i Plausible) ──
@@ -3556,13 +3052,11 @@
         // piltaster, Esc, Enter og mellomrom virker som vanlig i menyen.
         var meny = Boolean(t && t.tagName === 'SELECT' && t.hasAttribute('data-hurtigmeny'));
         var iFelt = t && !meny && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName));
-        var vindu = D.el.open || F.el.open || E.el.open;
+        var vindu = D.el.open;
         if (meny && (e.key.length !== 1 || e.key === ' ')) return;
+        // «/» søker i «Vis alle» (som i Plausible)
         if (e.key === '/') {
-            if (iFelt) return;
-            if (D.el.open) { if (!D.sok.hidden) { e.preventDefault(); D.sok.focus(); } return; }
-            // Filtrer finnes bare i den detaljerte visningen
-            if (!vindu && !enkel()) { e.preventDefault(); apneFilter(); }
+            if (!iFelt && vindu && !D.sok.hidden) { e.preventDefault(); D.sok.focus(); }
             return;
         }
         if (iFelt || vindu) return;
