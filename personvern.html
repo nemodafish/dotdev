@@ -36,6 +36,12 @@
   bookingtjeneste, oppdater også avsnitt 3 og listen i avsnitt 6. Alt i
   begge artiklene.
 
+  SKJEMA: «Nettside-sjekk» på forsiden (seksjonen #sjekk i index.html) sendes
+  til Netlify Forms. Det er beskrevet i raden «Du sender skjemaet» i avsnitt 2,
+  i avsnitt 3 (Netlify, Akismet, varsel på e-post), i avsnitt 4 (sletting), i
+  listen i avsnitt 6 og i statistikkraden (hendelsen «Henvendelse»). Endrer
+  dere feltene eller tjenesten, oppdater alt dette i begge artiklene.
+
   Teksten er en mal og ikke juridisk rådgivning. Datatilsynet har gode
   veiledere på datatilsynet.no hvis dere er usikre.
 ═══════════════════════════════════════════════════════════════════════════
@@ -278,14 +284,14 @@
             <p class="label">Personvern</p>
             <h1>Personvern&shy;erklæring</h1>
             <!-- ✏️ Oppdater datoen når teksten endres (også i den engelske artikkelen) -->
-            <p class="updated">Sist oppdatert: 5. oktober 2026</p>
+            <p class="updated">Sist oppdatert: 8. oktober 2026</p>
 
             <section class="summary" aria-labelledby="kort">
                 <h2 id="kort">Kort fortalt</h2>
                 <ul>
                     <li>Vi bruker ikke informasjonskapsler (cookies) og sporer deg ikke på tvers av nettsteder. Vi teller besøk med Plausible, som ikke lagrer noe på enheten din og ikke vet hvem du er. Eneste unntak er kundeportalen, som setter to nødvendige cookies når en kunde logger inn.</li>
-                    <li>Utenom tekniske logger hos Netlify og besøkstellingen over samler vi bare inn opplysninger du selv sender oss, via bookingsiden eller <span class="nw">på e-post</span>.</li>
-                    <li>Vi bruker opplysningene bare til å svare deg og gjennomføre samtalen eller oppdraget.</li>
+                    <li>Utenom tekniske logger hos Netlify og besøkstellingen over samler vi bare inn opplysninger du selv sender oss, via bookingsiden, skjemaet på nettsiden eller <span class="nw">på e-post</span>.</li>
+                    <li>Vi bruker opplysningene bare til å svare deg, gjøre nettside-sjekken du ber om, og gjennomføre samtalen eller oppdraget.</li>
                     <li>Vi selger aldri opplysningene dine, og vi deler dem bare med leverandører vi trenger for å drive (se avsnitt 6).</li>
                 </ul>
             </section>
@@ -311,6 +317,11 @@
                         <td data-th="Formål og grunnlag">Svare på henvendelsen. Grunnlag: vår berettigede interesse i å besvare henvendelser (art. 6 nr. 1 f), eller avtale (art. 6 nr. 1 b) når henvendelsen gjelder et oppdrag.</td>
                     </tr>
                     <tr>
+                        <td data-th="Når">Du sender skjemaet på nettsiden (nettside-sjekk eller bestilling av nettside)</td>
+                        <td data-th="Opplysninger">E-postadressen din og det du skriver. Adressen til nettsiden din (frivillig ved bestilling). Frivillig: navn. Netlify registrerer i tillegg blant annet tidspunkt, IP-adresse, nettlesertype og siden skjemaet ble sendt fra (se avsnitt&nbsp;3).</td>
+                        <td data-th="Formål og grunnlag">Svare deg, gjøre nettside-sjekken du ber om, eller følge opp bestillingen og eventuelt gi deg et tilbud. Grunnlag: tiltak før en mulig avtale som du har bedt om (art. 6 nr. 1 b), eller vår berettigede interesse i å besvare henvendelser (art. 6 nr. 1 f).</td>
+                    </tr>
+                    <tr>
                         <td data-th="Når">Du blir kunde</td>
                         <td data-th="Opplysninger">Kontakt- og faktureringsopplysninger og korrespondanse om oppdraget.</td>
                         <td data-th="Formål og grunnlag">Levere oppdraget og fakturere. Grunnlag: avtale (art. 6 nr. 1 b) og rettslig plikt etter bokføringsloven (art. 6 nr. 1 c).</td>
@@ -327,21 +338,22 @@
                     </tr>
                     <tr>
                         <td data-th="Når">Du besøker nettsiden (statistikk)</td>
-                        <td data-th="Opplysninger">Side, hvor lenge du er der og hvor langt du blar, nettstedet du kom fra, omtrentlig sted (land, region og by), type enhet, operativsystem og nettleser, og hvilke lenker til andre nettsteder du trykker på (for eksempel «Velg tidspunkt»). IP-adressen lagres ikke (se avsnitt 5).</td>
+                        <td data-th="Opplysninger">Side, hvor lenge du er der og hvor langt du blar, nettstedet du kom fra, omtrentlig sted (land, region og by), type enhet, operativsystem og nettleser, hvilke lenker til andre nettsteder du trykker på (for eksempel til prosjektene våre), og om skjemaet blir sendt og om det gjelder nettside-sjekk eller bestilling av nettside (ikke hva du skriver). IP-adressen lagres ikke (se avsnitt 5).</td>
                         <td data-th="Formål og grunnlag">Se hvor mange som besøker nettsiden og hvilke sider som blir brukt, så vi kan forbedre den. Vi ser bare samlede tall. Grunnlag: berettiget interesse (art. 6 nr. 1 f).</td>
                     </tr>
                 </tbody>
             </table>
             <p>Vi bruker ikke opplysningene til profilering eller automatiserte avgjørelser.</p>
 
-            <h2 id="skjema">3. Slik fungerer bookingen</h2>
-            <p>Knappen «Velg tidspunkt» åpner bookingsiden vår i Google Kalender i en ny fane. Der ser du bare tider som er ledige, og du booker direkte i kalenderen vår. Nettsiden har ikke noe eget bookingskjema. Navn, <span class="nw">e-post</span> og det andre du oppgir, fyller du inn på Google-siden, og det lagres i Google Kalender i vår Google Workspace-konto. Du får bekreftelse på e-post med en lenke til Google Meet, der vi tar samtalen på video. Google behandler opplysningene på våre vegne som databehandler. Ingenting lagres på selve nettsiden.</p>
+            <h2 id="skjema">3. Slik fungerer bookingen og skjemaet</h2>
+            <p>Avtaler vi en samtale, kan du booke tiden på bookingsiden vår i Google Kalender. Der ser du bare tider som er ledige, og du booker direkte i kalenderen vår. Navn, <span class="nw">e-post</span> og det andre du oppgir, fyller du inn på Google-siden, og det lagres i Google Kalender i vår Google Workspace-konto. Du får bekreftelse på e-post med en lenke til Google Meet, der vi tar samtalen på video. Google behandler opplysningene på våre vegne som databehandler. Bookingen lagres ikke på selve nettsiden.</p>
+            <p>Skjemaet på nettsiden (nettside-sjekk eller bestilling av nettside) sendes til Netlify Forms. Netlify tar imot og lagrer innsendingene for oss som databehandler, filtrerer bort spam (med tjenesten Akismet) og varsler oss på e-post, så en kopi også havner i e-posten vår. Sammen med det du fyller inn, registrerer Netlify blant annet tidspunkt, IP-adresse, nettlesertype og siden skjemaet ble sendt fra, blant annet for å stoppe spam. Vi bruker opplysningene bare til å svare deg og gjøre sjekken eller følge opp bestillingen du ber om, og sletter dem etter reglene i avsnitt&nbsp;4.</p>
             <p>Foretrekker du e-post, kan du skrive til <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a> i stedet.</p>
             <p>Nettsiden driftes hos Netlify, som lagrer tekniske logger (blant annet IP-adresse) i en begrenset periode for drift og sikkerhet.</p>
 
             <h2 id="lagring">4. Hvor lenge vi lagrer opplysningene</h2>
             <ul>
-                <li>Bookinger, forespørsler og e-poster som ikke fører til oppdrag, slettes senest 12 måneder etter siste kontakt.</li>
+                <li>Bookinger, forespørsler (også fra skjemaet på nettsiden) og e-poster som ikke fører til oppdrag, slettes senest 12 måneder etter siste kontakt.</li>
                 <li>Er du kunde, lagrer vi korrespondanse og kontaktopplysninger så lenge kundeforholdet varer, og deretter i opptil 12 måneder.</li>
                 <li>Regnskapsmateriale (som fakturaer) lagres i 5 år etter regnskapsårets slutt, slik bokføringsloven krever.</li>
                 <li>Besøksstatistikken lagres hos Plausible uten IP-adresse så lenge vi bruker tjenesten. Koden som skiller besøkende fra hverandre, byttes hver dag og kan ikke kobles til deg etter at døgnet er omme.</li>
@@ -359,7 +371,7 @@
             <p>Vi deler bare opplysninger med leverandører vi trenger for å drive. De er våre databehandlere, behandler opplysningene bare etter våre instrukser og har databehandleravtale med oss:</p>
             <ul>
                 <li>E-post og bookingkalender: Google (Google Workspace)</li>
-                <li>Webhotell og drift av nettsiden: Netlify, Inc. (USA)</li>
+                <li>Webhotell, drift av nettsiden og mottak av skjemaet: Netlify, Inc. (USA)</li>
                 <li>Besøksstatistikk: Plausible Insights OÜ (Estland, data lagres i EU)</li>
                 <!-- ✏️ Regnskapssystem: fjern kommentartegnene og skriv inn leverandøren når dere tar det i bruk (også i den engelske artikkelen)
                 <li>Regnskapssystem (for kunder): Leverandørnavn (land)</li>
@@ -394,14 +406,14 @@
             <p class="label">Privacy</p>
             <h1>Privacy policy</h1>
             <!-- ✏️ Oppdater datoen når teksten endres (også i den norske artikkelen) -->
-            <p class="updated">Last updated: 5 October 2026</p>
+            <p class="updated">Last updated: 8 October 2026</p>
 
             <section class="summary" aria-labelledby="en-short">
                 <h2 id="en-short">In short</h2>
                 <ul>
                     <li>We do not use cookies and do not track you across websites. We count visits with Plausible, which stores nothing on your device and does not know who you are. The only exception is the client portal, which sets two necessary cookies when a customer logs in.</li>
-                    <li>Apart from technical logs at Netlify and the visit counting above, we only collect information you send us yourself, through the booking page or by email.</li>
-                    <li>We only use that information to reply to you and to carry out the call or the project.</li>
+                    <li>Apart from technical logs at Netlify and the visit counting above, we only collect information you send us yourself, through the booking page, the form on the website or by email.</li>
+                    <li>We only use that information to reply to you, to carry out the website check you ask for, and to carry out the call or the project.</li>
                     <li>We never sell your information, and we only share it with service providers we need to run our business (see section 6).</li>
                 </ul>
             </section>
@@ -427,6 +439,11 @@
                         <td data-th="Purpose and basis">To reply to your enquiry. Basis: our legitimate interest in answering enquiries (<span class="nw">Art. 6(1)(f)</span>), or contract (<span class="nw">Art. 6(1)(b)</span>) when the enquiry concerns a project.</td>
                     </tr>
                     <tr>
+                        <td data-th="When">You send the form on the website (website check or website order)</td>
+                        <td data-th="Information">Your email address and what you write. The address of your website (optional when ordering). Optional: name. Netlify also records, among other things, the time, IP address, browser type and the page the form was sent from (see section&nbsp;3).</td>
+                        <td data-th="Purpose and basis">To reply to you, carry out the website check you ask for, or follow up your order and possibly send you a quote. Basis: steps taken at your request before a possible contract (<span class="nw">Art. 6(1)(b)</span>), or our legitimate interest in answering enquiries (<span class="nw">Art. 6(1)(f)</span>).</td>
+                    </tr>
+                    <tr>
                         <td data-th="When">You become a customer</td>
                         <td data-th="Information">Contact and billing details, and correspondence about the project.</td>
                         <td data-th="Purpose and basis">To deliver the project and send invoices. Basis: contract (<span class="nw">Art. 6(1)(b)</span>) and our legal obligation under the Norwegian Bookkeeping Act (<span class="nw">Art. 6(1)(c)</span>).</td>
@@ -443,21 +460,22 @@
                     </tr>
                     <tr>
                         <td data-th="When">You visit the website (statistics)</td>
-                        <td data-th="Information">Page, how long you stay and how far you scroll, the website you came from, approximate location (country, region and city), device type, operating system and browser, and which links to other websites you click (such as “Choose a time”). Your IP address is not stored (see section 5).</td>
+                        <td data-th="Information">Page, how long you stay and how far you scroll, the website you came from, approximate location (country, region and city), device type, operating system and browser, which links to other websites you click (such as the links to our projects), and whether the form is sent and whether it is a website check or a website order (not what you write). Your IP address is not stored (see section 5).</td>
                         <td data-th="Purpose and basis">To see how many people visit the website and which pages they use, so that we can improve it. We only see totals. Basis: legitimate interest (<span class="nw">Art. 6(1)(f)</span>).</td>
                     </tr>
                 </tbody>
             </table>
             <p>We do not use the information for profiling or automated decision-making.</p>
 
-            <h2 id="en-form">3. How booking works</h2>
-            <p>The “Choose a time” button opens our booking page in Google Calendar in a new tab. There you only see times that are free, and you book directly in our calendar. The website has no booking form of its own. You enter your name, email and any other details on Google’s page, and they are stored in Google Calendar in our Google Workspace account. You get a confirmation by email with a Google Meet link, where we hold the call on video. Google processes the information on our behalf as a data processor. Nothing is stored on the website itself.</p>
+            <h2 id="en-form">3. How booking and the form work</h2>
+            <p>If we arrange a call, you can book the time on our booking page in Google Calendar. There you only see times that are free, and you book directly in our calendar. You enter your name, email and any other details on Google’s page, and they are stored in Google Calendar in our Google Workspace account. You get a confirmation by email with a Google Meet link, where we hold the call on video. Google processes the information on our behalf as a data processor. The booking is not stored on the website itself.</p>
+            <p>The form on the website (website check or website order) is sent to Netlify Forms. Netlify receives and stores the submissions for us as a data processor, filters out spam (using the Akismet service) and notifies us by email, so a copy also ends up in our inbox. Along with what you fill in, Netlify records, among other things, the time, IP address, browser type and the page the form was sent from, partly to stop spam. We only use the information to reply to you and carry out the check or follow up the order you ask for, and delete it according to the rules in section&nbsp;4.</p>
             <p>If you prefer email, you can write to <a href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a> instead.</p>
             <p>The website is hosted by Netlify, which keeps technical logs (including IP addresses) for a limited period for operation and security.</p>
 
             <h2 id="en-retention">4. How long we keep the information</h2>
             <ul>
-                <li>Bookings, requests and emails that do not lead to a project are deleted no later than 12 months after our last contact.</li>
+                <li>Bookings, requests (including those from the form on the website) and emails that do not lead to a project are deleted no later than 12 months after our last contact.</li>
                 <li>If you are a customer, we keep correspondence and contact details for as long as the customer relationship lasts, and then for up to 12 months.</li>
                 <li>Accounting records (such as invoices) are kept for 5 years after the end of the financial year, as required by the Norwegian Bookkeeping Act.</li>
                 <li>Visitor statistics are kept by Plausible, without IP addresses, for as long as we use the service. The code that tells visitors apart changes every day and cannot be linked to you once the day is over.</li>
@@ -475,7 +493,7 @@
             <p>We only share information with service providers we need to run our business. They are our data processors, only process the information on our instructions and have a data processing agreement with us:</p>
             <ul>
                 <li>Email and booking calendar: Google (Google Workspace)</li>
-                <li>Website hosting and operation: Netlify, Inc. (USA)</li>
+                <li>Website hosting, operation and receiving the form: Netlify, Inc. (USA)</li>
                 <li>Visitor statistics: Plausible Insights OÜ (Estonia, data stored in the EU)</li>
                 <!-- ✏️ Regnskapssystem, engelsk: fjern kommentartegnene og skriv inn leverandøren når dere tar det i bruk (også i den norske artikkelen)
                 <li>Accounting system (for customers): Supplier name (country)</li>

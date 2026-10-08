@@ -38,6 +38,8 @@ Nettsiden følger innstillingen til den besøkende: står telefonen eller nettle
 
 ## Booking
 
+**Skjult fra 8. oktober 2026.** «Book en samtale» er fjernet fra siden: bookingseksjonen har `hidden`, og alle knappene heter «Bestill nettside» og går til skjemaet (`#bestill`, se «Skjema» under). Målet «Book samtale» i Plausible får derfor ingen nye treff. For å hente bookingen tilbake: fjern `hidden` på seksjonen og sett knappene tilbake til `href="#booking"` og `data-i18n="nav.book"` (se kommentaren over seksjonen i `index.html`). Bookingsiden i Google Kalender finnes fortsatt og kan sendes som lenke.
+
 «Book en samtale» på forsiden bruker bookingsiden «Introsamtale med DOTDEV» i Google Kalender (kontoen kontakt@dotdev.no). Nettsiden har ikke noe eget bookingskjema: knappen «Velg tidspunkt» åpner Google-siden i en ny fane, der den besøkende ser ledige tider og booker selv. Google legger bookingen i kalenderen og sender bekreftelse med lenke til Google Meet. Samtalen er på video. Uten JavaScript viser siden en e-postknapp til kontakt@dotdev.no i stedet, og lenken «Foretrekker du e-post? kontakt@dotdev.no» står alltid i bookingseksjonen.
 
 - **Bytte lenken:** lim inn den nye adressen i `BOOKING.externalUrl` (øverst i skriptet nederst i `index.html`). Bruk den lange adressen (`https://calendar.google.com/calendar/appointments/schedules/…?hl=no`), ikke kortlenken `calendar.app.google/…`, som mister `?hl=no` når den sender videre. På engelsk bytter siden selv `hl=no` til `hl=en`.
@@ -45,6 +47,24 @@ Nettsiden følger innstillingen til den besøkende: står telefonen eller nettle
 - **Endrer dere feltene i Google-skjemaet** (i dag navn og e-post, og frivillig telefon og «Bedrift og nettside»), oppdater raden «Du booker en samtale» i avsnitt 2 i `personvern.html`, på norsk og engelsk.
 - **Bytter dere bookingtjeneste**, bytt lenken og oppdater avsnitt 3 og 6 i `personvern.html` (begge språk). `_headers` trenger ingen endring, fordi siden bare lenker til bookingsiden og ikke bygger den inn.
 - **Telling:** et klikk på «Velg tidspunkt» telles som målet «Book samtale» i Plausible.
+
+## Skjema: nettside-sjekk og meldinger
+
+Seksjonen «Nettside-sjekk» (`#sjekk`, rett under bookingen) har ett skjema med to valg: **Nettside-sjekk** (adressen til nettsiden + e-post) og **Bestill nettside** (e-post + kort om bedriften og hva de trenger; nettsiden de har i dag er frivillig). Navn er frivillig. Overskriften og punktene til venstre bytter med valget. Innsendingene tas imot av **Netlify Forms** (skjemaet heter `henvendelse`), så det trengs ingen egen server eller nøkler.
+
+**Gjør dette én gang i Netlify (ellers kommer ingenting frem):**
+
+1. Netlify → nettstedet → **Forms** → **Enable form detection**. Publiser på nytt etterpå (Deploys → Trigger deploy), så Netlify finner skjemaet. Til da får besøkende en feilmelding med e-postadressen i stedet for takk.
+2. Forms → **Submission notifications** (heter «Form notifications» noen steder) → Add notification → **Email notification** → skjemaet `henvendelse` → `kontakt@dotdev.no`.
+3. Send en test fra dotdev.no og sjekk at den dukker opp under Forms og på e-post.
+
+- **Svare:** trykk «Svar» på varselet i kontakt@dotdev.no. Feltet heter `email`, så svaret skal gå til kunden og ikke til Netlify (sjekk det med testen i punkt 3). Emnet viser om det er nettside-sjekk eller bestilling av nettside, og `sprak` sier om skjemaet ble sendt på norsk eller engelsk.
+- **Slette:** Netlify sletter aldri innsendingene selv. Slett dem etter reglene i `personvern.html` (avsnitt 4: senest 12 måneder etter siste kontakt hvis det ikke blir oppdrag) på tre steder: under Forms i Netlify, i «Spam submissions» der, og varsel-e-postene i kontakt@dotdev.no. Sett gjerne av en fast dag to ganger i året.
+- **Spam:** et skjult felle-felt og Netlifys spamfilter. Spam havner under «Spam submissions» i Netlify.
+- **Telling:** vellykket innsending telles som hendelsen «Henvendelse» i Plausible (med `type`). Legg den til som mål (Plausible → Site settings → Goals → Custom event `Henvendelse`). Fordelingen på type krever Business-planen; på de andre planene vises bare antallet.
+- **Kostnad:** hvordan innsendinger telles, avhenger av Netlify-planen (de gamle planene har en månedlig grense, kredittplanene har egne regler). Sjekk under Billing / Usage, og følg med den første tiden. Kommer det mye spam, kan skjemaet slås av ved å fjerne `data-netlify="true"` og publisere.
+- **Uten JavaScript** er bare e-post påkrevd, så en sjelden gang kan det komme en henvendelse uten adresse eller melding.
+- **Endrer dere feltene**, oppdater raden «Du sender skjemaet» i avsnitt 2 og avsnitt 3 i `personvern.html` (begge språk), og punkt 8b i guiden i `index.html`.
 
 ## Kundeportalen
 
