@@ -148,6 +148,9 @@
        email må hete akkurat det: da kan dere trykke «Svar» på varselet og
        svare kunden direkte. subject blir emnet i varselet (JS setter det
        etter valget). Endrer dere navnene, må de endres likt i HTML og JS.
+     • Feltnavnene i varselet («Nettside», «Navn», «E-post», «Melding») er
+       teksten i <label>. Derfor er <label> skjult og fast, mens den synlige
+       teksten over feltet (.skjema__etikett) bytter med valget.
      • Uten JavaScript er bare e-post påkrevd (et skjult felt kan ikke være
        påkrevd), så en sjelden gang kan det komme en tom henvendelse.
      • Lenker til #bestill (alle «Bestill nettside»-knappene, også på 404-siden)
@@ -1424,7 +1427,8 @@
 
     /* Feltene */
     .skjema__felt { display: flex; flex-direction: column; gap: 8px; }
-    .skjema__felt label { font-family: var(--f-title); font-size: 1rem; font-weight: 500; letter-spacing: -.02em; }
+    .skjema__felt label, .skjema__etikett { font-family: var(--f-title); font-size: 1rem; font-weight: 500; letter-spacing: -.02em; }
+    .skjema__etikett { cursor: default; }
     .skjema__valgfritt { color: var(--c-muted); font-weight: 400; }
     .skjema__felt input, .skjema__felt textarea {
         width: 100%;
@@ -1971,7 +1975,7 @@
         .skjema__valg input:hover + span { color: var(--x-text); }
         .skjema__valg input:checked + span { background: var(--x-surface-2); color: var(--x-text); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .38); }
         .skjema__valg input:focus-visible + span { outline-color: var(--c-lime); }
-        .skjema__felt label { color: var(--x-text); }
+        .skjema__felt label, .skjema__etikett { color: var(--x-text); }
         .skjema__valgfritt, .skjema__info, .skjema__takk p { color: var(--x-muted); }
         .skjema__felt input, .skjema__felt textarea { border-color: rgba(255, 255, 255, .38); background: var(--x-deep); color: var(--x-text); }
         .skjema__felt input::placeholder, .skjema__felt textarea::placeholder { color: color-mix(in srgb, var(--x-muted) 70%, transparent); }
@@ -2579,14 +2583,20 @@
                     <label><input type="radio" name="type" value="bestill" data-skjema-valg><span data-i18n="sj.optOrder">Bestill nettside</span></label>
                 </fieldset>
 
+                <!-- Feltnavn: Netlify bruker teksten i <label> som navn på feltet i varselet på e-post.
+                     Derfor har <label> et fast, kort navn (skjult for øyet), mens den synlige teksten over
+                     feltet (.skjema__etikett) følger valget. aria-labelledby gir feltet den synlige teksten
+                     som navn for skjermlesere, og et klikk på teksten flytter fokus til feltet (modul 12). -->
                 <div class="skjema__felt">
-                    <label for="sj-nettside"><span data-bare="sjekk" data-i18n="sj.url">Adressen til nettsiden</span><span data-bare="bestill" data-i18n="sj.urlOrder">Nettsiden dere har i dag</span> <span class="skjema__valgfritt" data-bare="bestill" data-i18n="sj.optional">(valgfritt)</span></label>
-                    <input id="sj-nettside" name="nettside" type="text" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" maxlength="300" placeholder="dinbedrift.no" data-i18n-attr="placeholder:sj.urlPh" data-skjema-url>
+                    <span class="skjema__etikett" id="sj-nettside-tekst" data-skjema-etikett="sj-nettside"><span data-bare="sjekk" data-i18n="sj.url">Adressen til nettsiden</span><span data-bare="bestill" data-i18n="sj.urlOrder">Nettsiden dere har i dag</span><span class="skjema__valgfritt" data-bare="bestill"> <span data-i18n="sj.optional">(valgfritt)</span></span></span>
+                    <label class="sr-only" for="sj-nettside">Nettside</label>
+                    <input id="sj-nettside" aria-labelledby="sj-nettside-tekst" name="nettside" type="text" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" maxlength="300" placeholder="dinbedrift.no" data-i18n-attr="placeholder:sj.urlPh" data-skjema-url>
                 </div>
                 <div class="skjema__to">
                     <div class="skjema__felt">
-                        <label for="sj-navn"><span data-i18n="sj.name">Navn</span> <span class="skjema__valgfritt" data-i18n="sj.optional">(valgfritt)</span></label>
-                        <input id="sj-navn" name="navn" type="text" autocomplete="name" maxlength="120">
+                        <span class="skjema__etikett" id="sj-navn-tekst" data-skjema-etikett="sj-navn"><span data-i18n="sj.name">Navn</span> <span class="skjema__valgfritt" data-i18n="sj.optional">(valgfritt)</span></span>
+                        <label class="sr-only" for="sj-navn">Navn</label>
+                        <input id="sj-navn" aria-labelledby="sj-navn-tekst" name="navn" type="text" autocomplete="name" maxlength="120">
                     </div>
                     <div class="skjema__felt">
                         <label for="sj-epost" data-i18n="sj.email">E-post</label>
@@ -2594,8 +2604,9 @@
                     </div>
                 </div>
                 <div class="skjema__felt">
-                    <label for="sj-melding"><span data-bare="sjekk" data-i18n="sj.msgCheck">Er det noe spesielt vi skal se på?</span><span data-bare="bestill" data-i18n="sj.msgOrder">Fortell kort om bedriften og hva dere trenger</span> <span class="skjema__valgfritt" data-bare="sjekk" data-i18n="sj.optional">(valgfritt)</span></label>
-                    <textarea id="sj-melding" name="melding" rows="4" maxlength="4000" data-skjema-melding></textarea>
+                    <span class="skjema__etikett" id="sj-melding-tekst" data-skjema-etikett="sj-melding"><span data-bare="bestill" data-i18n="sj.msgOrder">Fortell kort om bedriften og hva dere trenger</span><span data-bare="sjekk" data-i18n="sj.msgCheck">Er det noe spesielt vi skal se på?</span><span class="skjema__valgfritt" data-bare="sjekk"> <span data-i18n="sj.optional">(valgfritt)</span></span></span>
+                    <label class="sr-only" for="sj-melding">Melding</label>
+                    <textarea id="sj-melding" aria-labelledby="sj-melding-tekst" name="melding" rows="4" maxlength="4000" data-skjema-melding></textarea>
                 </div>
 
                 <p class="skjema__status" role="alert" data-skjema-status></p>
@@ -3819,6 +3830,11 @@ const I18N = {
         };
 
         valg.forEach(r => r.addEventListener('change', () => { visValg(); visFeil(null); }));
+        // Den synlige teksten over et felt (ikke en <label>, se HTML-en): klikk flytter fokus til feltet
+        $$('[data-skjema-etikett]', form).forEach(el => el.addEventListener('click', () => {
+            const felt = document.getElementById(el.dataset.skjemaEtikett);
+            if (felt) felt.focus();
+        }));
         if (url) url.addEventListener('input', () => url.setCustomValidity(''));
 
         form.addEventListener('submit', async e => {
