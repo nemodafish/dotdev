@@ -144,7 +144,9 @@
        på nytt etterpå (Deploys → Trigger deploy), ellers finner ikke Netlify
        skjemaet. Legg så til e-postvarsel til kontakt@dotdev.no under Forms →
        Submission notifications («Form notifications»). Se LES-MEG.md.
-     • Feltene heter type, nettside, navn, email, melding, sprak og subject.
+     • Feltene heter type, nettside, navn, email, melding, sprak og subject, og ved
+       bestilling også behov, bransje, hensikt, innhold og oppstart (valgknapper;
+       value er teksten som havner i varselet, alltid på norsk).
        email må hete akkurat det: da kan dere trykke «Svar» på varselet og
        svare kunden direkte. subject blir emnet i varselet (JS setter det
        etter valget). Endrer dere navnene, må de endres likt i HTML og JS.
@@ -1445,6 +1447,30 @@
     .skjema__felt input::placeholder, .skjema__felt textarea::placeholder { color: color-mix(in srgb, var(--c-muted) 75%, transparent); }
     .skjema__felt input:focus, .skjema__felt textarea:focus { outline: 2px solid transparent; outline-offset: 0; border-color: var(--c-blue); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-blue) 22%, transparent); }
     .skjema__felt input:user-invalid, .skjema__felt textarea:user-invalid { border-color: var(--c-error); }
+    /* Veiledning ved bestilling: spørsmål med valgknapper («chips») */
+    .skjema__veiledning { display: flex; flex-direction: column; gap: var(--sp-3); }
+    .skjema__sporsmal { min-width: 0; margin: 0; padding: 0; border: 0; }
+    .skjema__sporsmal legend { margin-bottom: 10px; padding: 0; }
+    .skjema__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .skjema__chip { position: relative; display: inline-flex; }
+    .skjema__chip input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+    /* Når nettleseren ruller til et felt som mangler: la spørsmålet stå synlig under menylinja */
+    .skjema input, .skjema textarea { scroll-margin-top: calc(var(--nav-top) + var(--nav-h) + 4.5rem); }
+    .skjema__sporsmal:has(input:user-invalid) .skjema__chip span { border-color: var(--c-error); }
+    .skjema__chip span {
+        display: inline-flex; align-items: center; gap: 6px;
+        min-height: 44px; padding: 8px 16px;
+        border: 1px solid color-mix(in srgb, var(--c-black) 45%, transparent);
+        border-radius: var(--r-pill);
+        background: var(--c-white); color: var(--c-black);
+        font-size: 1rem; line-height: 1.2;
+        transition: background-color .2s, border-color .2s, color .2s;
+    }
+    .skjema__chip input:hover + span { border-color: var(--c-black); }
+    .skjema__chip input:checked + span { border-color: var(--c-blue); background: var(--c-blue); color: var(--c-white); }
+    .skjema__chip input:checked + span::before { content: "✓"; content: "✓" / ""; font-weight: 600; }   /* ikke bare farge; leses ikke opp */
+    .skjema__chip input:focus-visible + span { outline: 2px solid var(--c-blue); outline-offset: 2px; }
+    .skjema__hint { margin-top: 10px; color: var(--c-muted); font-size: .9375rem; line-height: 1.45; }
     .skjema__to { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
     @media (min-width: 640px) { .skjema__to { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 
@@ -1462,8 +1488,12 @@
     /* Høykontrastmodus (Windows): farger og skygger forsvinner, så vis valg og fokus med kant */
     @media (forced-colors: active) {
         .skjema__valg { border: 1px solid CanvasText; }
-        .skjema__valg input:checked + span { outline: 2px solid Highlight; outline-offset: -2px; }
+        .skjema__valg span { border: 2px solid transparent; }
+        .skjema__valg input:checked + span { border-color: Highlight; }
+        .skjema__valg input:focus-visible + span { outline: 2px solid CanvasText; outline-offset: 2px; }
         .skjema__felt input:focus, .skjema__felt textarea:focus { outline: 2px solid Highlight; }
+        .skjema__chip input:checked + span { border: 2px solid Highlight; }
+        .skjema__chip input:focus-visible + span { outline: 2px solid CanvasText; outline-offset: 3px; }
     }
 
     /* Takk-meldingen etter innsending */
@@ -1983,6 +2013,12 @@
         .skjema__felt input:user-invalid, .skjema__felt textarea:user-invalid { border-color: #ff6b81; }
         .skjema__status { color: #ff8a9b; }
         .skjema__info a, .skjema__ny { color: var(--x-text); }
+        .skjema__chip span { border-color: rgba(255, 255, 255, .38); background: var(--x-deep); color: var(--x-text); }
+        .skjema__chip input:hover + span { border-color: var(--x-text); }
+        .skjema__chip input:checked + span { border-color: var(--c-blue); background: var(--c-blue); color: #fff; }
+        .skjema__chip input:focus-visible + span { outline-color: var(--c-lime); }
+        .skjema__hint { color: var(--x-muted); }
+        .skjema__sporsmal:has(input:user-invalid) .skjema__chip span { border-color: #ff6b81; }
 
         /* Kontakt */
         .cta { background: #000; }
@@ -2451,7 +2487,7 @@
         <div class="faq__list">
             <details class="faq__item">
                 <summary><span data-i18n="faq.q1">Hva koster en nettside?</span><span class="faq__icon" aria-hidden="true"></span></summary>
-                <div class="faq__answer"><p data-i18n="faq.a1">Det kommer an på hva du trenger. Fortell kort om bedriften under <a class="ulink" href="#bestill">Bestill nettside</a>, så får du et konkret tilbud før vi setter i gang. Det er helt uforpliktende.</p></div>
+                <div class="faq__answer"><p data-i18n="faq.a1">Det kommer an på hva du trenger. Svar på noen enkle spørsmål under <a class="ulink" href="#bestill">Bestill nettside</a>, så får du et konkret tilbud før vi setter i gang. Det er helt uforpliktende.</p></div>
             </details>
             <details class="faq__item">
                 <summary><span data-i18n="faq.q2">Kan dere forbedre eller fornye nettsiden jeg allerede har?</span><span class="faq__icon" aria-hidden="true"></span></summary>
@@ -2459,7 +2495,7 @@
             </details>
             <details class="faq__item">
                 <summary><span data-i18n="faq.q6">Hvordan bestiller jeg en nettside?</span><span class="faq__icon" aria-hidden="true"></span></summary>
-                <div class="faq__answer"><p data-i18n="faq.a6">Velg <a class="ulink" href="#bestill">Bestill nettside</a> i skjemaet lenger ned, og fortell kort om bedriften og hva dere trenger. Vi svarer innen én&nbsp;arbeidsdag og avtaler veien videre.</p></div>
+                <div class="faq__answer"><p data-i18n="faq.a6">Velg <a class="ulink" href="#bestill">Bestill nettside</a> i skjemaet lenger ned, og svar på noen enkle spørsmål. Du trenger ikke kunne noe om nettsider. Vi svarer innen én&nbsp;arbeidsdag og avtaler veien videre.</p></div>
             </details>
             <details class="faq__item">
                 <summary><span data-i18n="faq.q3">Hva er AI-automatisering, og passer det for oss?</span><span class="faq__icon" aria-hidden="true"></span></summary>
@@ -2554,7 +2590,7 @@
             <p class="kicker"><span data-bare="sjekk" data-i18n="sj.kicker">Nettside-sjekk</span><span data-bare="bestill" data-i18n="sj.kickerOrder">Ny nettside</span></p>
             <!-- ✏️ Overskrift og ingress for hvert valg -->
             <h2 class="booking__title" id="sjekk-title"><span data-bare="sjekk" data-i18n="sj.title">Få en sjekk av nettsiden&nbsp;din</span><span data-bare="bestill" data-i18n="sj.titleOrder">Bestill en ny&nbsp;nettside</span></h2>
-            <p class="booking__lead"><span data-bare="sjekk" data-i18n="sj.lead">Send oss adressen, så går vi gjennom nettsiden din og sender deg en kort vurdering på e-post: hva som fungerer, og hva som kan bli bedre.</span><span data-bare="bestill" data-i18n="sj.leadOrder">Fortell kort om bedriften og hva dere trenger, så svarer vi innen én&nbsp;arbeidsdag og avtaler veien videre.</span></p>
+            <p class="booking__lead"><span data-bare="sjekk" data-i18n="sj.lead">Send oss adressen, så går vi gjennom nettsiden din og sender deg en kort vurdering på e-post: hva som fungerer, og hva som kan bli bedre.</span><span data-bare="bestill" data-i18n="sj.leadOrder">Svar på noen enkle spørsmål, så hører du fra oss innen én&nbsp;arbeidsdag, og vi avtaler veien videre.</span></p>
             <!-- ✏️ Tre korte punkter for hvert valg -->
             <ul class="booking__facts" data-bare="sjekk">
                 <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 16.5a8 8 0 1 1 15 0"/><path d="M12 12.5l4-4"/></svg></span><span data-i18n="sj.fact1">Fart, mobilvisning og synlighet i&nbsp;Google</span></li>
@@ -2562,7 +2598,7 @@
                 <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span data-i18n="sj.fact3">Helt uforpliktende</span></li>
             </ul>
             <ul class="booking__facts" data-bare="bestill">
-                <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M3 9h18M7 13h6M7 16h4"/></svg></span><span data-i18n="sj.factO1">Skreddersydd for bedriften din</span></li>
+                <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M3 9h18M7 13h6M7 16h4"/></svg></span><span data-i18n="sj.factO1">Du trenger ikke kunne noe om nettsider</span></li>
                 <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg></span><span data-i18n="sj.factO2">Svar innen én&nbsp;arbeidsdag</span></li>
                 <li><span class="ichip" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span data-i18n="sj.fact3">Helt uforpliktende</span></li>
             </ul>
@@ -2573,7 +2609,7 @@
             <form class="skjema__form" name="henvendelse" method="POST" data-netlify="true" netlify-honeypot="bot-field" data-skjema-form>
                 <input type="hidden" name="form-name" value="henvendelse">
                 <input type="hidden" name="sprak" value="no" data-skjema-sprak>
-                <input type="hidden" name="subject" value="Nettside-sjekk fra dotdev.no">
+                <input type="hidden" name="subject" value="Henvendelse fra dotdev.no">
                 <!-- Felle for spamroboter: skjult for mennesker (CSS), roboter fyller den ut -->
                 <p class="skjema__felle" aria-hidden="true"><label>Ikke fyll ut dette feltet: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
 
@@ -2583,6 +2619,20 @@
                     <label><input type="radio" name="type" value="bestill" data-skjema-valg><span data-i18n="sj.optOrder">Bestill nettside</span></label>
                 </fieldset>
 
+                <!-- ✏️ Veiledning ved bestilling: enkle valg, så kunden ikke trenger å vite hva som skal stå.
+                     name (behov, bransje, hensikt, innhold, oppstart) blir feltnavnet i varselet, og value er
+                     det som står der (alltid på norsk). JS slår sammen flere avkryssinger til én linje. -->
+                <div class="skjema__veiledning" data-bare="bestill">
+                    <fieldset class="skjema__sporsmal">
+                        <legend class="skjema__etikett" data-i18n="sj.qNeed">Hva trenger dere?</legend>
+                        <div class="skjema__chips">
+                            <label class="skjema__chip"><input type="radio" name="behov" value="Ny nettside" data-skjema-behov><span data-i18n="sj.needNew">Ny nettside</span></label>
+                            <label class="skjema__chip"><input type="radio" name="behov" value="Ny versjon av nettsiden vi har"><span data-i18n="sj.needRedo">Ny versjon av nettsiden vi har</span></label>
+                            <label class="skjema__chip"><input type="radio" name="behov" value="Usikker, vil gjerne ha råd"><span data-i18n="sj.needUnsure">Usikker, vil gjerne ha råd</span></label>
+                        </div>
+                    </fieldset>
+                </div>
+
                 <!-- Feltnavn: Netlify bruker teksten i <label> som navn på feltet i varselet på e-post.
                      Derfor har <label> et fast, kort navn (skjult for øyet), mens den synlige teksten over
                      feltet (.skjema__etikett) følger valget. aria-labelledby gir feltet den synlige teksten
@@ -2591,6 +2641,42 @@
                     <span class="skjema__etikett" id="sj-nettside-tekst" data-skjema-etikett="sj-nettside"><span data-bare="sjekk" data-i18n="sj.url">Adressen til nettsiden</span><span data-bare="bestill" data-i18n="sj.urlOrder">Nettsiden dere har i dag</span><span class="skjema__valgfritt" data-bare="bestill"> <span data-i18n="sj.optional">(valgfritt)</span></span></span>
                     <label class="sr-only" for="sj-nettside">Nettside</label>
                     <input id="sj-nettside" aria-labelledby="sj-nettside-tekst" name="nettside" type="text" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" maxlength="300" placeholder="dinbedrift.no" data-i18n-attr="placeholder:sj.urlPh" data-skjema-url>
+                </div>
+
+                <div class="skjema__veiledning" data-bare="bestill">
+                    <div class="skjema__felt">
+                        <span class="skjema__etikett" id="sj-bransje-tekst" data-skjema-etikett="sj-bransje"><span data-i18n="sj.qBiz">Hva driver bedriften med?</span><span class="skjema__valgfritt"> <span data-i18n="sj.optional">(valgfritt)</span></span></span>
+                        <label class="sr-only" for="sj-bransje">Bransje</label>
+                        <input id="sj-bransje" aria-labelledby="sj-bransje-tekst" name="bransje" type="text" maxlength="200" placeholder="f.eks. frisør eller rørlegger" data-i18n-attr="placeholder:sj.bizPh">
+                    </div>
+                    <fieldset class="skjema__sporsmal">
+                        <legend class="skjema__etikett"><span data-i18n="sj.qGoal">Hva skal nettsiden hjelpe dere med?</span><span class="skjema__valgfritt"> <span data-i18n="sj.pickAny">(velg gjerne flere)</span></span></legend>
+                        <div class="skjema__chips">
+                            <label class="skjema__chip"><input type="checkbox" name="hensikt" value="Få flere henvendelser"><span data-i18n="sj.goal1">Få flere henvendelser</span></label>
+                            <label class="skjema__chip"><input type="checkbox" name="hensikt" value="Bli funnet på Google"><span data-i18n="sj.goal2">Bli funnet på Google</span></label>
+                            <label class="skjema__chip"><input type="checkbox" name="hensikt" value="Vise frem tjenester og priser"><span data-i18n="sj.goal3">Vise frem tjenester og priser</span></label>
+                            <label class="skjema__chip"><input type="checkbox" name="hensikt" value="Ta imot bestillinger eller timebestilling"><span data-i18n="sj.goal4">Ta imot bestillinger eller timebestilling</span></label>
+                            <label class="skjema__chip"><input type="checkbox" name="hensikt" value="Selge produkter på nett"><span data-i18n="sj.goal5">Selge produkter på nett</span></label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="skjema__sporsmal" aria-describedby="sj-innhold-hint">
+                        <legend class="skjema__etikett"><span data-i18n="sj.qHave">Hva har dere allerede?</span><span class="skjema__valgfritt"> <span data-i18n="sj.pickAny">(velg gjerne flere)</span></span></legend>
+                        <div class="skjema__chips">
+                            <label class="skjema__chip"><input type="checkbox" name="innhold" value="Logo"><span data-i18n="sj.haveLogo">Logo</span></label>
+                            <label class="skjema__chip"><input type="checkbox" name="innhold" value="Bilder"><span data-i18n="sj.havePhotos">Bilder</span></label>
+                            <label class="skjema__chip"><input type="checkbox" name="innhold" value="Tekster"><span data-i18n="sj.haveTexts">Tekster</span></label>
+                            <label class="skjema__chip"><input type="checkbox" name="innhold" value="Ingenting ennå"><span data-i18n="sj.haveNone">Ingenting ennå</span></label>
+                        </div>
+                        <p class="skjema__hint" id="sj-innhold-hint" data-i18n="sj.haveHint">Det går fint å starte uten. Vi finner ut av det sammen.</p>
+                    </fieldset>
+                    <fieldset class="skjema__sporsmal">
+                        <legend class="skjema__etikett"><span data-i18n="sj.qStart">Når ønsker dere å være i gang?</span><span class="skjema__valgfritt"> <span data-i18n="sj.optional">(valgfritt)</span></span></legend>
+                        <div class="skjema__chips">
+                            <label class="skjema__chip"><input type="radio" name="oppstart" value="Så snart som mulig"><span data-i18n="sj.start1">Så snart som mulig</span></label>
+                            <label class="skjema__chip"><input type="radio" name="oppstart" value="I løpet av noen måneder"><span data-i18n="sj.start2">I løpet av noen måneder</span></label>
+                            <label class="skjema__chip"><input type="radio" name="oppstart" value="Ikke bestemt ennå"><span data-i18n="sj.start3">Ikke bestemt ennå</span></label>
+                        </div>
+                    </fieldset>
                 </div>
                 <div class="skjema__to">
                     <div class="skjema__felt">
@@ -2604,7 +2690,7 @@
                     </div>
                 </div>
                 <div class="skjema__felt">
-                    <span class="skjema__etikett" id="sj-melding-tekst" data-skjema-etikett="sj-melding"><span data-bare="bestill" data-i18n="sj.msgOrder">Fortell kort om bedriften og hva dere trenger</span><span data-bare="sjekk" data-i18n="sj.msgCheck">Er det noe spesielt vi skal se på?</span><span class="skjema__valgfritt" data-bare="sjekk"> <span data-i18n="sj.optional">(valgfritt)</span></span></span>
+                    <span class="skjema__etikett" id="sj-melding-tekst" data-skjema-etikett="sj-melding"><span data-bare="bestill"><span data-i18n="sj.msgOrder">Noe mer vi bør vite?</span><span class="skjema__valgfritt"> <span data-i18n="sj.optional">(valgfritt)</span></span></span><span data-bare="sjekk"><span data-i18n="sj.msgCheck">Er det noe spesielt vi skal se på?</span><span class="skjema__valgfritt"> <span data-i18n="sj.optional">(valgfritt)</span></span></span></span>
                     <label class="sr-only" for="sj-melding">Melding</label>
                     <textarea id="sj-melding" aria-labelledby="sj-melding-tekst" name="melding" rows="4" maxlength="4000" data-skjema-melding></textarea>
                 </div>
@@ -2869,11 +2955,11 @@ const I18N = {
         // Spørsmål og svar
         'faq.title': 'Frequently asked questions',
         'faq.q1': 'How much does a website cost?',
-        'faq.a1': 'It depends on what you need. Tell us briefly about your business under <a class="ulink" href="#bestill">Order a website</a>, and you’ll get a detailed quote before we start. There’s no obligation.',
+        'faq.a1': 'It depends on what you need. Answer a few simple questions under <a class="ulink" href="#bestill">Order a website</a>, and you’ll get a detailed quote before we start. There’s no obligation.',
         'faq.q2': 'Can you improve or redesign the website I already have?',
         'faq.a2': 'Yes. Send us the address under <a class="ulink" href="#sjekk">Website check</a>, and we’ll go through your website and email you a short review with specific suggestions for improvement.',
         'faq.q6': 'How do I order a website?',
-        'faq.a6': 'Choose <a class="ulink" href="#bestill">Order a website</a> in the form further down, and tell us briefly about your business and what you need. We reply within one working&nbsp;day and agree on the next steps.',
+        'faq.a6': 'Choose <a class="ulink" href="#bestill">Order a website</a> in the form further down, and answer a few simple questions. You don’t need to know anything about websites. We reply within one working&nbsp;day and agree on the next steps.',
         'faq.q3': 'What is AI automation, and is it right for us?',
         'faq.a3': 'It means repetitive tasks are done automatically, such as replying to and sorting enquiries or creating reports. Email <a class="ulink" href="mailto:kontakt@dotdev.no">kontakt@dotdev.no</a> briefly about what takes up a lot of your time, and we’ll find out whether anything is worth automating.',
         'faq.q4': 'Do I need to know exactly what I want?',
@@ -2907,8 +2993,8 @@ const I18N = {
         'sj.alt': 'Anything else? Email',
         'sj.kickerOrder': 'New website',
         'sj.titleOrder': 'Order a new&nbsp;website',
-        'sj.leadOrder': 'Tell us briefly about your business and what you need, and we’ll reply within one working&nbsp;day and agree on the next steps.',
-        'sj.factO1': 'Tailored to your business',
+        'sj.leadOrder': 'Answer a few simple questions, and we’ll reply within one working&nbsp;day and agree on the next steps.',
+        'sj.factO1': 'You don’t need to know anything about websites',
         'sj.factO2': 'Reply within one working&nbsp;day',
         'sj.legend': 'What is it about?',
         'sj.optCheck': 'Website check',
@@ -2920,7 +3006,30 @@ const I18N = {
         'sj.email': 'Email',
         'sj.emailPh': 'name@business.com',
         'sj.msgCheck': 'Anything in particular we should look at?',
-        'sj.msgOrder': 'Tell us briefly about your business and what you need',
+        'sj.msgOrder': 'Anything else we should know?',
+        'sj.qNeed': 'What do you need?',
+        'sj.needNew': 'A new website',
+        'sj.needRedo': 'A new version of our current website',
+        'sj.needUnsure': 'Not sure, we’d like some advice',
+        'sj.qBiz': 'What does your business do?',
+        'sj.bizPh': 'e.g. hair salon or plumber',
+        'sj.qGoal': 'What should the website help you with?',
+        'sj.pickAny': '(choose any that apply)',
+        'sj.goal1': 'Get more enquiries',
+        'sj.goal2': 'Be found on Google',
+        'sj.goal3': 'Show our services and prices',
+        'sj.goal4': 'Take orders or bookings',
+        'sj.goal5': 'Sell products online',
+        'sj.qHave': 'What do you already have?',
+        'sj.haveLogo': 'Logo',
+        'sj.havePhotos': 'Photos',
+        'sj.haveTexts': 'Texts',
+        'sj.haveNone': 'Nothing yet',
+        'sj.haveHint': 'It’s fine to start without them. We’ll work it out together.',
+        'sj.qStart': 'When would you like to get started?',
+        'sj.start1': 'As soon as possible',
+        'sj.start2': 'Within a few months',
+        'sj.start3': 'Not decided yet',
         'sj.urlOrder': 'Your current website',
         'sj.sendCheck': 'Submit your website',
         'sj.sendOrder': 'Send request',
@@ -3768,11 +3877,13 @@ const I18N = {
         const MSG = {
             no: {
                 url: 'Skriv adressen til nettsiden, for eksempel dinbedrift.no.',
+                behov: 'Velg hva dere trenger.',
                 fail: 'Noe gikk galt, og henvendelsen ble ikke sendt. Prøv igjen, eller skriv til ',
                 offline: 'Det ser ut som du er uten nett. Prøv igjen, eller skriv til '
             },
             en: {
                 url: 'Enter your website address, for example yourbusiness.com.',
+                behov: 'Choose what you need.',
                 fail: 'Something went wrong, and your enquiry wasn’t sent. Please try again, or email ',
                 offline: 'You seem to be offline. Please try again, or email '
             }
@@ -3787,13 +3898,22 @@ const I18N = {
         const valg = $$('[data-skjema-valg]', form);
         const sek = card.closest('section') || card;    // teksten til venstre følger også valget
         const valgt = () => { const r = valg.find(x => x.checked); return r ? r.value : 'sjekk'; };
+        // «Hva trenger dere?»: meldingen på sidens språk (ikke nettleserens) når ingenting er valgt
+        const behov = $('[data-skjema-behov]', form);
+        const sjekkBehov = () => {
+            if (!behov) return;
+            const mangler = valgt() === 'bestill' && !$('input[name="behov"]:checked', form);
+            behov.setCustomValidity(mangler ? M().behov : '');
+        };
 
         // Vis feltene og tekstene for valget, og sett hva som er påkrevd
         const visValg = () => {
             const v = valgt();
             $$('[data-bare]', sek).forEach(el => { el.hidden = el.dataset.bare !== v; });
             if (url) { url.required = v === 'sjekk'; url.setCustomValidity(''); }
-            if (melding) melding.required = v === 'bestill';
+            if (melding) melding.required = false;                 // valgfri i begge valg
+            if (behov) behov.required = v === 'bestill';          // «Hva trenger dere?» må velges ved bestilling
+            sjekkBehov();
         };
         // «dinbedrift.no» → «https://dinbedrift.no/». null = ikke en nettadresse
         const rensUrl = s => {
@@ -3836,6 +3956,7 @@ const I18N = {
             if (felt) felt.focus();
         }));
         if (url) url.addEventListener('input', () => url.setCustomValidity(''));
+        $$('input[name="behov"]', form).forEach(r => r.addEventListener('change', sjekkBehov));
 
         form.addEventListener('submit', async e => {
             e.preventDefault();
@@ -3846,7 +3967,12 @@ const I18N = {
             const data = new FormData(form);
             data.set('nettside', rensUrl(url && url.value) || '');
             data.set('sprak', LANG.get());
-            data.set('subject', (v === 'sjekk' ? 'Nettside-sjekk' : 'Bestilling av nettside') + ' fra dotdev.no' + (data.get('nettside') ? ': ' + data.get('nettside') : ''));
+            if (v === 'bestill') {
+                // flere avkryssinger blir én linje i varselet
+                ['hensikt', 'innhold'].forEach(n => { const a = data.getAll(n); data.delete(n); if (a.length) data.set(n, a.join(', ')); });
+            } else ['behov', 'bransje', 'hensikt', 'innhold', 'oppstart'].forEach(n => data.delete(n));
+            const tillegg = v === 'sjekk' ? data.get('nettside') : data.get('behov');
+            data.set('subject', (v === 'sjekk' ? 'Nettside-sjekk' : 'Bestilling av nettside') + ' fra dotdev.no' + (tillegg ? ': ' + tillegg : ''));
             opptatt = true;
             form.setAttribute('aria-busy', 'true');
             visFeil(null);
@@ -3890,7 +4016,7 @@ const I18N = {
         });
         window.addEventListener('hashchange', () => { if (window.location.hash === '#bestill') velg('bestill'); });
         // Nytt språk: feilmeldingen på riktig språk
-        LANG.on(() => { if (feil) visFeil(feil); if (url) url.setCustomValidity(''); });
+        LANG.on(() => { if (feil) visFeil(feil); if (url) url.setCustomValidity(''); sjekkBehov(); });
         visValg();
         if (window.location.hash === '#bestill') velg('bestill');
     })();

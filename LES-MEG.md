@@ -50,7 +50,7 @@ Nettsiden følger innstillingen til den besøkende: står telefonen eller nettle
 
 ## Skjema: nettside-sjekk og meldinger
 
-Seksjonen «Nettside-sjekk» (`#sjekk`, rett under bookingen) har ett skjema med to valg: **Nettside-sjekk** (adressen til nettsiden + e-post) og **Bestill nettside** (e-post + kort om bedriften og hva de trenger; nettsiden de har i dag er frivillig). Navn er frivillig. Overskriften og punktene til venstre bytter med valget. Innsendingene tas imot av **Netlify Forms** (skjemaet heter `henvendelse`), så det trengs ingen egen server eller nøkler.
+Seksjonen «Nettside-sjekk» (`#sjekk`, rett under bookingen) har ett skjema med to valg: **Nettside-sjekk** (adressen til nettsiden + e-post) og **Bestill nettside** (enkle spørsmål med valgknapper: hva de trenger, bransje, hva nettsiden skal hjelpe med, hva de har klart og når de vil starte; så e-post og frivillig melding). Svarene kommer som egne felt i varselet: Behov, Bransje, Hensikt, Innhold og Oppstart. Uten JavaScript (sjeldent) sendes skjemaet som vanlig skjema; da kan flere avkryssinger komme som flere verdier, og emnet blir «Henvendelse fra dotdev.no». Navn er frivillig. Overskriften og punktene til venstre bytter med valget. Innsendingene tas imot av **Netlify Forms** (skjemaet heter `henvendelse`), så det trengs ingen egen server eller nøkler.
 
 **Gjør dette én gang i Netlify (ellers kommer ingenting frem):**
 
